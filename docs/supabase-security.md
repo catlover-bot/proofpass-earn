@@ -39,3 +39,8 @@ Public certificate reads should return only the fields needed for the proof page
 - Participant policy: admin-only reads and writes, with limited insert support for public check-in.
 - Point ledger policy: admin-only reads and server-controlled writes.
 - Organization policy: admin-only access for private settings.
+
+## Local and Pilot RLS Notes
+
+- Event creation uses `insert(...).select("id").single()` so the `events` table needs both insert and select permission for the caller.
+- If insert is allowed but select is blocked, the event may be written without returning an id to the app. The event creation page should show an error instead of redirecting.

@@ -1,11 +1,13 @@
 import { BadgeCheck } from "lucide-react";
 import { Card, PageShell } from "@/components/ui";
 
-export default function ProfilePlaceholderPage({
+export default async function ProfilePlaceholderPage({
   params
 }: {
-  params: { emailHash: string };
+  params: Promise<{ emailHash: string }>;
 }) {
+  const { emailHash } = await params;
+
   return (
     <PageShell className="max-w-3xl space-y-6">
       <Card>
@@ -26,7 +28,7 @@ export default function ProfilePlaceholderPage({
 
       <Card>
         <p className="text-sm font-semibold text-slate-500">Profile key</p>
-        <p className="mt-2 break-all text-sm font-bold text-ink">{params.emailHash}</p>
+        <p className="mt-2 break-all text-sm font-bold text-ink">{emailHash}</p>
         <div className="mt-6 rounded-md border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
           <h2 className="text-lg font-bold text-ink">No public proofs available</h2>
           <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-700">

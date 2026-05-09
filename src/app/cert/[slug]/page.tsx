@@ -10,8 +10,10 @@ export const dynamic = "force-dynamic";
 export default async function CertificatePage({
   params
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
+
   const missing = getMissingEnv();
   if (missing.length > 0) {
     return (
@@ -33,7 +35,7 @@ export default async function CertificatePage({
   const { data: certificate, error: certificateError } = await supabase
     .from("certificates")
     .select("id,event_id,participant_id,public_slug,certificate_type,status,issued_at")
-    .eq("public_slug", params.slug)
+    .eq("public_slug", slug)
     .maybeSingle();
 
   if (certificateError) {
