@@ -6,14 +6,33 @@ import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import { labelRole } from "@/lib/points";
+import { isValidUuid } from "@/lib/validation/uuid";
 
 export const dynamic = "force-dynamic";
 
 export default async function EventDetailPage({
   params
 }: {
-  params: { eventId: string };
+  params: Promise<{ eventId: string }>;
 }) {
+  const { eventId } = await params;
+
+  if (!isValidUuid(eventId)) {
+    return (
+      <PageShell className="space-y-6">
+        <Card>
+          <h1 className="text-2xl font-bold text-ink">Invalid event id</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            This event link is not valid. Open the event from the event list or create a new event.
+          </p>
+          <ButtonLink href="/admin/events" className="mt-5" variant="secondary">
+            Back to events
+          </ButtonLink>
+        </Card>
+      </PageShell>
+    );
+  }
+
   const missing = getMissingEnv();
   if (missing.length > 0) {
     return (
@@ -37,7 +56,7 @@ export default async function EventDetailPage({
   const { data: event, error: eventError } = await supabase
     .from("events")
     .select("id,title,description,location,starts_at,ends_at,checkin_code")
-    .eq("id", params.eventId)
+    .eq("id", eventId)
     .maybeSingle();
 
   if (eventError) {

@@ -21,6 +21,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
+## Environment Troubleshooting
+
+- `.env.local` must be in the project root, next to `package.json`.
+- Restart `npm run dev` after editing `.env.local`; Next.js reads local environment values when the dev server starts.
+- `NEXT_PUBLIC_APP_URL` should match the local port. The current local app URL is `http://localhost:3001`.
+- Open `/setup` to confirm the required variables show `Set` without exposing their values.
+
 ## Database
 
 Run the SQL files in this order from the Supabase SQL editor:

@@ -10,8 +10,10 @@ export const dynamic = "force-dynamic";
 export default async function CheckinPage({
   params
 }: {
-  params: { eventCode: string };
+  params: Promise<{ eventCode: string }>;
 }) {
+  const { eventCode } = await params;
+
   const missing = getMissingEnv();
   if (missing.length > 0) {
     return (
@@ -33,7 +35,7 @@ export default async function CheckinPage({
   const { data: event, error } = await supabase
     .from("events")
     .select("id,title,description,location,starts_at,ends_at,checkin_code")
-    .eq("checkin_code", params.eventCode)
+    .eq("checkin_code", eventCode)
     .maybeSingle();
 
   if (error) {

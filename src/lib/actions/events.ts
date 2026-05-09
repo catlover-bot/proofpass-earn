@@ -12,6 +12,24 @@ export type ActionResult = {
   fieldErrors?: Partial<Record<keyof EventFormValues, string[]>>;
 };
 
+const EVENT_RETURN_HELP =
+  "Check Supabase RLS: event creation needs both insert and select permission on events when returning the created id.";
+
+function formatCreateError(message: string) {
+  const lowerMessage = message.toLowerCase();
+
+  if (
+    lowerMessage.includes("row-level security") ||
+    lowerMessage.includes("permission") ||
+    lowerMessage.includes("0 rows") ||
+    lowerMessage.includes("no rows")
+  ) {
+    return `${message} ${EVENT_RETURN_HELP}`;
+  }
+
+  return message;
+}
+
 async function ensureOrganization(supabase: SupabaseClient<Database>) {
   const { data: existing, error: existingError } = await supabase
     .from("organizations")
@@ -39,6 +57,10 @@ async function ensureOrganization(supabase: SupabaseClient<Database>) {
 
   if (createError) {
     throw new Error(createError.message);
+  }
+
+  if (!created?.id) {
+    throw new Error("Organization was not created correctly. No organization id was returned.");
   }
 
   return created.id;
@@ -88,7 +110,13 @@ export async function createEventAction(values: EventFormValues): Promise<Action
 
     if (error) {
       return {
-        error: error.message
+        error: formatCreateError(error.message)
+      };
+    }
+
+    if (!data?.id) {
+      return {
+        error: `Event was not created correctly. No event id was returned. ${EVENT_RETURN_HELP}`
       };
     }
 
