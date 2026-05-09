@@ -18,7 +18,9 @@ Create a Supabase project, then set:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3001
+ADMIN_BASIC_AUTH_USER=
+ADMIN_BASIC_AUTH_PASSWORD=
 ```
 
 ## Environment Troubleshooting
@@ -55,15 +57,15 @@ npm run dev
 
 Expected localhost URLs:
 
-- `http://localhost:3000/`
-- `http://localhost:3000/admin`
-- `http://localhost:3000/admin/events`
-- `http://localhost:3000/admin/events/new`
-- `http://localhost:3000/checkin/demo-study-group`
+- `http://localhost:3001/`
+- `http://localhost:3001/admin`
+- `http://localhost:3001/admin/events`
+- `http://localhost:3001/admin/events/new`
+- `http://localhost:3001/checkin/demo-study-group`
 
 ## Local Happy Path
 
-1. Open `http://localhost:3000/admin/events`.
+1. Open `http://localhost:3001/admin/events`.
 2. Confirm the seeded event appears.
 3. Open the event detail page.
 4. Open or scan the check-in URL.

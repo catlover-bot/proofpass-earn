@@ -8,9 +8,12 @@ Set these in the Vercel project before the first production build:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_APP_URL=https://your-production-domain.example
+ADMIN_BASIC_AUTH_USER=
+ADMIN_BASIC_AUTH_PASSWORD=
 ```
 
 `NEXT_PUBLIC_APP_URL` must match the production domain so generated QR check-in URLs point to the deployed app.
+`ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_PASSWORD` are server-only values and must not use the `NEXT_PUBLIC` prefix.
 
 ## Supabase Setup Order
 
@@ -31,7 +34,7 @@ NEXT_PUBLIC_APP_URL=https://your-production-domain.example
 ## Production Smoke Test Checklist
 
 - Landing page loads.
-- `/admin/events` loads and either shows events or a clear empty state.
+- `/admin/events` requires Basic Auth, then loads and either shows events or a clear empty state.
 - `/admin/events/new` creates an event.
 - Event detail page displays a QR code and check-in URL.
 - Check-in URL accepts participant details and redirects to a certificate page.

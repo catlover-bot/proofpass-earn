@@ -1,15 +1,24 @@
 import { CheckCircle2, CircleAlert } from "lucide-react";
 import { Card, PageShell, StatusPill } from "@/components/ui";
 import { REQUIRED_ENV } from "@/lib/supabase/client";
+import { ADMIN_BASIC_AUTH_ENV } from "@/lib/admin-env";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default function SetupPage() {
-  const statuses = REQUIRED_ENV.map((name) => ({
-    name,
-    isSet: Boolean(process.env[name])
-  }));
+  const statuses = [
+    ...REQUIRED_ENV.map((name) => ({
+      name,
+      scope: "Public browser variable",
+      isSet: Boolean(process.env[name])
+    })),
+    ...ADMIN_BASIC_AUTH_ENV.map((name) => ({
+      name,
+      scope: "Server-only variable",
+      isSet: Boolean(process.env[name])
+    }))
+  ];
 
   return (
     <PageShell className="max-w-3xl space-y-6">
@@ -36,9 +45,12 @@ export default function SetupPage() {
                   {status.name}
                 </code>
               </div>
-              <StatusPill tone={status.isSet ? "success" : "warning"}>
-                {status.isSet ? "Set" : "Missing"}
-              </StatusPill>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500">{status.scope}</span>
+                <StatusPill tone={status.isSet ? "success" : "warning"}>
+                  {status.isSet ? "Set" : "Missing"}
+                </StatusPill>
+              </div>
             </div>
           ))}
         </div>
