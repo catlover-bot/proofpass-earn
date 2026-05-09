@@ -1,0 +1,162 @@
+import { Award, ShieldAlert, ShieldCheck } from "lucide-react";
+import { SetupError } from "@/components/SetupError";
+import { Card, PageShell, StatusPill } from "@/components/ui";
+import { formatDate, formatDateTime } from "@/lib/format";
+import { labelRole } from "@/lib/points";
+import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
+
+export const dynamic = "force-dynamic";
+
+export default async function CertificatePage({
+  params
+}: {
+  params: { slug: string };
+}) {
+  const missing = getMissingEnv();
+  if (missing.length > 0) {
+    return (
+      <PageShell>
+        <SetupError missing={missing} />
+      </PageShell>
+    );
+  }
+
+  const supabase = getSupabaseClient();
+  if (!supabase) {
+    return (
+      <PageShell>
+        <SetupError message="Supabase is not configured yet." />
+      </PageShell>
+    );
+  }
+
+  const { data: certificate, error: certificateError } = await supabase
+    .from("certificates")
+    .select("id,event_id,participant_id,public_slug,certificate_type,status,issued_at")
+    .eq("public_slug", params.slug)
+    .maybeSingle();
+
+  if (certificateError) {
+    return (
+      <PageShell>
+        <SetupError title="Unable to load certificate" message={certificateError.message} />
+      </PageShell>
+    );
+  }
+
+  if (!certificate) {
+    return (
+      <PageShell>
+        <Card>
+          <h1 className="text-2xl font-bold text-ink">Certificate not found</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            This proof URL does not match a public certificate.
+          </p>
+        </Card>
+      </PageShell>
+    );
+  }
+
+  const [{ data: event, error: eventError }, { data: participant, error: participantError }] =
+    await Promise.all([
+      supabase
+        .from("events")
+        .select("title,starts_at,ends_at,location")
+        .eq("id", certificate.event_id)
+        .maybeSingle(),
+      supabase.from("participants").select("name,role").eq("id", certificate.participant_id).maybeSingle()
+    ]);
+
+  if (eventError || participantError) {
+    return (
+      <PageShell>
+        <SetupError
+          title="Unable to load certificate details"
+          message={eventError?.message ?? participantError?.message}
+        />
+      </PageShell>
+    );
+  }
+
+  if (!event || !participant) {
+    return (
+      <PageShell>
+        <Card>
+          <h1 className="text-2xl font-bold text-ink">Certificate details unavailable</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            The proof record exists, but its linked event or participant is missing.
+          </p>
+        </Card>
+      </PageShell>
+    );
+  }
+
+  const revoked = certificate.status === "revoked";
+
+  return (
+    <PageShell className="max-w-4xl space-y-6">
+      <Card className={revoked ? "border-red-200 bg-red-50" : "border-mint/30"}>
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <div className={revoked ? "rounded-md bg-red-100 p-3 text-red-700" : "rounded-md bg-mint/10 p-3 text-mint"}>
+                {revoked ? <ShieldAlert className="h-7 w-7" /> : <ShieldCheck className="h-7 w-7" />}
+              </div>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Public proof</p>
+                <h1 className="text-3xl font-bold text-ink">{event.title}</h1>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-slate-500">Participant</p>
+              <p className="mt-1 text-2xl font-bold text-ink">{participant.name}</p>
+            </div>
+          </div>
+
+          <StatusPill tone={revoked ? "danger" : "success"}>{certificate.status}</StatusPill>
+        </div>
+
+        {revoked ? (
+          <div className="mt-6 rounded-md border border-red-200 bg-white p-4 text-sm font-medium text-red-700">
+            This proof has been revoked by the issuer and should not be treated as valid.
+          </div>
+        ) : null}
+      </Card>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <Award className="h-6 w-6 text-gold" />
+          <p className="mt-4 text-sm font-semibold text-slate-500">Certificate type</p>
+          <p className="mt-1 text-xl font-bold text-ink">{labelRole(certificate.certificate_type)}</p>
+        </Card>
+        <Card>
+          <p className="text-sm font-semibold text-slate-500">Participant role</p>
+          <p className="mt-1 text-xl font-bold text-ink">{labelRole(participant.role)}</p>
+        </Card>
+        <Card>
+          <p className="text-sm font-semibold text-slate-500">Event date</p>
+          <p className="mt-1 text-xl font-bold text-ink">{formatDate(event.starts_at)}</p>
+          <p className="mt-2 text-sm text-slate-600">{event.location}</p>
+        </Card>
+        <Card>
+          <p className="text-sm font-semibold text-slate-500">Issued at</p>
+          <p className="mt-1 text-xl font-bold text-ink">{formatDateTime(certificate.issued_at)}</p>
+        </Card>
+      </div>
+
+      <Card>
+        <dl className="grid gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="font-semibold text-slate-500">Issuer</dt>
+            <dd className="mt-1 font-bold text-ink">ProofPass Earn organizer</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-slate-500">Proof ID</dt>
+            <dd className="mt-1 break-all font-bold text-ink">{certificate.public_slug}</dd>
+          </div>
+        </dl>
+      </Card>
+    </PageShell>
+  );
+}
