@@ -2,14 +2,141 @@
 
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { ROLE_CERTIFICATE_TYPE, ROLE_POINTS } from "@/lib/points";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
+import type { Database, ParticipantRole } from "@/lib/supabase/types";
 import { checkinFormSchema, type CheckinFormValues } from "@/lib/validation/checkin";
 
 export type CheckinActionResult = {
   error?: string;
   fieldErrors?: Partial<Record<keyof CheckinFormValues, string[]>>;
 };
+
+const CHECKIN_ERROR = "Unable to complete check-in. Please try again or contact the event organizer.";
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
+async function findExistingParticipant(
+  supabase: SupabaseClient<Database>,
+  eventId: string,
+  normalizedEmail: string
+) {
+  const { data, error } = await supabase
+    .from("participants")
+    .select("id,email,role")
+    .eq("event_id", eventId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    throw new Error(CHECKIN_ERROR);
+  }
+
+  return data.find((participant) => normalizeEmail(participant.email) === normalizedEmail) ?? null;
+}
+
+async function findValidCertificate(
+  supabase: SupabaseClient<Database>,
+  eventId: string,
+  participantId: string
+) {
+  const { data, error } = await supabase
+    .from("certificates")
+    .select("public_slug")
+    .eq("event_id", eventId)
+    .eq("participant_id", participantId)
+    .eq("status", "valid")
+    .order("issued_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(CHECKIN_ERROR);
+  }
+
+  return data;
+}
+
+async function findAnyCertificate(
+  supabase: SupabaseClient<Database>,
+  eventId: string,
+  participantId: string
+) {
+  const { data, error } = await supabase
+    .from("certificates")
+    .select("public_slug,status")
+    .eq("event_id", eventId)
+    .eq("participant_id", participantId)
+    .order("issued_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(CHECKIN_ERROR);
+  }
+
+  return data;
+}
+
+async function createCertificate(
+  supabase: SupabaseClient<Database>,
+  eventId: string,
+  participantId: string,
+  role: ParticipantRole
+) {
+  const certificateSlug = `proof_${nanoid(14)}`;
+  const { error } = await supabase.from("certificates").insert({
+    event_id: eventId,
+    participant_id: participantId,
+    public_slug: certificateSlug,
+    certificate_type: ROLE_CERTIFICATE_TYPE[role],
+    status: "valid"
+  });
+
+  if (error) {
+    throw new Error(CHECKIN_ERROR);
+  }
+
+  return certificateSlug;
+}
+
+async function ensureCheckinPoints(
+  supabase: SupabaseClient<Database>,
+  event: { id: string; title: string },
+  participantId: string,
+  role: ParticipantRole
+) {
+  const { data: existingPoint, error: pointLookupError } = await supabase
+    .from("point_ledger")
+    .select("id")
+    .eq("event_id", event.id)
+    .eq("participant_id", participantId)
+    .eq("action_type", "check_in")
+    .limit(1)
+    .maybeSingle();
+
+  if (pointLookupError) {
+    throw new Error(CHECKIN_ERROR);
+  }
+
+  if (existingPoint) {
+    return;
+  }
+
+  const { error: pointError } = await supabase.from("point_ledger").insert({
+    event_id: event.id,
+    participant_id: participantId,
+    action_type: "check_in",
+    points: ROLE_POINTS[role],
+    reason: `${role} check-in for ${event.title}`
+  });
+
+  if (pointError) {
+    throw new Error(CHECKIN_ERROR);
+  }
+}
 
 export async function checkInAction(values: CheckinFormValues): Promise<CheckinActionResult | void> {
   const parsed = checkinFormSchema.safeParse(values);
@@ -38,6 +165,7 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
   let certificateSlug: string;
 
   try {
+    const normalizedEmail = normalizeEmail(parsed.data.email);
     const { data: event, error: eventError } = await supabase
       .from("events")
       .select("id,title")
@@ -46,7 +174,7 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
 
     if (eventError) {
       return {
-        error: eventError.message
+        error: "Unable to load this check-in link. Please try again or contact the event organizer."
       };
     }
 
@@ -56,55 +184,49 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
       };
     }
 
-    const { data: participant, error: participantError } = await supabase
-      .from("participants")
-      .insert({
-        event_id: event.id,
-        name: parsed.data.name,
-        email: parsed.data.email.toLowerCase(),
-        role: parsed.data.role
-      })
-      .select("id")
-      .single();
+    const existingParticipant = await findExistingParticipant(supabase, event.id, normalizedEmail);
 
-    if (participantError) {
-      return {
-        error: participantError.message
-      };
-    }
+    if (existingParticipant) {
+      const validCertificate = await findValidCertificate(supabase, event.id, existingParticipant.id);
 
-    certificateSlug = `proof_${nanoid(14)}`;
+      if (validCertificate) {
+        certificateSlug = validCertificate.public_slug;
+      } else {
+        const existingCertificate = await findAnyCertificate(supabase, event.id, existingParticipant.id);
 
-    const { error: certificateError } = await supabase.from("certificates").insert({
-      event_id: event.id,
-      participant_id: participant.id,
-      public_slug: certificateSlug,
-      certificate_type: ROLE_CERTIFICATE_TYPE[parsed.data.role],
-      status: "valid"
-    });
+        if (existingCertificate) {
+          return {
+            error: "A certificate already exists for this participant but is not currently valid. Contact the event organizer."
+          };
+        }
 
-    if (certificateError) {
-      return {
-        error: certificateError.message
-      };
-    }
+        certificateSlug = await createCertificate(supabase, event.id, existingParticipant.id, existingParticipant.role);
+        await ensureCheckinPoints(supabase, event, existingParticipant.id, existingParticipant.role);
+      }
+    } else {
+      const { data: participant, error: participantError } = await supabase
+        .from("participants")
+        .insert({
+          event_id: event.id,
+          name: parsed.data.name.trim(),
+          email: normalizedEmail,
+          role: parsed.data.role
+        })
+        .select("id,role")
+        .single();
 
-    const { error: pointError } = await supabase.from("point_ledger").insert({
-      event_id: event.id,
-      participant_id: participant.id,
-      action_type: "check_in",
-      points: ROLE_POINTS[parsed.data.role],
-      reason: `${parsed.data.role} check-in for ${event.title}`
-    });
+      if (participantError || !participant?.id) {
+        return {
+          error: CHECKIN_ERROR
+        };
+      }
 
-    if (pointError) {
-      return {
-        error: pointError.message
-      };
+      certificateSlug = await createCertificate(supabase, event.id, participant.id, participant.role);
+      await ensureCheckinPoints(supabase, event, participant.id, participant.role);
     }
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : "Unable to complete check-in."
+      error: error instanceof Error ? error.message : CHECKIN_ERROR
     };
   }
 

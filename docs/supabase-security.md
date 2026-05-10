@@ -44,3 +44,6 @@ Public certificate reads should return only the fields needed for the proof page
 
 - Event creation uses `insert(...).select("id").single()` so the `events` table needs both insert and select permission for the caller.
 - If insert is allowed but select is blocked, the event may be written without returning an id to the app. The event creation page should show an error instead of redirecting.
+- Duplicate check-in prevention is currently handled in application logic for the pilot.
+- Future production data integrity should add a normalized email strategy and a unique constraint or index per event, such as a `normalized_email` column with `unique(event_id, normalized_email)`.
+- Do not add a destructive migration to existing pilot data without a cleanup plan.
