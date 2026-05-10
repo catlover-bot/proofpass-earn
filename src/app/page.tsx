@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Users
 } from "lucide-react";
+import { PublicFooter } from "@/components/PublicFooter";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
 
 const proofTypes = [
@@ -158,6 +159,8 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      <PublicFooter />
     </PageShell>
   );
 }

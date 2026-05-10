@@ -1,4 +1,5 @@
 import { Award, ShieldAlert, ShieldCheck } from "lucide-react";
+import { PublicFooter } from "@/components/PublicFooter";
 import { SetupError } from "@/components/SetupError";
 import { Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -17,8 +18,9 @@ export default async function CertificatePage({
   const missing = getMissingEnv();
   if (missing.length > 0) {
     return (
-      <PageShell>
+      <PageShell className="space-y-6">
         <SetupError missing={missing} />
+        <PublicFooter />
       </PageShell>
     );
   }
@@ -26,8 +28,9 @@ export default async function CertificatePage({
   const supabase = getSupabaseClient();
   if (!supabase) {
     return (
-      <PageShell>
+      <PageShell className="space-y-6">
         <SetupError message="Supabase is not configured yet." />
+        <PublicFooter />
       </PageShell>
     );
   }
@@ -40,21 +43,23 @@ export default async function CertificatePage({
 
   if (certificateError) {
     return (
-      <PageShell>
+      <PageShell className="space-y-6">
         <SetupError title="Unable to load certificate" message={certificateError.message} />
+        <PublicFooter />
       </PageShell>
     );
   }
 
   if (!certificate) {
     return (
-      <PageShell>
+      <PageShell className="space-y-6">
         <Card>
           <h1 className="text-2xl font-bold text-ink">Certificate not found</h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
             This proof URL does not match a public certificate.
           </p>
         </Card>
+        <PublicFooter />
       </PageShell>
     );
   }
@@ -71,24 +76,26 @@ export default async function CertificatePage({
 
   if (eventError || participantError) {
     return (
-      <PageShell>
+      <PageShell className="space-y-6">
         <SetupError
           title="Unable to load certificate details"
           message={eventError?.message ?? participantError?.message}
         />
+        <PublicFooter />
       </PageShell>
     );
   }
 
   if (!event || !participant) {
     return (
-      <PageShell>
+      <PageShell className="space-y-6">
         <Card>
           <h1 className="text-2xl font-bold text-ink">Certificate details unavailable</h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
             The proof record exists, but its linked event or participant is missing.
           </p>
         </Card>
+        <PublicFooter />
       </PageShell>
     );
   }
@@ -159,6 +166,14 @@ export default async function CertificatePage({
           </div>
         </dl>
       </Card>
+
+      <Card className="bg-slate-50 shadow-none">
+        <p className="text-sm font-semibold text-slate-700">
+          This public proof page does not display participant email.
+        </p>
+      </Card>
+
+      <PublicFooter />
     </PageShell>
   );
 }
