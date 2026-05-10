@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Award, ExternalLink, LinkIcon, MapPin, Users } from "lucide-react";
+import { Award, CheckCircle2, ExternalLink, LinkIcon, MapPin, MessageSquareText, Users } from "lucide-react";
+import { CopyButton } from "@/components/CopyButton";
 import { QrCodePanel } from "@/components/QrCodePanel";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
@@ -143,6 +144,7 @@ export default async function EventDetailPage({
   }
 
   const checkinUrl = `${appUrl}/checkin/${event.checkin_code}`;
+  const organizerShareText = `Please check in here to receive your public participation proof: ${checkinUrl}. Your email is used for duplicate handling and organizer-side management, but it will not appear on the public certificate page.`;
 
   return (
     <PageShell className="space-y-8">
@@ -180,22 +182,52 @@ export default async function EventDetailPage({
               <LinkIcon className="h-4 w-4" />
               Check-in URL
             </div>
-            <p className="mt-2 break-all text-sm font-semibold text-ink">{checkinUrl}</p>
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="break-all text-sm font-semibold text-ink">{checkinUrl}</p>
+              <CopyButton value={checkinUrl} label="Copy URL" copiedLabel="URL copied" />
+            </div>
           </div>
         </Card>
 
         <QrCodePanel value={checkinUrl} />
       </div>
 
+      <Card className="space-y-5">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="h-5 w-5 text-mint" />
+          <h2 className="text-xl font-bold text-ink">Pilot event checklist</h2>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-md bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+            <p className="font-semibold text-ink">Before sharing</p>
+            <p className="mt-2">Open the check-in URL once, confirm the event details, and keep this page open during the event.</p>
+          </div>
+          <div className="rounded-md bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+            <p className="font-semibold text-ink">Public pages</p>
+            <p className="mt-2">The check-in page and certificate pages are public. Public certificates do not show participant email.</p>
+          </div>
+        </div>
+        <div className="rounded-md border border-slate-200 bg-white p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+            <MessageSquareText className="h-4 w-4" />
+            Organizer message
+          </div>
+          <p className="mt-3 text-sm leading-6 text-ink">{organizerShareText}</p>
+          <div className="mt-4">
+            <CopyButton value={organizerShareText} label="Copy message" copiedLabel="Message copied" />
+          </div>
+        </div>
+      </Card>
+
       <Card>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-mint" />
-              <h2 className="text-xl font-bold text-ink">Participants</h2>
+              <h2 className="text-xl font-bold text-ink">Admin-only participant status</h2>
             </div>
             <p className="mt-2 text-sm text-slate-700">
-              Participant email is kept out of this event view for the MVP surface.
+              Participant email is hidden here and on public certificate pages. Use this list to confirm check-ins, certificate status, certificate links, and points.
             </p>
           </div>
           <StatusPill>{participants.length} checked in</StatusPill>
@@ -217,7 +249,7 @@ export default async function EventDetailPage({
                   <th className="py-3 pr-4 font-semibold">Name</th>
                   <th className="py-3 pr-4 font-semibold">Role</th>
                   <th className="py-3 pr-4 font-semibold">Checked in</th>
-                  <th className="py-3 pr-4 font-semibold">Certificate</th>
+                  <th className="py-3 pr-4 font-semibold">Certificate link/status</th>
                   <th className="py-3 pr-4 text-right font-semibold">Points</th>
                 </tr>
               </thead>

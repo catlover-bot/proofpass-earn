@@ -1,10 +1,11 @@
 import { Award, ShieldAlert, ShieldCheck } from "lucide-react";
+import { CopyButton } from "@/components/CopyButton";
 import { PublicFooter } from "@/components/PublicFooter";
 import { SetupError } from "@/components/SetupError";
 import { Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { labelRole } from "@/lib/points";
-import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
+import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ export default async function CertificatePage({
   }
 
   const supabase = getSupabaseClient();
+  const appUrl = getAppUrl();
   if (!supabase) {
     return (
       <PageShell className="space-y-6">
@@ -101,6 +103,7 @@ export default async function CertificatePage({
   }
 
   const revoked = certificate.status === "revoked";
+  const proofUrl = `${appUrl}/cert/${certificate.public_slug}`;
 
   return (
     <PageShell className="max-w-4xl space-y-6">
@@ -167,9 +170,20 @@ export default async function CertificatePage({
         </dl>
       </Card>
 
+      <Card className="space-y-4">
+        <div>
+          <p className="text-sm font-semibold text-slate-500">Proof URL</p>
+          <p className="mt-2 break-all text-sm font-bold text-ink">{proofUrl}</p>
+        </div>
+        <CopyButton value={proofUrl} label="Copy proof URL" copiedLabel="Proof URL copied" />
+      </Card>
+
       <Card className="bg-slate-50 shadow-none">
         <p className="text-sm font-semibold text-slate-700">
           This public proof page does not display participant email.
+        </p>
+        <p className="mt-2 text-sm leading-6 text-slate-700">
+          This proof represents event participation or contribution. It is not a financial asset.
         </p>
       </Card>
 

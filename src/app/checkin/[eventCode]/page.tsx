@@ -79,9 +79,21 @@ export default async function CheckinPage({
         </div>
       </Card>
 
-      <Card>
+      <div className="space-y-5">
+        <Card className="space-y-3 bg-slate-50 shadow-none">
+          <h2 className="text-lg font-bold text-ink">Before you check in</h2>
+          <p className="text-sm leading-6 text-slate-700">
+            Your email is used for duplicate handling and organizer-side management. It is not displayed on
+            public certificate pages.
+          </p>
+          <p className="text-sm leading-6 text-slate-700">
+            If you check in again with the same email, ProofPass Earn will return your existing proof when possible.
+          </p>
+        </Card>
+        <Card>
         <CheckinForm eventCode={event.checkin_code} />
-      </Card>
+        </Card>
+      </div>
     </PageShell>
   );
 }

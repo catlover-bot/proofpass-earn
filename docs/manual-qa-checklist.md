@@ -2,6 +2,15 @@
 
 Use this checklist before pilot sharing and after check-in changes.
 
+## Core Routes
+
+- Open `/setup` and confirm required variables show set or missing without values.
+- Open `/admin/events` and confirm Basic Auth protects the admin route in the deployed app.
+- Open `/admin/events/new` and create an event.
+- Open `/admin/events/[eventId]` and confirm QR code, copyable check-in URL, organizer copy, participant list, and pilot checklist appear.
+- Open `/checkin/[eventCode]` and confirm event details and privacy explanation appear.
+- Open `/cert/[slug]` and confirm proof details, copyable proof URL, privacy note, and footer links appear.
+
 ## Check-In De-Duplication
 
 1. Create a new event.
@@ -25,8 +34,22 @@ Expected behavior:
 - No duplicate check-in point entry for the same participant and event.
 - Repeated check-in still feels successful by returning the participant to a certificate page.
 
+## Invalid Check-In Code
+
+1. Open `/checkin/not-a-real-code`.
+2. Confirm a safe invalid check-in message appears.
+
 ## Public Certificate Privacy
 
 1. Open the public certificate page.
 2. Confirm the participant name, event title, certificate type, event date, status, and proof ID appear.
 3. Confirm participant email does not appear.
+
+## Vercel Smoke Test
+
+- `/` loads.
+- `/privacy`, `/terms`, and `/contact` load.
+- `/admin/events` requires Basic Auth.
+- `/admin/events/new` creates an event after authentication.
+- `/checkin/[eventCode]` is public.
+- `/cert/[slug]` is public and does not expose participant email.
