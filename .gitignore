@@ -17,3 +17,11 @@ patches
 *.patch
 *.tmp.*
 proofpass-earn
+artifacts
+cache
+typechain-types
+
+# Hardhat
+artifacts/
+cache/
+typechain-types/

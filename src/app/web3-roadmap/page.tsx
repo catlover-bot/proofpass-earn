@@ -50,6 +50,15 @@ export default function Web3RoadmapPage() {
         <p>No personal information should be placed on-chain.</p>
       </Card>
 
+      <Card className="space-y-3 text-sm leading-6 text-slate-700">
+        <h2 className="text-xl font-bold text-ink">Testnet SBT prototype</h2>
+        <p>
+          A testnet-only prototype can be used for optional experiments with non-transferable proof tokens. This
+          is not production minting, not a financial asset, and not required for the current wallet-free MVP.
+        </p>
+        <p>The app does not include a mint button, wallet login, or client-side wallet connection.</p>
+      </Card>
+
       <PublicFooter />
     </PageShell>
   );
