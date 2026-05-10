@@ -104,6 +104,7 @@ export default async function CertificatePage({
 
   const revoked = certificate.status === "revoked";
   const proofUrl = `${appUrl}/cert/${certificate.public_slug}`;
+  const metadataUrl = `${proofUrl}/metadata`;
 
   return (
     <PageShell className="max-w-4xl space-y-6">
@@ -176,6 +177,33 @@ export default async function CertificatePage({
           <p className="mt-2 break-all text-sm font-bold text-ink">{proofUrl}</p>
         </div>
         <CopyButton value={proofUrl} label="Copy proof URL" copiedLabel="Proof URL copied" />
+      </Card>
+
+      <Card className="space-y-4">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-mint">Web3-ready</p>
+          <h2 className="mt-2 text-xl font-bold text-ink">Proof metadata</h2>
+        </div>
+        <dl className="grid gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="font-semibold text-slate-500">Current proof type</dt>
+            <dd className="mt-1 font-bold text-ink">Off-chain public proof</dd>
+          </div>
+          <div>
+            <dt className="font-semibold text-slate-500">Web3 status</dt>
+            <dd className="mt-1 font-bold text-ink">SBT-ready metadata available</dd>
+          </div>
+          <div className="sm:col-span-2">
+            <dt className="font-semibold text-slate-500">Metadata URL</dt>
+            <dd className="mt-1 break-all font-bold text-mint">
+              <a href={metadataUrl}>{metadataUrl}</a>
+            </dd>
+          </div>
+        </dl>
+        <p className="text-sm leading-6 text-slate-700">
+          This proof is not minted on-chain. Future versions may support optional non-transferable SBT issuance
+          without placing personal information on-chain.
+        </p>
       </Card>
 
       <Card className="bg-slate-50 shadow-none">

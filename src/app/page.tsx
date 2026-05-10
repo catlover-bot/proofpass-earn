@@ -5,6 +5,7 @@ import {
   BadgeCheck,
   CalendarDays,
   ClipboardCheck,
+  Layers3,
   QrCode,
   ShieldCheck,
   Users
@@ -156,6 +157,25 @@ export default function Home() {
             ProofPass Earn is not a token exchange, payment product, wallet experience, or speculative crypto
             application. It is a practical operating layer for event proof, participant records, and community
             contribution tracking.
+          </p>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-soft">
+        <div className="grid gap-6 md:grid-cols-[0.7fr_1.3fr]">
+          <div className="flex items-start gap-3">
+            <Layers3 className="h-6 w-6 text-mint" />
+            <div>
+              <h2 className="text-xl font-bold text-ink">Web3-ready, not speculative</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-700">
+                No wallet is required today. Future optional SBTs should be non-transferable proof of attendance,
+                speaking, or contribution.
+              </p>
+            </div>
+          </div>
+          <p className="text-sm leading-6 text-slate-700">
+            ProofPass Earn has no tradable tokens, no payments, and no investment product. Personal information
+            should stay off-chain, including in any future proof metadata or SBT flow.
           </p>
         </div>
       </section>

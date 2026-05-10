@@ -3,7 +3,8 @@ import Link from "next/link";
 const footerLinks = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
-  { href: "/contact", label: "Contact" }
+  { href: "/contact", label: "Contact" },
+  { href: "/web3-roadmap", label: "Web3 Roadmap" }
 ];
 
 export function PublicFooter() {

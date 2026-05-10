@@ -25,6 +25,10 @@ export default function TermsPage() {
           Public proof URLs may be accessible to anyone with the link. The service may change during the pilot
           phase as organizer and participant feedback is reviewed.
         </p>
+        <p>
+          Future SBT support, if added, should be optional and non-transferable. Personal information should not
+          be placed on-chain.
+        </p>
       </Card>
 
       <PublicFooter />
