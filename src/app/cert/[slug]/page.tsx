@@ -73,6 +73,14 @@ function getExplorerUrl(certificate: CertificateRecord) {
   return null;
 }
 
+function shortenHash(value: string) {
+  if (value.length <= 12) {
+    return value;
+  }
+
+  return `${value.slice(0, 6)}...${value.slice(-4)}`;
+}
+
 export default async function CertificatePage({
   params
 }: {
@@ -264,7 +272,11 @@ export default async function CertificatePage({
         <Card className="space-y-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-mint">Testnet proof</p>
-            <h2 className="mt-2 text-xl font-bold text-ink">On-chain testnet SBT</h2>
+            <h2 className="mt-2 text-xl font-bold text-ink">On-chain testnet SBT proof</h2>
+            <p className="mt-3 text-sm leading-6 text-slate-700">
+              This proof was also minted on {getNetworkName(certificate)} as a non-transferable testnet SBT.
+              It is not a financial asset.
+            </p>
           </div>
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
@@ -277,22 +289,35 @@ export default async function CertificatePage({
             </div>
             <div className="sm:col-span-2">
               <dt className="font-semibold text-slate-500">Contract address</dt>
-              <dd className="mt-1 break-all font-bold text-mint">
-                {contractUrl ? <a href={contractUrl}>{certificate.contract_address}</a> : certificate.contract_address}
+              <dd className="mt-1 space-y-1">
+                <p className="font-bold text-ink">{shortenHash(certificate.contract_address ?? "")}</p>
+                {contractUrl ? (
+                  <a className="font-bold text-mint" href={contractUrl}>
+                    View contract on Basescan
+                  </a>
+                ) : null}
               </dd>
             </div>
             {certificate.tx_hash ? (
               <div className="sm:col-span-2">
                 <dt className="font-semibold text-slate-500">Mint transaction</dt>
-                <dd className="mt-1 break-all font-bold text-mint">
-                  {txUrl ? <a href={txUrl}>{certificate.tx_hash}</a> : certificate.tx_hash}
+                <dd className="mt-1 space-y-1">
+                  <p className="font-bold text-ink">{shortenHash(certificate.tx_hash)}</p>
+                  {txUrl ? (
+                    <a className="font-bold text-mint" href={txUrl}>
+                      View mint transaction on Basescan
+                    </a>
+                  ) : null}
                 </dd>
               </div>
             ) : null}
             <div className="sm:col-span-2">
               <dt className="font-semibold text-slate-500">Token URI</dt>
-              <dd className="mt-1 break-all font-bold text-mint">
-                <a href={tokenUri}>{tokenUri}</a>
+              <dd className="mt-1 space-y-1">
+                <p className="break-all font-bold text-ink">{tokenUri}</p>
+                <a className="font-bold text-mint" href={tokenUri}>
+                  View token metadata
+                </a>
               </dd>
             </div>
             <div>
@@ -302,10 +327,6 @@ export default async function CertificatePage({
               </dd>
             </div>
           </dl>
-          <p className="text-sm leading-6 text-slate-700">
-            This is a manually attached testnet SBT record for an ERC-5192-style non-transferable proof. It is
-            not a financial asset.
-          </p>
         </Card>
       ) : (
         <Card className="space-y-4">

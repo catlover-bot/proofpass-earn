@@ -65,14 +65,14 @@ The mint script requires the token URI to point to the public certificate metada
 
 ## Successful Pilot Mint
 
-The first manual testnet mint was validated on Base Sepolia:
+The current pilot certificate mint was validated on Base Sepolia:
 
 - Network: Base Sepolia
 - Contract: `0x3d0C08e92C91C3e0B1cd0c11E876dAf7b8f3cDb4`
-- Mint transaction: `0x0cfe646875e5623d1bf6cfaa899cc377dd3a8eceef7ef8c78263ee25a674ea0a`
-- Token ID: `1`
-- Token URI: `https://proofpass-earn.vercel.app/cert/proof_FN1pZHVvriinQl/metadata`
-- `locked(1)`: `true`
+- Mint transaction: `0xea4f939cb23b062e78a46c7a0e1405ff28ecf7fa9d47abbd4e8cab89ec4bc1cc`
+- Token ID: `2`
+- Token URI: `https://proofpass-earn.vercel.app/cert/proof_xZ0Nb0iY9yMUf1/metadata`
+- `locked(2)`: `true`
 
 This validation remains testnet-only. The token is a non-transferable proof record, not a financial asset.
 
@@ -94,13 +94,13 @@ set
   chain_id = '84532',
   chain_name = 'Base Sepolia',
   contract_address = '0x3d0C08e92C91C3e0B1cd0c11E876dAf7b8f3cDb4',
-  token_id = '1',
-  tx_hash = '0x0cfe646875e5623d1bf6cfaa899cc377dd3a8eceef7ef8c78263ee25a674ea0a',
-  metadata_url = 'https://proofpass-earn.vercel.app/cert/proof_FN1pZHVvriinQl/metadata',
-  token_uri = 'https://proofpass-earn.vercel.app/cert/proof_FN1pZHVvriinQl/metadata',
+  token_id = '2',
+  tx_hash = '0xea4f939cb23b062e78a46c7a0e1405ff28ecf7fa9d47abbd4e8cab89ec4bc1cc',
+  metadata_url = 'https://proofpass-earn.vercel.app/cert/proof_xZ0Nb0iY9yMUf1/metadata',
+  token_uri = 'https://proofpass-earn.vercel.app/cert/proof_xZ0Nb0iY9yMUf1/metadata',
   minted_at = now(),
   sbt_status = 'locked'
-where public_slug = 'proof_FN1pZHVvriinQl';
+where public_slug = 'proof_xZ0Nb0iY9yMUf1';
 ```
 
 Do not attach participant email, private notes, or sensitive personal information to token metadata or on-chain records.
