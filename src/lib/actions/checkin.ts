@@ -196,7 +196,7 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
 
         if (existingCertificate) {
           return {
-            error: "A certificate already exists for this participant but is not currently valid. Contact the event organizer."
+            error: "This email has already checked in for this event. Contact the event organizer if you need help."
           };
         }
 

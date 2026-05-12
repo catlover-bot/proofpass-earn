@@ -14,7 +14,7 @@ export default function TermsPage() {
 
       <Card className="space-y-4 text-sm leading-6 text-slate-700">
         <p>
-          Certificates are participation and contribution records. They are not financial assets, investment
+          Proof pages are participation and contribution records. They are not financial assets, investment
           products, payment instruments, tradable rewards, or token exchange items.
         </p>
         <p>

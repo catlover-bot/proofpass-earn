@@ -112,7 +112,7 @@ export default async function EventDetailPage({
     if (certificatesError) {
       return (
         <PageShell>
-          <SetupError title="Unable to load certificates" message={certificatesError.message} />
+          <SetupError title="Unable to load proofs" message={certificatesError.message} />
         </PageShell>
       );
     }
@@ -144,13 +144,13 @@ export default async function EventDetailPage({
   }
 
   const checkinUrl = `${appUrl}/checkin/${event.checkin_code}`;
-  const organizerShareText = `Please check in here to receive your public participation proof: ${checkinUrl}. Your email is used for duplicate handling and organizer-side management, but it will not appear on the public certificate page.`;
+  const organizerShareText = `Please check in here to receive your public participation proof: ${checkinUrl}. Your email is used by the organizer and will not appear on the public proof page.`;
 
   return (
     <PageShell className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-mint">Event detail</p>
+          <p className="text-sm font-semibold uppercase tracking-wider text-mint">Event dashboard</p>
           <h1 className="mt-2 text-3xl font-bold text-ink">{event.title}</h1>
           <p className="mt-2 max-w-3xl text-slate-700">{event.description}</p>
         </div>
@@ -159,8 +159,34 @@ export default async function EventDetailPage({
         </ButtonLink>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="p-5">
+          <p className="text-sm font-semibold text-slate-500">Date and time</p>
+          <p className="mt-2 font-bold text-ink">{formatDateTime(event.starts_at)}</p>
+          <p className="mt-1 text-sm text-slate-600">Ends {formatDateTime(event.ends_at)}</p>
+        </Card>
+        <Card className="p-5">
+          <p className="text-sm font-semibold text-slate-500">Location</p>
+          <p className="mt-2 flex items-start gap-2 font-bold text-ink">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-mint" />
+            {event.location}
+          </p>
+        </Card>
+        <Card className="p-5">
+          <p className="text-sm font-semibold text-slate-500">Participants</p>
+          <p className="mt-2 text-3xl font-bold text-ink">{participants.length}</p>
+          <p className="mt-1 text-sm text-slate-600">Checked in so far</p>
+        </Card>
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="space-y-5">
+          <div>
+            <h2 className="text-xl font-bold text-ink">Share check-in</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              Display this QR code at the venue or share the link in an online meeting.
+            </p>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="text-sm font-semibold text-slate-500">Starts</p>
@@ -184,7 +210,7 @@ export default async function EventDetailPage({
             </div>
             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="break-all text-sm font-semibold text-ink">{checkinUrl}</p>
-              <CopyButton value={checkinUrl} label="Copy URL" copiedLabel="URL copied" />
+              <CopyButton value={checkinUrl} label="Copy check-in URL" copiedLabel="Check-in URL copied" />
             </div>
           </div>
         </Card>
@@ -204,7 +230,7 @@ export default async function EventDetailPage({
           </div>
           <div className="rounded-md bg-slate-50 p-4 text-sm leading-6 text-slate-700">
             <p className="font-semibold text-ink">Public pages</p>
-            <p className="mt-2">The check-in page and certificate pages are public. Public certificates do not show participant email.</p>
+            <p className="mt-2">The check-in page and proof pages are public. Public proof pages do not show participant email.</p>
           </div>
         </div>
         <div className="rounded-md border border-slate-200 bg-white p-4">
@@ -224,10 +250,11 @@ export default async function EventDetailPage({
           <div>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-mint" />
-              <h2 className="text-xl font-bold text-ink">Admin-only participant status</h2>
+              <h2 className="text-xl font-bold text-ink">Checked-in participants</h2>
             </div>
             <p className="mt-2 text-sm text-slate-700">
-              Participant email is hidden here and on public certificate pages. Use this list to confirm check-ins, certificate status, certificate links, and points.
+              Participant email is hidden here and on public proof pages. Use this list to confirm check-ins,
+              proof links, and points.
             </p>
           </div>
           <StatusPill>{participants.length} checked in</StatusPill>
@@ -238,7 +265,7 @@ export default async function EventDetailPage({
             <Award className="mx-auto h-8 w-8 text-slate-400" />
             <h3 className="mt-3 text-lg font-bold text-ink">No participants yet</h3>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-700">
-              Share the check-in QR code during the event. Participants will appear here after they submit the form.
+              Share the QR code to start issuing proofs.
             </p>
           </div>
         ) : (
@@ -249,7 +276,7 @@ export default async function EventDetailPage({
                   <th className="py-3 pr-4 font-semibold">Name</th>
                   <th className="py-3 pr-4 font-semibold">Role</th>
                   <th className="py-3 pr-4 font-semibold">Checked in</th>
-                  <th className="py-3 pr-4 font-semibold">Certificate link/status</th>
+                  <th className="py-3 pr-4 font-semibold">Proof</th>
                   <th className="py-3 pr-4 text-right font-semibold">Points</th>
                 </tr>
               </thead>
@@ -265,13 +292,18 @@ export default async function EventDetailPage({
                       <td className="py-4 pr-4 text-slate-700">{formatDateTime(participant.checked_in_at)}</td>
                       <td className="py-4 pr-4">
                         {certificate ? (
-                          <Link
-                            href={`/cert/${certificate.public_slug}`}
-                            className="inline-flex items-center gap-2 font-semibold text-mint hover:text-ink"
-                          >
-                            {certificate.status}
-                            <ExternalLink className="h-4 w-4" />
-                          </Link>
+                          <div className="flex flex-wrap items-center gap-3">
+                            <StatusPill tone={certificate.status === "valid" ? "success" : "danger"}>
+                              {certificate.status}
+                            </StatusPill>
+                            <Link
+                              href={`/cert/${certificate.public_slug}`}
+                              className="inline-flex items-center gap-2 font-semibold text-mint hover:text-ink"
+                            >
+                              Open proof
+                              <ExternalLink className="h-4 w-4" />
+                            </Link>
+                          </div>
                         ) : (
                           <span className="text-slate-500">Not issued</span>
                         )}

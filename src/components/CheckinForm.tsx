@@ -9,10 +9,10 @@ import { checkinFormSchema, type CheckinFormValues } from "@/lib/validation/chec
 import { Button, FieldError } from "@/components/ui";
 
 const roleOptions = [
-  { value: "attendee", label: "Attendee", points: 10 },
-  { value: "speaker", label: "Speaker", points: 50 },
-  { value: "contributor", label: "Contributor", points: 100 },
-  { value: "organizer", label: "Organizer", points: 100 }
+  { value: "attendee", label: "Attendee", description: "joined the event", points: 10 },
+  { value: "speaker", label: "Speaker", description: "gave a talk or presentation", points: 50 },
+  { value: "contributor", label: "Contributor", description: "helped with the event or materials", points: 30 },
+  { value: "organizer", label: "Organizer", description: "organized or hosted the event", points: 40 }
 ] as const;
 
 export function CheckinForm({ eventCode }: { eventCode: string }) {
@@ -51,7 +51,7 @@ export function CheckinForm({ eventCode }: { eventCode: string }) {
         <span className="text-sm font-semibold text-slate-800">Name</span>
         <input
           className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
-          placeholder="Your public proof name"
+          placeholder="Name to show on your proof"
           {...register("name")}
         />
         <FieldError message={errors.name?.message} />
@@ -62,21 +62,21 @@ export function CheckinForm({ eventCode }: { eventCode: string }) {
         <input
           type="email"
           className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
-          placeholder="Used for organizer records only"
+          placeholder="Used for organizer records, not public proof"
           {...register("email")}
         />
         <FieldError message={errors.email?.message} />
       </label>
 
       <label className="space-y-2">
-        <span className="text-sm font-semibold text-slate-800">Role</span>
+        <span className="text-sm font-semibold text-slate-800">How did you participate?</span>
         <select
           className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
           {...register("role")}
         >
           {roleOptions.map((role) => (
             <option key={role.value} value={role.value}>
-              {role.label} · {role.points} points
+              {role.label} · {role.description} · {role.points} pts
             </option>
           ))}
         </select>
@@ -91,7 +91,7 @@ export function CheckinForm({ eventCode }: { eventCode: string }) {
 
       <Button type="submit" disabled={isPending}>
         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeCheck className="h-4 w-4" />}
-        Complete check-in
+        {isPending ? "Completing check-in..." : "Complete check-in"}
       </Button>
     </form>
   );

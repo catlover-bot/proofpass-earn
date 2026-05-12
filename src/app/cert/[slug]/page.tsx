@@ -1,4 +1,4 @@
-import { Award, ShieldAlert, ShieldCheck } from "lucide-react";
+import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
 import { PublicFooter } from "@/components/PublicFooter";
 import { SetupError } from "@/components/SetupError";
@@ -129,7 +129,7 @@ export default async function CertificatePage({
   if (certificateError) {
     return (
       <PageShell className="space-y-6">
-        <SetupError title="Unable to load certificate" message={certificateError.message} />
+        <SetupError title="Unable to load proof" message={certificateError.message} />
         <PublicFooter />
       </PageShell>
     );
@@ -139,9 +139,9 @@ export default async function CertificatePage({
     return (
       <PageShell className="space-y-6">
         <Card>
-          <h1 className="text-2xl font-bold text-ink">Certificate not found</h1>
+          <h1 className="text-2xl font-bold text-ink">Proof not found</h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
-            This proof URL does not match a public certificate.
+            This proof URL does not match a public proof page.
           </p>
         </Card>
         <PublicFooter />
@@ -163,7 +163,7 @@ export default async function CertificatePage({
     return (
       <PageShell className="space-y-6">
         <SetupError
-          title="Unable to load certificate details"
+          title="Unable to load proof details"
           message={eventError?.message ?? participantError?.message}
         />
         <PublicFooter />
@@ -175,7 +175,7 @@ export default async function CertificatePage({
     return (
       <PageShell className="space-y-6">
         <Card>
-          <h1 className="text-2xl font-bold text-ink">Certificate details unavailable</h1>
+          <h1 className="text-2xl font-bold text-ink">Proof details unavailable</h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
             The proof record exists, but its linked event or participant is missing.
           </p>
@@ -214,9 +214,19 @@ export default async function CertificatePage({
               <p className="text-sm font-semibold text-slate-500">Participant</p>
               <p className="mt-1 text-2xl font-bold text-ink">{participant.name}</p>
             </div>
+
+            <div>
+              <p className="text-sm font-semibold text-slate-500">Proof type</p>
+              <div className="mt-2">
+                <StatusPill tone="success">{labelRole(certificate.certificate_type)}</StatusPill>
+              </div>
+            </div>
           </div>
 
-          <StatusPill tone={revoked ? "danger" : "success"}>{certificate.status}</StatusPill>
+          <div className="flex flex-wrap gap-2">
+            <StatusPill tone={revoked ? "danger" : "success"}>{labelRole(certificate.status)}</StatusPill>
+            {hasOnChainSbt ? <StatusPill tone="warning">testnet</StatusPill> : null}
+          </div>
         </div>
 
         {revoked ? (
@@ -228,22 +238,20 @@ export default async function CertificatePage({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card>
-          <Award className="h-6 w-6 text-gold" />
-          <p className="mt-4 text-sm font-semibold text-slate-500">Certificate type</p>
-          <p className="mt-1 text-xl font-bold text-ink">{labelRole(certificate.certificate_type)}</p>
-        </Card>
-        <Card>
           <p className="text-sm font-semibold text-slate-500">Participant role</p>
           <p className="mt-1 text-xl font-bold text-ink">{labelRole(participant.role)}</p>
         </Card>
         <Card>
           <p className="text-sm font-semibold text-slate-500">Event date</p>
           <p className="mt-1 text-xl font-bold text-ink">{formatDate(event.starts_at)}</p>
-          <p className="mt-2 text-sm text-slate-600">{event.location}</p>
         </Card>
         <Card>
           <p className="text-sm font-semibold text-slate-500">Issued at</p>
           <p className="mt-1 text-xl font-bold text-ink">{formatDateTime(certificate.issued_at)}</p>
+        </Card>
+        <Card>
+          <p className="text-sm font-semibold text-slate-500">Location</p>
+          <p className="mt-1 text-xl font-bold text-ink">{event.location}</p>
         </Card>
       </div>
 
@@ -264,6 +272,9 @@ export default async function CertificatePage({
         <div>
           <p className="text-sm font-semibold text-slate-500">Proof URL</p>
           <p className="mt-2 break-all text-sm font-bold text-ink">{proofUrl}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-700">
+            Share this proof link with your community, portfolio, or event recap.
+          </p>
         </div>
         <CopyButton value={proofUrl} label="Copy proof URL" copiedLabel="Proof URL copied" />
       </Card>
@@ -271,11 +282,11 @@ export default async function CertificatePage({
       {hasOnChainSbt ? (
         <Card className="space-y-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-mint">Testnet proof</p>
-            <h2 className="mt-2 text-xl font-bold text-ink">On-chain testnet SBT proof</h2>
+            <p className="text-sm font-semibold uppercase tracking-wider text-mint">Advanced proof record</p>
+            <h2 className="mt-2 text-xl font-bold text-ink">Optional testnet SBT record</h2>
             <p className="mt-3 text-sm leading-6 text-slate-700">
-              This proof was also minted on {getNetworkName(certificate)} as a non-transferable testnet SBT.
-              It is not a financial asset.
+              This proof was also recorded on {getNetworkName(certificate)} as a non-transferable testnet SBT.
+              It is for pilot verification only and is not a financial asset.
             </p>
           </div>
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
@@ -312,18 +323,18 @@ export default async function CertificatePage({
               </div>
             ) : null}
             <div className="sm:col-span-2">
-              <dt className="font-semibold text-slate-500">Token URI</dt>
+              <dt className="font-semibold text-slate-500">Metadata</dt>
               <dd className="mt-1 space-y-1">
-                <p className="break-all font-bold text-ink">{tokenUri}</p>
                 <a className="font-bold text-mint" href={tokenUri}>
-                  View token metadata
+                  View metadata
                 </a>
               </dd>
             </div>
             <div>
               <dt className="font-semibold text-slate-500">Locked</dt>
-              <dd className="mt-1 font-bold text-ink">
+              <dd className="mt-1 flex flex-wrap items-center gap-2 font-bold text-ink">
                 {certificate.sbt_status === "unlocked" ? "Check contract" : "true"}
+                {certificate.sbt_status === "unlocked" ? null : <StatusPill tone="success">locked</StatusPill>}
               </dd>
             </div>
           </dl>
@@ -331,35 +342,22 @@ export default async function CertificatePage({
       ) : (
         <Card className="space-y-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-mint">Web3-ready</p>
-            <h2 className="mt-2 text-xl font-bold text-ink">Proof metadata</h2>
+            <p className="text-sm font-semibold uppercase tracking-wider text-mint">Proof metadata</p>
+            <h2 className="mt-2 text-xl font-bold text-ink">Structured proof metadata is available.</h2>
           </div>
-          <dl className="grid gap-4 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="font-semibold text-slate-500">Current proof type</dt>
-              <dd className="mt-1 font-bold text-ink">Off-chain public proof</dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-500">Web3 status</dt>
-              <dd className="mt-1 font-bold text-ink">SBT-ready metadata available</dd>
-            </div>
-            <div className="sm:col-span-2">
-              <dt className="font-semibold text-slate-500">Metadata URL</dt>
-              <dd className="mt-1 break-all font-bold text-mint">
-                <a href={metadataUrl}>{metadataUrl}</a>
-              </dd>
-            </div>
-          </dl>
           <p className="text-sm leading-6 text-slate-700">
-            This proof is not minted on-chain. Future versions may support optional non-transferable SBT issuance
-            without placing personal information on-chain.
+            This proof has structured metadata and can be used for future badges, credentials, or optional SBT
+            experiments.
           </p>
+          <a className="inline-flex font-bold text-mint hover:text-ink" href={metadataUrl}>
+            View metadata
+          </a>
         </Card>
       )}
 
       <Card className="bg-slate-50 shadow-none">
         <p className="text-sm font-semibold text-slate-700">
-          This public proof page does not display participant email.
+          Participant email is not shown on this public page.
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-700">
           This proof represents event participation or contribution. It is not a financial asset.

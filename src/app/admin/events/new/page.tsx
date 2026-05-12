@@ -13,7 +13,7 @@ export default function NewEventPage() {
           <p className="text-sm font-semibold uppercase tracking-wider text-mint">New event</p>
           <h1 className="mt-2 text-3xl font-bold text-ink">Create an event</h1>
           <p className="mt-2 max-w-2xl text-slate-700">
-            Add event details, then generate a unique QR check-in link.
+            Set up a QR check-in and proof issuing page.
           </p>
         </div>
         <ButtonLink href="/admin/events" variant="secondary">

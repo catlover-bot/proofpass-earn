@@ -4,7 +4,7 @@ const footerLinks = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
   { href: "/contact", label: "Contact" },
-  { href: "/web3-roadmap", label: "Web3 Roadmap" }
+  { href: "/web3-roadmap", label: "Web3 roadmap" }
 ];
 
 export function PublicFooter() {

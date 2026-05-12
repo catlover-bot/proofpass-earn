@@ -35,7 +35,7 @@ export default function PrivacyPage() {
         <h2 className="text-xl font-bold text-ink">How participant email is used</h2>
         <p>
           Participant email is used for organizer-side management and duplicate handling. It is not shown on
-          public certificate pages.
+          public proof pages.
         </p>
         <p>
           Public proof URLs may be accessible to anyone with the link. Participants can contact the event

@@ -8,7 +8,7 @@ const phases = [
   },
   {
     title: "Next",
-    body: "Structured proof metadata for certificate pages, without participant email or sensitive personal data."
+    body: "Structured proof metadata for proof pages, without participant email or sensitive personal data."
   },
   {
     title: "Later",
@@ -57,7 +57,7 @@ export default function Web3RoadmapPage() {
           is not production minting, not a financial asset, and not required for the current wallet-free MVP.
         </p>
         <p>
-          The first manual Base Sepolia mint has been validated with certificate metadata and
+          The first manual Base Sepolia mint has been validated with proof metadata and
           <code className="mx-1 rounded bg-slate-100 px-1 py-0.5 text-xs font-semibold">locked(tokenId)</code>
           returning true.
         </p>
