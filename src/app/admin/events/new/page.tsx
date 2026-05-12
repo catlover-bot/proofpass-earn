@@ -24,7 +24,7 @@ export default function NewEventPage() {
       {missing.length > 0 ? (
         <SetupError missing={missing} />
       ) : (
-        <Card>
+        <Card className="shadow-lift">
           <EventForm />
         </Card>
       )}

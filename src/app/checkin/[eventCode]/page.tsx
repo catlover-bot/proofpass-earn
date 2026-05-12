@@ -61,7 +61,7 @@ export default async function CheckinPage({
 
   return (
     <PageShell className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr]">
-      <Card className="space-y-5">
+      <Card className="space-y-5 shadow-lift">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm font-semibold uppercase tracking-wider text-mint">Check in</p>
           <StatusPill tone="success">Wallet-free</StatusPill>
@@ -81,7 +81,7 @@ export default async function CheckinPage({
             {event.location}
           </p>
         </div>
-        <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm leading-6 text-slate-700">
           <p className="flex items-start gap-2">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-mint" />
             Enter your name and email. Your email is used by the organizer and is not shown on the public proof page.
@@ -90,7 +90,7 @@ export default async function CheckinPage({
       </Card>
 
       <div className="space-y-5">
-        <Card className="space-y-3 bg-slate-50 shadow-none">
+        <Card className="space-y-3 bg-paper/80 shadow-none">
           <div className="flex items-center gap-2">
             <BadgeCheck className="h-5 w-5 text-mint" />
             <h2 className="text-lg font-bold text-ink">Before you check in</h2>
@@ -103,7 +103,7 @@ export default async function CheckinPage({
             during the pilot.
           </p>
         </Card>
-        <Card>
+        <Card className="shadow-lift">
           <CheckinForm eventCode={event.checkin_code} />
         </Card>
       </div>

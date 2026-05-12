@@ -197,7 +197,7 @@ export default async function CertificatePage({
 
   return (
     <PageShell className="max-w-4xl space-y-6">
-      <Card className={revoked ? "border-red-200 bg-red-50" : "border-mint/30"}>
+      <Card className={revoked ? "border-red-200 bg-red-50 shadow-lift" : "border-mint/30 bg-white shadow-lift"}>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-5">
             <div className="flex items-center gap-3">
@@ -237,19 +237,19 @@ export default async function CertificatePage({
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
+        <Card className="bg-paper/70 p-5 shadow-none">
           <p className="text-sm font-semibold text-slate-500">Participant role</p>
           <p className="mt-1 text-xl font-bold text-ink">{labelRole(participant.role)}</p>
         </Card>
-        <Card>
+        <Card className="bg-paper/70 p-5 shadow-none">
           <p className="text-sm font-semibold text-slate-500">Event date</p>
           <p className="mt-1 text-xl font-bold text-ink">{formatDate(event.starts_at)}</p>
         </Card>
-        <Card>
+        <Card className="bg-paper/70 p-5 shadow-none">
           <p className="text-sm font-semibold text-slate-500">Issued at</p>
           <p className="mt-1 text-xl font-bold text-ink">{formatDateTime(certificate.issued_at)}</p>
         </Card>
-        <Card>
+        <Card className="bg-paper/70 p-5 shadow-none">
           <p className="text-sm font-semibold text-slate-500">Location</p>
           <p className="mt-1 text-xl font-bold text-ink">{event.location}</p>
         </Card>
@@ -280,7 +280,7 @@ export default async function CertificatePage({
       </Card>
 
       {hasOnChainSbt ? (
-        <Card className="space-y-4">
+        <Card className="space-y-4 border-violet-200 bg-white">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-mint">Advanced proof record</p>
             <h2 className="mt-2 text-xl font-bold text-ink">Optional testnet SBT record</h2>
@@ -334,13 +334,13 @@ export default async function CertificatePage({
               <dt className="font-semibold text-slate-500">Locked</dt>
               <dd className="mt-1 flex flex-wrap items-center gap-2 font-bold text-ink">
                 {certificate.sbt_status === "unlocked" ? "Check contract" : "true"}
-                {certificate.sbt_status === "unlocked" ? null : <StatusPill tone="success">locked</StatusPill>}
+                {certificate.sbt_status === "unlocked" ? null : <StatusPill tone="testnet">locked</StatusPill>}
               </dd>
             </div>
           </dl>
         </Card>
       ) : (
-        <Card className="space-y-4">
+        <Card className="space-y-4 border-cyan-200 bg-white">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-mint">Proof metadata</p>
             <h2 className="mt-2 text-xl font-bold text-ink">Structured proof metadata is available.</h2>
@@ -355,7 +355,7 @@ export default async function CertificatePage({
         </Card>
       )}
 
-      <Card className="bg-slate-50 shadow-none">
+      <Card className="bg-paper/80 shadow-none">
         <p className="text-sm font-semibold text-slate-700">
           Participant email is not shown on this public page.
         </p>

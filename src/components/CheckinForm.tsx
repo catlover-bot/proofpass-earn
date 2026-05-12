@@ -47,41 +47,55 @@ export function CheckinForm({ eventCode }: { eventCode: string }) {
     <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
       <input type="hidden" {...register("eventCode")} />
 
-      <label className="space-y-2">
+      <label className="block space-y-2">
         <span className="text-sm font-semibold text-slate-800">Name</span>
         <input
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
           placeholder="Name to show on your proof"
           {...register("name")}
         />
         <FieldError message={errors.name?.message} />
       </label>
 
-      <label className="space-y-2">
+      <label className="block space-y-2">
         <span className="text-sm font-semibold text-slate-800">Email</span>
         <input
           type="email"
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
           placeholder="Used for organizer records, not public proof"
           {...register("email")}
         />
         <FieldError message={errors.email?.message} />
       </label>
 
-      <label className="space-y-2">
-        <span className="text-sm font-semibold text-slate-800">How did you participate?</span>
-        <select
-          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
-          {...register("role")}
-        >
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-semibold text-slate-800">How did you participate?</legend>
+        <div className="grid gap-3">
           {roleOptions.map((role) => (
-            <option key={role.value} value={role.value}>
-              {role.label} · {role.description} · {role.points} pts
-            </option>
+            <label
+              key={role.value}
+              className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-mint/50 has-[:checked]:border-mint has-[:checked]:bg-emerald-50/60"
+            >
+              <input
+                type="radio"
+                value={role.value}
+                className="mt-1 h-4 w-4 accent-mint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                {...register("role")}
+              />
+              <span className="flex-1">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold text-ink">{role.label}</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+                    {role.points} pts
+                  </span>
+                </span>
+                <span className="mt-1 block text-sm leading-6 text-slate-600">{role.description}</span>
+              </span>
+            </label>
           ))}
-        </select>
+        </div>
         <FieldError message={errors.role?.message} />
-      </label>
+      </fieldset>
 
       {serverError ? (
         <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">

@@ -43,7 +43,7 @@ export function EventForm() {
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold text-slate-800">Event title</span>
           <input
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
             placeholder="Weekly research reading group"
             {...register("title")}
           />
@@ -54,7 +54,7 @@ export function EventForm() {
           <span className="text-sm font-semibold text-slate-800">Description</span>
           <textarea
             rows={4}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
             placeholder="Short description shown on check-in and proof pages"
             {...register("description")}
           />
@@ -64,7 +64,7 @@ export function EventForm() {
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold text-slate-800">Location</span>
           <input
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
             placeholder="Room name, venue, or online"
             {...register("location")}
           />
@@ -75,7 +75,7 @@ export function EventForm() {
           <span className="text-sm font-semibold text-slate-800">Starts at</span>
           <input
             type="datetime-local"
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
             {...register("starts_at")}
           />
           <p className="text-xs leading-5 text-slate-500">Use the local event time.</p>
@@ -86,7 +86,7 @@ export function EventForm() {
           <span className="text-sm font-semibold text-slate-800">Ends at</span>
           <input
             type="datetime-local"
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
             {...register("ends_at")}
           />
           <p className="text-xs leading-5 text-slate-500">Must be after the start time.</p>

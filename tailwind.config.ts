@@ -9,12 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#172033",
-        mint: "#2f9f8f",
-        gold: "#d99d2b"
+        ink: "#102033",
+        navy: "#192a56",
+        mint: "#1f9e8a",
+        cyan: "#2a9fd6",
+        violet: "#7667d9",
+        gold: "#c48a25",
+        paper: "#fbfaf7"
       },
       boxShadow: {
-        soft: "0 18px 45px rgba(23, 32, 51, 0.08)"
+        soft: "0 18px 45px rgba(16, 32, 51, 0.08)",
+        lift: "0 24px 70px rgba(16, 32, 51, 0.12)"
       }
     }
   },

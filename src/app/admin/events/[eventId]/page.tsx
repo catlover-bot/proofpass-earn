@@ -160,19 +160,19 @@ export default async function EventDetailPage({
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="p-5">
+        <Card className="bg-paper/70 p-5 shadow-none">
           <p className="text-sm font-semibold text-slate-500">Date and time</p>
           <p className="mt-2 font-bold text-ink">{formatDateTime(event.starts_at)}</p>
           <p className="mt-1 text-sm text-slate-600">Ends {formatDateTime(event.ends_at)}</p>
         </Card>
-        <Card className="p-5">
+        <Card className="bg-paper/70 p-5 shadow-none">
           <p className="text-sm font-semibold text-slate-500">Location</p>
           <p className="mt-2 flex items-start gap-2 font-bold text-ink">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-mint" />
             {event.location}
           </p>
         </Card>
-        <Card className="p-5">
+        <Card className="bg-paper/70 p-5 shadow-none">
           <p className="text-sm font-semibold text-slate-500">Participants</p>
           <p className="mt-2 text-3xl font-bold text-ink">{participants.length}</p>
           <p className="mt-1 text-sm text-slate-600">Checked in so far</p>
@@ -180,7 +180,7 @@ export default async function EventDetailPage({
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card className="space-y-5">
+        <Card className="space-y-5 shadow-lift">
           <div>
             <h2 className="text-xl font-bold text-ink">Share check-in</h2>
             <p className="mt-2 text-sm leading-6 text-slate-700">
