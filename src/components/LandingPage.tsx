@@ -1,21 +1,14 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
 import { ArrowRight, BadgeCheck, ClipboardCheck, EyeOff, Layers3, Link2, QrCode, Users } from "lucide-react";
 import { PublicFooter } from "@/components/PublicFooter";
-import { ButtonLink, Card, PageShell, StatusPill, cn } from "@/components/ui";
+import { SiteHeader } from "@/components/SiteHeader";
+import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
+import { commonCopy, type Language, withLanguage } from "@/lib/i18n";
 
-type Language = "en" | "ja";
+const demoProofHref = "/cert/proof_xZ0Nb0iY9yMUf1";
 
 const copy = {
   en: {
-    nav: {
-      home: "Home",
-      events: "Events",
-      demo: "Demo proof",
-      roadmap: "Web3 roadmap"
-    },
     hero: {
       badge: "No wallet required",
       title: "QR check-in and proof pages for community events",
@@ -30,7 +23,10 @@ const copy = {
       event: "Research Systems Night",
       participant: "Mika Tanaka",
       role: "Speaker proof",
-      url: "/cert/proof_xZ0Nb0iY9yMUf1"
+      status: "Public URL ready",
+      participantLabel: "Participant",
+      proofTypeLabel: "Proof type",
+      proofUrlLabel: "Proof URL"
     },
     stepsLabel: "How it works",
     steps: ["Create an event", "Share the QR code", "Issue proof pages"],
@@ -40,7 +36,9 @@ const copy = {
     proofLabel: "Proof types",
     proofTitle: "Recognize the roles that make events work.",
     proofTypes: ["Attendee", "Speaker", "Contributor", "Organizer"],
+    proofTypeBody: "Record this role as a public proof page.",
     whyLabel: "Why use this?",
+    whyTitle: "Useful proof, without extra participant work.",
     reasons: [
       "Replace manual attendance lists",
       "Give participants a shareable proof URL",
@@ -48,6 +46,7 @@ const copy = {
       "Prepare for future badge and SBT experiments"
     ],
     advanced: {
+      label: "Advanced",
       heading: "Advanced proof infrastructure, when your community needs it",
       body:
         "ProofPass starts as a wallet-free proof page. For pilots, the same proof can expose structured metadata and optional Base Sepolia testnet SBT records."
@@ -55,12 +54,6 @@ const copy = {
     badges: ["Wallet-free", "Public proof URL", "Email hidden on public pages", "Optional testnet SBT"]
   },
   ja: {
-    nav: {
-      home: "ホーム",
-      events: "イベント",
-      demo: "デモ証明",
-      roadmap: "Web3ロードマップ"
-    },
     hero: {
       badge: "ウォレット不要",
       title: "コミュニティイベントのQRチェックインと参加証明",
@@ -74,18 +67,23 @@ const copy = {
       label: "証明プレビュー",
       event: "Research Systems Night",
       participant: "Mika Tanaka",
-      role: "登壇者の証明",
-      url: "/cert/proof_xZ0Nb0iY9yMUf1"
+      role: "登壇証明",
+      status: "公開URL発行済み",
+      participantLabel: "参加者",
+      proofTypeLabel: "証明タイプ",
+      proofUrlLabel: "証明URL"
     },
     stepsLabel: "使い方",
     steps: ["イベントを作成", "QRコードを共有", "参加証明ページを発行"],
     whoLabel: "対象イベント",
-    whoTitle: "実際のコミュニティ運営に使いやすい形です。",
+    whoTitle: "研究・学習・コミュニティの現場で使いやすい形です。",
     audiences: ["研究会", "勉強会", "ハッカソン", "コミュニティイベント", "社内ワークショップ"],
     proofLabel: "証明タイプ",
-    proofTitle: "イベントを支える役割を記録できます。",
+    proofTitle: "イベントを支える役割を証明として残せます。",
     proofTypes: ["参加者", "登壇者", "貢献者", "主催者"],
+    proofTypeBody: "この役割を公開参加証明として記録します。",
     whyLabel: "使う理由",
+    whyTitle: "参加者に余計な手間を増やさず、イベント後にも残る証明を発行できます。",
     reasons: [
       "手作業の参加者リストを減らす",
       "参加者に共有できる証明URLを渡せる",
@@ -93,62 +91,25 @@ const copy = {
       "将来のバッジやSBT実験に拡張できる"
     ],
     advanced: {
+      label: "高度な証明",
       heading: "必要に応じて拡張できる証明インフラ",
       body:
         "ProofPassはまずウォレット不要の証明ページとして使えます。実証では、同じ証明を構造化メタデータやBase Sepolia上のテストネットSBT記録に拡張できます。"
     },
     badges: ["ウォレット不要", "公開証明URL", "メール非公開", "任意のテストネットSBT"]
   }
-} satisfies Record<Language, object>;
+} as const satisfies Record<Language, object>;
 
 const stepIcons = [BadgeCheck, QrCode, Link2];
 const reasonIcons = [ClipboardCheck, Link2, EyeOff, Layers3];
 
-export function LandingPage() {
-  const [language, setLanguage] = useState<Language>("en");
-  const t = copy[language];
+export function LandingPage({ lang }: { lang: Language }) {
+  const t = copy[lang];
+  const common = commonCopy[lang];
 
   return (
     <PageShell className="space-y-14 py-7 sm:space-y-16 sm:py-10">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2 text-lg font-bold text-ink">
-          <span className="rounded-lg bg-ink p-2 text-white">
-            <BadgeCheck className="h-5 w-5" />
-          </span>
-          ProofPass Earn
-        </Link>
-        <div className="flex flex-wrap items-center gap-4">
-          <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-700">
-            <Link href="/" className="hover:text-ink">
-              {t.nav.home}
-            </Link>
-            <Link href="/admin/events" className="hover:text-ink">
-              {t.nav.events}
-            </Link>
-            <Link href="/cert/proof_xZ0Nb0iY9yMUf1" className="hover:text-ink">
-              {t.nav.demo}
-            </Link>
-            <Link href="/web3-roadmap" className="hover:text-ink">
-              {t.nav.roadmap}
-            </Link>
-          </nav>
-          <div className="flex rounded-full border border-slate-200 bg-white p-1 text-xs font-bold shadow-sm" aria-label="Landing page language">
-            {(["ja", "en"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setLanguage(option)}
-                className={cn(
-                  "min-h-8 rounded-full px-3 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink",
-                  language === option ? "bg-ink text-white" : "text-slate-600 hover:bg-slate-100"
-                )}
-              >
-                {option === "ja" ? "日本語" : "English"}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
+      <SiteHeader lang={lang} />
 
       <section className="grid items-center gap-8 lg:grid-cols-[1.04fr_0.96fr]">
         <div className="space-y-7">
@@ -163,14 +124,17 @@ export function LandingPage() {
             <p className="max-w-2xl text-lg leading-8 text-slate-700">{t.hero.subtitle}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <ButtonLink href="/admin/events/new">
+            <ButtonLink href={withLanguage("/admin/events/new", lang)}>
               {t.hero.primary}
               <ArrowRight className="h-4 w-4" />
             </ButtonLink>
-            <ButtonLink href="/cert/proof_xZ0Nb0iY9yMUf1" variant="secondary">
+            <ButtonLink href={withLanguage(demoProofHref, lang)} variant="secondary">
               {t.hero.secondary}
             </ButtonLink>
-            <Link href="/web3-roadmap" className="inline-flex min-h-11 items-center text-sm font-semibold text-mint hover:text-ink">
+            <Link
+              href={withLanguage("/web3-roadmap", lang)}
+              className="inline-flex min-h-11 items-center text-sm font-semibold text-mint hover:text-ink"
+            >
               {t.hero.roadmap}
             </Link>
           </div>
@@ -184,24 +148,24 @@ export function LandingPage() {
           <div className="space-y-5 p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-semibold text-slate-500">Participant</p>
+                <p className="text-sm font-semibold text-slate-500">{t.preview.participantLabel}</p>
                 <p className="mt-1 text-xl font-bold text-ink">{t.preview.participant}</p>
               </div>
-              <StatusPill tone="success">Valid</StatusPill>
+              <StatusPill tone="success">{common.valid}</StatusPill>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg border border-slate-200 bg-paper p-4">
-                <p className="text-sm font-semibold text-slate-500">Proof type</p>
+                <p className="text-sm font-semibold text-slate-500">{t.preview.proofTypeLabel}</p>
                 <p className="mt-1 font-bold text-ink">{t.preview.role}</p>
               </div>
               <div className="rounded-lg border border-slate-200 bg-paper p-4">
-                <p className="text-sm font-semibold text-slate-500">Status</p>
-                <p className="mt-1 font-bold text-ink">Public URL ready</p>
+                <p className="text-sm font-semibold text-slate-500">{common.status}</p>
+                <p className="mt-1 font-bold text-ink">{t.preview.status}</p>
               </div>
             </div>
             <div className="rounded-lg bg-ink p-4 text-white">
-              <p className="text-sm font-semibold text-white/70">Proof URL</p>
-              <p className="mt-2 break-all text-sm font-semibold">{t.preview.url}</p>
+              <p className="text-sm font-semibold text-white/70">{t.preview.proofUrlLabel}</p>
+              <p className="mt-2 break-all text-sm font-semibold">{demoProofHref}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {t.badges.map((badge, index) => (
@@ -214,7 +178,7 @@ export function LandingPage() {
         </Card>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-3" aria-label={t.stepsLabel}>
         {t.steps.map((step, index) => {
           const Icon = stepIcons[index];
           return (
@@ -253,7 +217,7 @@ export function LandingPage() {
           {t.proofTypes.map((type) => (
             <Card key={type} className="p-5">
               <StatusPill tone="success">{type}</StatusPill>
-              <p className="mt-4 text-sm leading-6 text-slate-700">{language === "ja" ? "イベントでの役割を公開証明として残せます。" : "Record this role as a public proof page."}</p>
+              <p className="mt-4 text-sm leading-6 text-slate-700">{t.proofTypeBody}</p>
             </Card>
           ))}
         </div>
@@ -263,9 +227,7 @@ export function LandingPage() {
         <div className="grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">{t.whyLabel}</p>
-            <h2 className="mt-2 text-2xl font-bold text-ink">
-              {language === "ja" ? "イベント後にも残る証明を、かんたんに。" : "Useful proof, without extra participant work."}
-            </h2>
+            <h2 className="mt-2 text-2xl font-bold text-ink">{t.whyTitle}</h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {t.reasons.map((reason, index) => {
@@ -284,14 +246,14 @@ export function LandingPage() {
       <section className="rounded-2xl border border-violet-200/70 bg-white/90 p-6 shadow-soft">
         <div className="grid gap-5 md:grid-cols-[0.65fr_1.35fr]">
           <div>
-            <StatusPill tone="testnet">Advanced</StatusPill>
+            <StatusPill tone="testnet">{t.advanced.label}</StatusPill>
             <h2 className="mt-3 text-2xl font-bold text-ink">{t.advanced.heading}</h2>
           </div>
           <p className="text-sm leading-7 text-slate-700">{t.advanced.body}</p>
         </div>
       </section>
 
-      <PublicFooter />
+      <PublicFooter lang={lang} />
     </PageShell>
   );
 }

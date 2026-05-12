@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { eventFormSchema, type EventFormValues } from "@/lib/validation/event";
+import { normalizeLanguage, withLanguage } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/supabase/types";
 
@@ -68,6 +69,7 @@ async function ensureOrganization(supabase: SupabaseClient<Database>) {
 
 export async function createEventAction(values: EventFormValues): Promise<ActionResult | void> {
   const parsed = eventFormSchema.safeParse(values);
+  const lang = normalizeLanguage(values.lang);
 
   if (!parsed.success) {
     return {
@@ -127,5 +129,5 @@ export async function createEventAction(values: EventFormValues): Promise<Action
     };
   }
 
-  redirect(`/admin/events/${eventId}`);
+  redirect(withLanguage(`/admin/events/${eventId}`, lang));
 }

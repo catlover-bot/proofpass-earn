@@ -53,7 +53,7 @@ export async function GET(
   return NextResponse.json({
     name: `ProofPass Earn proof: ${event.title}`,
     description:
-      "Off-chain public proof metadata for event participation or contribution. This metadata does not include participant email.",
+      "Off-chain public proof metadata for event participation or contribution. Private contact details are not included.",
     external_url: `${appUrl}/cert/${certificate.public_slug}`,
     attributes: [
       { trait_type: "Event title", value: event.title },

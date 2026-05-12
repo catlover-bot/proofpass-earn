@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ROLE_CERTIFICATE_TYPE, ROLE_POINTS } from "@/lib/points";
+import { normalizeLanguage, withLanguage } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import type { Database, ParticipantRole } from "@/lib/supabase/types";
 import { checkinFormSchema, type CheckinFormValues } from "@/lib/validation/checkin";
@@ -140,6 +141,7 @@ async function ensureCheckinPoints(
 
 export async function checkInAction(values: CheckinFormValues): Promise<CheckinActionResult | void> {
   const parsed = checkinFormSchema.safeParse(values);
+  const lang = normalizeLanguage(values.lang);
 
   if (!parsed.success) {
     return {
@@ -196,7 +198,10 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
 
         if (existingCertificate) {
           return {
-            error: "This email has already checked in for this event. Contact the event organizer if you need help."
+            error:
+              lang === "ja"
+                ? "このメールアドレスはすでにこのイベントにチェックインしています。必要な場合は主催者に連絡してください。"
+                : "This email has already checked in for this event. Contact the event organizer if you need help."
           };
         }
 
@@ -230,5 +235,5 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
     };
   }
 
-  redirect(`/cert/${certificateSlug}`);
+  redirect(withLanguage(`/cert/${certificateSlug}`, lang));
 }

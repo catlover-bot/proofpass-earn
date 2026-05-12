@@ -11,7 +11,8 @@ export const eventFormSchema = z
     description: z.string().trim().min(2, "Enter a short description."),
     location: z.string().trim().min(2, "Enter a location."),
     starts_at: dateTimeValue,
-    ends_at: dateTimeValue
+    ends_at: dateTimeValue,
+    lang: z.enum(["en", "ja"]).optional()
   })
   .refine((value) => new Date(value.ends_at).getTime() > new Date(value.starts_at).getTime(), {
     message: "End time must be after the start time.",

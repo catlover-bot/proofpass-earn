@@ -1,37 +1,57 @@
 import { PublicFooter } from "@/components/PublicFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import { Card, PageShell } from "@/components/ui";
+import { commonCopy, getLanguageFromSearchParams, type Language, type SearchParamsLike } from "@/lib/i18n";
 
-export default function TermsPage() {
+const copy = {
+  en: {
+    title: "Pilot terms",
+    intro: "ProofPass Earn is a pilot service for event proof and contribution records.",
+    paragraphs: [
+      "Proof pages are participation and contribution records. They are not financial assets, investment products, payment instruments, tradable rewards, or token exchange items.",
+      "The service has no token exchange, no payment flow, and no investment product. Organizers are responsible for using the service appropriately for their events.",
+      "Public proof URLs may be accessible to anyone with the link. The service may change during the pilot phase as organizer and participant feedback is reviewed.",
+      "Future SBT support, if added, should be optional and non-transferable. Personal information should not be placed on-chain."
+    ]
+  },
+  ja: {
+    title: "パイロット利用規約",
+    intro: "ProofPass Earnは、イベント参加証明と貢献記録のためのパイロットサービスです。",
+    paragraphs: [
+      "証明ページは参加および貢献の記録です。金融資産、投資商品、決済手段、取引可能な報酬、トークン交換の対象ではありません。",
+      "このサービスにはトークン交換、決済フロー、投資商品はありません。主催者は、自分たちのイベントに適した形でサービスを利用する責任があります。",
+      "公開証明URLは、リンクを知っている人がアクセスできる場合があります。サービスはパイロット期間中、主催者と参加者のフィードバックに基づいて変更される場合があります。",
+      "将来SBT対応を追加する場合も、任意かつ譲渡不可であるべきです。個人情報をオンチェーンに載せるべきではありません。"
+    ]
+  }
+} satisfies Record<Language, { title: string; intro: string; paragraphs: string[] }>;
+
+export default async function TermsPage({
+  searchParams
+}: {
+  searchParams: Promise<SearchParamsLike>;
+}) {
+  const lang = getLanguageFromSearchParams(await searchParams);
+  const t = copy[lang];
+  const common = commonCopy[lang];
+
   return (
     <PageShell className="max-w-4xl space-y-8">
+      <SiteHeader lang={lang} />
+
       <div>
-        <p className="text-sm font-semibold uppercase tracking-wider text-mint">Terms</p>
-        <h1 className="mt-2 text-3xl font-bold text-ink">Pilot terms</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-700">
-          ProofPass Earn is a pilot service for event proof and contribution records.
-        </p>
+        <p className="text-sm font-semibold uppercase tracking-wider text-mint">{common.terms}</p>
+        <h1 className="mt-2 text-3xl font-bold text-ink">{t.title}</h1>
+        <p className="mt-3 text-sm leading-6 text-slate-700">{t.intro}</p>
       </div>
 
       <Card className="space-y-4 text-sm leading-6 text-slate-700">
-        <p>
-          Proof pages are participation and contribution records. They are not financial assets, investment
-          products, payment instruments, tradable rewards, or token exchange items.
-        </p>
-        <p>
-          The service has no token exchange, no payment flow, and no investment product. Organizers are
-          responsible for using the service appropriately for their events.
-        </p>
-        <p>
-          Public proof URLs may be accessible to anyone with the link. The service may change during the pilot
-          phase as organizer and participant feedback is reviewed.
-        </p>
-        <p>
-          Future SBT support, if added, should be optional and non-transferable. Personal information should not
-          be placed on-chain.
-        </p>
+        {t.paragraphs.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
       </Card>
 
-      <PublicFooter />
+      <PublicFooter lang={lang} />
     </PageShell>
   );
 }

@@ -1,17 +1,59 @@
 import Link from "next/link";
 import { CalendarPlus, CheckCircle2, MapPin, Users } from "lucide-react";
+import { SiteHeader } from "@/components/SiteHeader";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
+import { commonCopy, getLanguageFromSearchParams, type SearchParamsLike, withLanguage } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
 export const dynamic = "force-dynamic";
 
-export default async function EventsPage() {
+export default async function EventsPage({
+  searchParams
+}: {
+  searchParams: Promise<SearchParamsLike>;
+}) {
+  const lang = getLanguageFromSearchParams(await searchParams);
+  const common = commonCopy[lang];
+  const copy = {
+    en: {
+      label: "Events",
+      subtitle: "Create QR check-ins and manage issued proof pages.",
+      newEvent: "New event",
+      pilot: "Admin access currently uses temporary Basic Auth for the pilot.",
+      emptyTitle: "Create your first event",
+      emptyText: "Generate a QR check-in and start issuing proof pages.",
+      checkinReady: "Check-in ready",
+      participants: "participants",
+      ends: "Ends",
+      checkedIn: "checked in",
+      open: "Open dashboard",
+      unableEvents: "Unable to load events",
+      unableCounts: "Unable to load participant counts"
+    },
+    ja: {
+      label: "イベント",
+      subtitle: "QRチェックインを作成し、参加証明ページを管理します。",
+      newEvent: "新規イベント",
+      pilot: "管理画面はパイロット用のBasic認証で保護されています。",
+      emptyTitle: "最初のイベントを作成",
+      emptyText: "QRチェックインを作成して、参加証明ページの発行を始めましょう。",
+      checkinReady: "チェックイン準備済み",
+      participants: "参加者",
+      ends: "終了",
+      checkedIn: "チェックイン済み",
+      open: "ダッシュボードを開く",
+      unableEvents: "イベントを読み込めません",
+      unableCounts: "参加者数を読み込めません"
+    }
+  }[lang];
+
   const missing = getMissingEnv();
   if (missing.length > 0) {
     return (
-      <PageShell>
+      <PageShell className="space-y-8">
+        <SiteHeader lang={lang} />
         <SetupError missing={missing} />
       </PageShell>
     );
@@ -20,7 +62,8 @@ export default async function EventsPage() {
   const supabase = getSupabaseClient();
   if (!supabase) {
     return (
-      <PageShell>
+      <PageShell className="space-y-8">
+        <SiteHeader lang={lang} />
         <SetupError message="Supabase is not configured yet." />
       </PageShell>
     );
@@ -33,8 +76,9 @@ export default async function EventsPage() {
 
   if (error) {
     return (
-      <PageShell>
-        <SetupError title="Unable to load events" message={error.message} />
+      <PageShell className="space-y-8">
+        <SiteHeader lang={lang} />
+        <SetupError title={copy.unableEvents} message={error.message} />
       </PageShell>
     );
   }
@@ -50,8 +94,9 @@ export default async function EventsPage() {
 
     if (participantCountError) {
       return (
-        <PageShell>
-          <SetupError title="Unable to load participant counts" message={participantCountError.message} />
+        <PageShell className="space-y-8">
+          <SiteHeader lang={lang} />
+          <SetupError title={copy.unableCounts} message={participantCountError.message} />
         </PageShell>
       );
     }
@@ -63,34 +108,36 @@ export default async function EventsPage() {
 
   return (
     <PageShell className="space-y-8">
+      <SiteHeader lang={lang} />
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-mint">Events</p>
-          <h1 className="mt-2 text-3xl font-bold text-ink">Event dashboard</h1>
+          <p className="text-sm font-semibold uppercase tracking-wider text-mint">{copy.label}</p>
+          <h1 className="mt-2 text-3xl font-bold text-ink">{common.eventDashboard}</h1>
           <p className="mt-2 max-w-2xl text-slate-700">
-            Create QR check-ins and manage issued proof pages.
+            {copy.subtitle}
           </p>
         </div>
-        <ButtonLink href="/admin/events/new">
+        <ButtonLink href={withLanguage("/admin/events/new", lang)}>
           <CalendarPlus className="h-4 w-4" />
-          New event
+          {copy.newEvent}
         </ButtonLink>
       </div>
 
       <Card className="border-amber-200 bg-amber-50 p-4 shadow-none">
         <p className="text-sm font-semibold text-amber-950">
-          Admin access currently uses temporary Basic Auth for the pilot.
+          {copy.pilot}
         </p>
       </Card>
 
       {events.length === 0 ? (
         <Card className="text-center">
-          <h2 className="text-xl font-bold text-ink">Create your first event</h2>
+          <h2 className="text-xl font-bold text-ink">{copy.emptyTitle}</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-700">
-            Generate a QR check-in and start issuing proof pages.
+            {copy.emptyText}
           </p>
-          <ButtonLink href="/admin/events/new" className="mt-5">
-            Create event
+          <ButtonLink href={withLanguage("/admin/events/new", lang)} className="mt-5">
+            {common.createEventShort}
           </ButtonLink>
         </Card>
       ) : (
@@ -103,8 +150,10 @@ export default async function EventsPage() {
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div>
                     <div className="mb-3 flex flex-wrap items-center gap-2">
-                      <StatusPill tone="success">Check-in ready</StatusPill>
-                      <StatusPill>{participantCount} participants</StatusPill>
+                      <StatusPill tone="success">{copy.checkinReady}</StatusPill>
+                      <StatusPill>
+                        {participantCount} {copy.participants}
+                      </StatusPill>
                     </div>
                     <h2 className="text-xl font-bold text-ink">{event.title}</h2>
                     <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">{event.description}</p>
@@ -115,16 +164,16 @@ export default async function EventsPage() {
                   </div>
                   <div className="min-w-56 space-y-3 rounded-md bg-slate-50 p-3 text-sm text-slate-700">
                     <p className="font-semibold text-ink">{formatDateTime(event.starts_at)}</p>
-                    <p>Ends {formatDateTime(event.ends_at)}</p>
+                    <p>{copy.ends} {formatDateTime(event.ends_at)}</p>
                     <p className="flex items-center gap-2 font-semibold text-slate-700">
                       <Users className="h-4 w-4 text-mint" />
-                      {participantCount} checked in
+                      {participantCount} {copy.checkedIn}
                     </p>
                     <Link
-                      href={`/admin/events/${event.id}`}
+                      href={withLanguage(`/admin/events/${event.id}`, lang)}
                       className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
                     >
-                      Open dashboard
+                      {copy.open}
                       <CheckCircle2 className="h-4 w-4" />
                     </Link>
                   </div>

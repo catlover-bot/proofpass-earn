@@ -4,18 +4,51 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BadgeCheck, Loader2 } from "lucide-react";
-import { checkInAction } from "@/lib/actions/checkin";
-import { checkinFormSchema, type CheckinFormValues } from "@/lib/validation/checkin";
 import { Button, FieldError } from "@/components/ui";
+import { checkInAction } from "@/lib/actions/checkin";
+import { type Language } from "@/lib/i18n";
+import { checkinFormSchema, type CheckinFormValues } from "@/lib/validation/checkin";
 
-const roleOptions = [
-  { value: "attendee", label: "Attendee", description: "joined the event", points: 10 },
-  { value: "speaker", label: "Speaker", description: "gave a talk or presentation", points: 50 },
-  { value: "contributor", label: "Contributor", description: "helped with the event or materials", points: 30 },
-  { value: "organizer", label: "Organizer", description: "organized or hosted the event", points: 40 }
-] as const;
+const roleOptions = {
+  en: [
+    { value: "attendee", label: "Attendee", description: "joined the event", points: 10 },
+    { value: "speaker", label: "Speaker", description: "gave a talk or presentation", points: 50 },
+    { value: "contributor", label: "Contributor", description: "helped with the event or materials", points: 30 },
+    { value: "organizer", label: "Organizer", description: "organized or hosted the event", points: 40 }
+  ],
+  ja: [
+    { value: "attendee", label: "参加者", description: "イベントに参加した", points: 10 },
+    { value: "speaker", label: "登壇者", description: "発表やトークを行った", points: 50 },
+    { value: "contributor", label: "貢献者", description: "イベントや資料づくりを手伝った", points: 30 },
+    { value: "organizer", label: "主催者", description: "イベントを企画・運営した", points: 40 }
+  ]
+} as const;
 
-export function CheckinForm({ eventCode }: { eventCode: string }) {
+const formCopy = {
+  en: {
+    name: "Name",
+    namePlaceholder: "Name to show on your proof",
+    email: "Email",
+    emailPlaceholder: "Used for organizer records, not public proof",
+    roleLegend: "How did you participate?",
+    points: "pts",
+    completing: "Completing check-in...",
+    submit: "Complete check-in"
+  },
+  ja: {
+    name: "名前",
+    namePlaceholder: "公開証明ページに表示する名前",
+    email: "メールアドレス",
+    emailPlaceholder: "主催者管理と重複確認に使用します",
+    roleLegend: "どの形で参加しましたか？",
+    points: "pts",
+    completing: "チェックイン中...",
+    submit: "チェックインを完了する"
+  }
+} satisfies Record<Language, Record<string, string>>;
+
+export function CheckinForm({ eventCode, lang }: { eventCode: string; lang: Language }) {
+  const t = formCopy[lang];
   const [serverError, setServerError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const {
@@ -28,14 +61,15 @@ export function CheckinForm({ eventCode }: { eventCode: string }) {
       eventCode,
       name: "",
       email: "",
-      role: "attendee"
+      role: "attendee",
+      lang
     }
   });
 
   const onSubmit = (values: CheckinFormValues) => {
     setServerError(null);
     startTransition(() => {
-      void checkInAction(values).then((result) => {
+      void checkInAction({ ...values, lang }).then((result) => {
         if (result?.error) {
           setServerError(result.error);
         }
@@ -46,32 +80,33 @@ export function CheckinForm({ eventCode }: { eventCode: string }) {
   return (
     <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
       <input type="hidden" {...register("eventCode")} />
+      <input type="hidden" value={lang} {...register("lang")} />
 
       <label className="block space-y-2">
-        <span className="text-sm font-semibold text-slate-800">Name</span>
+        <span className="text-sm font-semibold text-slate-800">{t.name}</span>
         <input
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
-          placeholder="Name to show on your proof"
+          placeholder={t.namePlaceholder}
           {...register("name")}
         />
         <FieldError message={errors.name?.message} />
       </label>
 
       <label className="block space-y-2">
-        <span className="text-sm font-semibold text-slate-800">Email</span>
+        <span className="text-sm font-semibold text-slate-800">{t.email}</span>
         <input
           type="email"
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10"
-          placeholder="Used for organizer records, not public proof"
+          placeholder={t.emailPlaceholder}
           {...register("email")}
         />
         <FieldError message={errors.email?.message} />
       </label>
 
       <fieldset className="space-y-3">
-        <legend className="text-sm font-semibold text-slate-800">How did you participate?</legend>
+        <legend className="text-sm font-semibold text-slate-800">{t.roleLegend}</legend>
         <div className="grid gap-3">
-          {roleOptions.map((role) => (
+          {roleOptions[lang].map((role) => (
             <label
               key={role.value}
               className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-mint/50 has-[:checked]:border-mint has-[:checked]:bg-emerald-50/60"
@@ -86,7 +121,7 @@ export function CheckinForm({ eventCode }: { eventCode: string }) {
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="font-bold text-ink">{role.label}</span>
                   <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
-                    {role.points} pts
+                    {role.points} {t.points}
                   </span>
                 </span>
                 <span className="mt-1 block text-sm leading-6 text-slate-600">{role.description}</span>
@@ -105,7 +140,7 @@ export function CheckinForm({ eventCode }: { eventCode: string }) {
 
       <Button type="submit" disabled={isPending}>
         {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeCheck className="h-4 w-4" />}
-        {isPending ? "Completing check-in..." : "Complete check-in"}
+        {isPending ? t.completing : t.submit}
       </Button>
     </form>
   );
