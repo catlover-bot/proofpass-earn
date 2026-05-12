@@ -63,6 +63,48 @@ npm run contracts:mint:testnet
 
 The mint script requires the token URI to point to the public certificate metadata endpoint.
 
+## Successful Pilot Mint
+
+The first manual testnet mint was validated on Base Sepolia:
+
+- Network: Base Sepolia
+- Contract: `0x3d0C08e92C91C3e0B1cd0c11E876dAf7b8f3cDb4`
+- Mint transaction: `0x0cfe646875e5623d1bf6cfaa899cc377dd3a8eceef7ef8c78263ee25a674ea0a`
+- Token ID: `1`
+- Token URI: `https://proofpass-earn.vercel.app/cert/proof_FN1pZHVvriinQl/metadata`
+- `locked(1)`: `true`
+
+This validation remains testnet-only. The token is a non-transferable proof record, not a financial asset.
+
+## Attach Mint Data To A Certificate
+
+For pilot testing, SBT mint data is attached manually after a successful testnet mint. There is no production mint UI.
+
+First run the optional nullable-field SQL if the pilot database does not already have the fields:
+
+```sql
+-- Run supabase/sbt-testnet-fields.sql
+```
+
+Then update the certificate by public slug:
+
+```sql
+update certificates
+set
+  chain_id = '84532',
+  chain_name = 'Base Sepolia',
+  contract_address = '0x3d0C08e92C91C3e0B1cd0c11E876dAf7b8f3cDb4',
+  token_id = '1',
+  tx_hash = '0x0cfe646875e5623d1bf6cfaa899cc377dd3a8eceef7ef8c78263ee25a674ea0a',
+  metadata_url = 'https://proofpass-earn.vercel.app/cert/proof_FN1pZHVvriinQl/metadata',
+  token_uri = 'https://proofpass-earn.vercel.app/cert/proof_FN1pZHVvriinQl/metadata',
+  minted_at = now(),
+  sbt_status = 'locked'
+where public_slug = 'proof_FN1pZHVvriinQl';
+```
+
+Do not attach participant email, private notes, or sensitive personal information to token metadata or on-chain records.
+
 ## Verify Locked Status
 
 After minting, verify the token is locked by calling:

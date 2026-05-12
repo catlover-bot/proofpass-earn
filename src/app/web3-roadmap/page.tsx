@@ -56,6 +56,11 @@ export default function Web3RoadmapPage() {
           A testnet-only prototype can be used for optional experiments with non-transferable proof tokens. This
           is not production minting, not a financial asset, and not required for the current wallet-free MVP.
         </p>
+        <p>
+          The first manual Base Sepolia mint has been validated with certificate metadata and
+          <code className="mx-1 rounded bg-slate-100 px-1 py-0.5 text-xs font-semibold">locked(tokenId)</code>
+          returning true.
+        </p>
         <p>The app does not include a mint button, wallet login, or client-side wallet connection.</p>
       </Card>
 

@@ -128,11 +128,15 @@ export type Database = {
           status: CertificateStatus;
           issued_at: string;
           created_at: string;
-          chain_id: string | null;
+          chain_id: number | string | null;
+          chain_name: string | null;
           contract_address: string | null;
           token_id: string | null;
           tx_hash: string | null;
           metadata_url: string | null;
+          token_uri: string | null;
+          minted_at: string | null;
+          sbt_status: string | null;
         };
         Insert: {
           id?: string;
@@ -143,11 +147,15 @@ export type Database = {
           status?: CertificateStatus;
           issued_at?: string;
           created_at?: string;
-          chain_id?: string | null;
+          chain_id?: number | string | null;
+          chain_name?: string | null;
           contract_address?: string | null;
           token_id?: string | null;
           tx_hash?: string | null;
           metadata_url?: string | null;
+          token_uri?: string | null;
+          minted_at?: string | null;
+          sbt_status?: string | null;
         };
         Update: {
           id?: string;
@@ -158,11 +166,15 @@ export type Database = {
           status?: CertificateStatus;
           issued_at?: string;
           created_at?: string;
-          chain_id?: string | null;
+          chain_id?: number | string | null;
+          chain_name?: string | null;
           contract_address?: string | null;
           token_id?: string | null;
           tx_hash?: string | null;
           metadata_url?: string | null;
+          token_uri?: string | null;
+          minted_at?: string | null;
+          sbt_status?: string | null;
         };
         Relationships: [];
       };

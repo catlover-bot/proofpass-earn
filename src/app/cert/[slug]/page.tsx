@@ -9,6 +9,70 @@ import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/clie
 
 export const dynamic = "force-dynamic";
 
+type CertificateRecord = {
+  id: string;
+  event_id: string;
+  participant_id: string;
+  public_slug: string;
+  certificate_type: string;
+  status: string;
+  issued_at: string;
+  chain_id: number | string | null;
+  chain_name?: string | null;
+  contract_address: string | null;
+  token_id: string | null;
+  tx_hash: string | null;
+  metadata_url: string | null;
+  token_uri?: string | null;
+  minted_at?: string | null;
+  sbt_status?: string | null;
+};
+
+const BASE_CERTIFICATE_SELECT =
+  "id,event_id,participant_id,public_slug,certificate_type,status,issued_at,chain_id,contract_address,token_id,tx_hash,metadata_url";
+const SBT_CERTIFICATE_SELECT = `${BASE_CERTIFICATE_SELECT},chain_name,token_uri,minted_at,sbt_status`;
+const BASE_SEPOLIA_CHAIN_ID = "84532";
+const BASE_SEPOLIA_EXPLORER_URL = "https://sepolia.basescan.org";
+
+function isMissingOptionalSbtColumn(error: { code?: string; message?: string }) {
+  const message = error.message ?? "";
+
+  return (
+    error.code === "42703" ||
+    error.code === "PGRST204" ||
+    message.includes("chain_name") ||
+    message.includes("token_uri") ||
+    message.includes("minted_at") ||
+    message.includes("sbt_status")
+  );
+}
+
+function getChainIdLabel(chainId: number | string | null) {
+  return chainId === null ? "" : String(chainId);
+}
+
+function getNetworkName(certificate: CertificateRecord) {
+  if (certificate.chain_name) {
+    return certificate.chain_name;
+  }
+
+  if (getChainIdLabel(certificate.chain_id) === BASE_SEPOLIA_CHAIN_ID) {
+    return "Base Sepolia";
+  }
+
+  return certificate.chain_id ? `Chain ${certificate.chain_id}` : "Testnet";
+}
+
+function getExplorerUrl(certificate: CertificateRecord) {
+  const networkName = getNetworkName(certificate).toLowerCase();
+
+  if (getChainIdLabel(certificate.chain_id) === BASE_SEPOLIA_CHAIN_ID || networkName === "base sepolia") {
+    return BASE_SEPOLIA_EXPLORER_URL;
+  }
+
+  return null;
+}
+
 export default async function CertificatePage({
   params
 }: {
@@ -37,11 +101,22 @@ export default async function CertificatePage({
     );
   }
 
-  const { data: certificate, error: certificateError } = await supabase
+  let certificateResult = await supabase
     .from("certificates")
-    .select("id,event_id,participant_id,public_slug,certificate_type,status,issued_at")
+    .select(SBT_CERTIFICATE_SELECT)
     .eq("public_slug", slug)
     .maybeSingle();
+
+  if (certificateResult.error && isMissingOptionalSbtColumn(certificateResult.error)) {
+    certificateResult = await supabase
+      .from("certificates")
+      .select(BASE_CERTIFICATE_SELECT)
+      .eq("public_slug", slug)
+      .maybeSingle();
+  }
+
+  const certificate = certificateResult.data as CertificateRecord | null;
+  const certificateError = certificateResult.error;
 
   if (certificateError) {
     return (
@@ -105,6 +180,12 @@ export default async function CertificatePage({
   const revoked = certificate.status === "revoked";
   const proofUrl = `${appUrl}/cert/${certificate.public_slug}`;
   const metadataUrl = `${proofUrl}/metadata`;
+  const tokenUri = certificate.token_uri ?? certificate.metadata_url ?? metadataUrl;
+  const hasOnChainSbt = Boolean(certificate.contract_address && certificate.token_id);
+  const explorerUrl = getExplorerUrl(certificate);
+  const contractUrl =
+    explorerUrl && certificate.contract_address ? `${explorerUrl}/address/${certificate.contract_address}` : null;
+  const txUrl = explorerUrl && certificate.tx_hash ? `${explorerUrl}/tx/${certificate.tx_hash}` : null;
 
   return (
     <PageShell className="max-w-4xl space-y-6">
@@ -179,32 +260,81 @@ export default async function CertificatePage({
         <CopyButton value={proofUrl} label="Copy proof URL" copiedLabel="Proof URL copied" />
       </Card>
 
-      <Card className="space-y-4">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-mint">Web3-ready</p>
-          <h2 className="mt-2 text-xl font-bold text-ink">Proof metadata</h2>
-        </div>
-        <dl className="grid gap-4 text-sm sm:grid-cols-2">
+      {hasOnChainSbt ? (
+        <Card className="space-y-4">
           <div>
-            <dt className="font-semibold text-slate-500">Current proof type</dt>
-            <dd className="mt-1 font-bold text-ink">Off-chain public proof</dd>
+            <p className="text-sm font-semibold uppercase tracking-wider text-mint">Testnet proof</p>
+            <h2 className="mt-2 text-xl font-bold text-ink">On-chain testnet SBT</h2>
           </div>
+          <dl className="grid gap-4 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="font-semibold text-slate-500">Network</dt>
+              <dd className="mt-1 font-bold text-ink">{getNetworkName(certificate)}</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-500">Token ID</dt>
+              <dd className="mt-1 font-bold text-ink">{certificate.token_id}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="font-semibold text-slate-500">Contract address</dt>
+              <dd className="mt-1 break-all font-bold text-mint">
+                {contractUrl ? <a href={contractUrl}>{certificate.contract_address}</a> : certificate.contract_address}
+              </dd>
+            </div>
+            {certificate.tx_hash ? (
+              <div className="sm:col-span-2">
+                <dt className="font-semibold text-slate-500">Mint transaction</dt>
+                <dd className="mt-1 break-all font-bold text-mint">
+                  {txUrl ? <a href={txUrl}>{certificate.tx_hash}</a> : certificate.tx_hash}
+                </dd>
+              </div>
+            ) : null}
+            <div className="sm:col-span-2">
+              <dt className="font-semibold text-slate-500">Token URI</dt>
+              <dd className="mt-1 break-all font-bold text-mint">
+                <a href={tokenUri}>{tokenUri}</a>
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-500">Locked</dt>
+              <dd className="mt-1 font-bold text-ink">
+                {certificate.sbt_status === "unlocked" ? "Check contract" : "true"}
+              </dd>
+            </div>
+          </dl>
+          <p className="text-sm leading-6 text-slate-700">
+            This is a manually attached testnet SBT record for an ERC-5192-style non-transferable proof. It is
+            not a financial asset.
+          </p>
+        </Card>
+      ) : (
+        <Card className="space-y-4">
           <div>
-            <dt className="font-semibold text-slate-500">Web3 status</dt>
-            <dd className="mt-1 font-bold text-ink">SBT-ready metadata available</dd>
+            <p className="text-sm font-semibold uppercase tracking-wider text-mint">Web3-ready</p>
+            <h2 className="mt-2 text-xl font-bold text-ink">Proof metadata</h2>
           </div>
-          <div className="sm:col-span-2">
-            <dt className="font-semibold text-slate-500">Metadata URL</dt>
-            <dd className="mt-1 break-all font-bold text-mint">
-              <a href={metadataUrl}>{metadataUrl}</a>
-            </dd>
-          </div>
-        </dl>
-        <p className="text-sm leading-6 text-slate-700">
-          This proof is not minted on-chain. Future versions may support optional non-transferable SBT issuance
-          without placing personal information on-chain.
-        </p>
-      </Card>
+          <dl className="grid gap-4 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="font-semibold text-slate-500">Current proof type</dt>
+              <dd className="mt-1 font-bold text-ink">Off-chain public proof</dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-slate-500">Web3 status</dt>
+              <dd className="mt-1 font-bold text-ink">SBT-ready metadata available</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="font-semibold text-slate-500">Metadata URL</dt>
+              <dd className="mt-1 break-all font-bold text-mint">
+                <a href={metadataUrl}>{metadataUrl}</a>
+              </dd>
+            </div>
+          </dl>
+          <p className="text-sm leading-6 text-slate-700">
+            This proof is not minted on-chain. Future versions may support optional non-transferable SBT issuance
+            without placing personal information on-chain.
+          </p>
+        </Card>
+      )}
 
       <Card className="bg-slate-50 shadow-none">
         <p className="text-sm font-semibold text-slate-700">

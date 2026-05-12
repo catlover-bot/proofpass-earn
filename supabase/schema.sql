@@ -67,11 +67,15 @@ create table if not exists certificates (
   status certificate_status not null default 'valid',
   issued_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
-  chain_id text,
+  chain_id integer,
+  chain_name text,
   contract_address text,
   token_id text,
   tx_hash text,
   metadata_url text,
+  token_uri text,
+  minted_at timestamptz,
+  sbt_status text,
   unique (event_id, participant_id)
 );
 
