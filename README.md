@@ -1,8 +1,8 @@
-# ProofPass Earn
+# ProofPass
 
-ProofPass Earn is a proof and contribution tracking platform for research events, study groups, hackathons, and technical communities.
+ProofPass is a proof collection and community contribution platform for research events, study groups, hackathons, and technical communities.
 
-Organizers can create events, generate QR check-in links, collect participant check-ins, issue public proof pages, assign role-based off-chain points, and review participant proof status.
+Organizers can create events, generate QR check-in links, collect participant check-ins, issue public proof pages with NFT/SBT-style proof card images, and review achievement badges.
 
 ## MVP Scope
 
@@ -10,11 +10,13 @@ Organizers can create events, generate QR check-in links, collect participant ch
 - QR check-in URLs for each event
 - Participant check-in with name, email, and role
 - Public certificate pages for attendance, speaker, contributor, and organizer proofs
-- Off-chain point ledger entries based on participant role
-- Safe public profile placeholder
+- Generated `/cert/[slug]/image` proof cards for metadata and page previews
+- Achievement badges for attendance, speaker, contributor, organizer, early supporter, and testnet SBT records
+- Public proof collection pages keyed by a hashed profile value
+- Optional event benefit placeholder for proof holder access
 - Supabase schema and local development seed data
 
-This MVP is off-chain only. It does not include wallet login, payment functionality, blockchain dependencies, tradable token logic, or token exchange features. Future SBT support may be added as a non-transferable proof layer, but no chain interaction is implemented now.
+This MVP is wallet-free and payment-free. It does not include wallet custody, crypto payments, production mint UI, or participant-side chain actions. Testnet SBT support is optional and non-transferable.
 
 ## Tech Stack
 
@@ -65,7 +67,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `/admin/events/[eventId]` event detail, QR code, and participants
 - `/checkin/[eventCode]` participant check-in
 - `/cert/[slug]` public certificate page
-- `/profile/[emailHash]` public profile placeholder
+- `/cert/[slug]/image` generated NFT/SBT-style proof card image
+- `/profile/[emailHash]` public proof collection
 
 ## Happy Path
 
@@ -75,13 +78,13 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 4. Share or scan the QR check-in URL.
 5. Submit participant name, email, and role.
 6. Confirm the redirect to the public certificate page.
-7. Return to the event detail page to review participant status and points.
+7. Return to the event detail page to review participant status and achievement badges.
 
 ## Privacy Notes
 
 - Public certificate pages do not expose participant email.
-- Public certificate pages do not expose internal point ledger details.
-- The public profile route is a placeholder and does not expose raw email.
+- Public certificate pages do not expose internal ledger details.
+- The public proof collection route does not expose raw email.
 - Admin routes are not production-secure until authentication, authorization, ownership checks, and RLS policies are added.
 - No personal information is intended for future on-chain metadata.
 
@@ -91,4 +94,5 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 npm run lint
 npm run typecheck
 npm run build
+npm run contracts:compile
 ```

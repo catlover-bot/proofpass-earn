@@ -8,13 +8,13 @@ const copy = {
     title: "Contact",
     intro: "For event-specific questions, contact the event organizer.",
     feedbackTitle: "Pilot feedback",
-    feedback: "Contact the ProofPass Earn team or the event organizer."
+    feedback: "Contact the ProofPass team or the event organizer."
   },
   ja: {
     title: "お問い合わせ",
     intro: "イベントごとの質問は、イベント主催者にお問い合わせください。",
     feedbackTitle: "パイロットへのフィードバック",
-    feedback: "ProofPass Earnチームまたはイベント主催者にお問い合わせください。"
+    feedback: "ProofPassチームまたはイベント主催者にお問い合わせください。"
   }
 } satisfies Record<Language, Record<string, string>>;
 

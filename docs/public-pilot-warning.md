@@ -1,6 +1,6 @@
 # Public Pilot Warning
 
-ProofPass Earn is currently suitable only for test and pilot data.
+ProofPass is currently suitable only for test and pilot data.
 
 The admin area uses temporary HTTP Basic Auth. This is useful for a first deployment, but it is not a complete production security model.
 

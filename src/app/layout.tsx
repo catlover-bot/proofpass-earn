@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ProofPass Earn",
+  title: "ProofPass",
   description:
-    "Off-chain proof and contribution tracking for research events, study groups, hackathons, and technical communities."
+    "Wallet-free proof pages and NFT/SBT-style event proof records for research events, study groups, hackathons, and technical communities."
 };
 
 export default function RootLayout({

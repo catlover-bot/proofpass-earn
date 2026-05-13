@@ -1,11 +1,15 @@
 import { ShieldAlert, ShieldCheck } from "lucide-react";
+import { AchievementBadgeList } from "@/components/AchievementBadgeList";
 import { CopyButton } from "@/components/CopyButton";
+import { EventBenefitPlaceholder } from "@/components/EventBenefitPlaceholder";
 import { PublicFooter } from "@/components/PublicFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SetupError } from "@/components/SetupError";
-import { Card, PageShell, StatusPill } from "@/components/ui";
+import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
+import { getProofAchievementBadges } from "@/lib/achievements";
 import { formatDate, formatDateTime } from "@/lib/format";
-import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike } from "@/lib/i18n";
+import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike, withLanguage } from "@/lib/i18n";
+import { getProfileHashForEmail } from "@/lib/profile";
 import { labelProofType } from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
@@ -104,27 +108,35 @@ export default async function CertificatePage({
       revoked:
         "This proof has been revoked by the issuer and should not be treated as valid.",
       issuer: "Issuer",
-      issuerName: "ProofPass Earn organizer",
+      issuerName: "ProofPass organizer",
       proofId: "Proof ID",
       share: "Share this proof link with your community, portfolio, or event recap.",
+      achievementsTitle: "Achievement badges",
+      cardPreviewTitle: "NFT/SBT-style proof card",
+      cardPreviewText:
+        "This generated image is included in the proof metadata and can represent attendance, speaking, contribution, or organizing activity.",
+      openImage: "Open proof image",
+      collectionTitle: "Proof collection",
+      collectionText: "View this participant's public proofs as a collectible proof collection. Email stays hidden.",
+      viewCollection: "View proof collection",
       advancedLabel: "Advanced proof record",
       sbtExplanation:
-        "This proof was also recorded on Base Sepolia as a non-transferable testnet SBT. It is for pilot verification only and is not a financial asset.",
+        "This proof was also recorded on Base Sepolia as a non-transferable testnet SBT for pilot verification.",
       network: "Network",
       tokenId: "Token ID",
       contractAddress: "Contract address",
-      mintTransaction: "Mint transaction",
+      mintTransaction: "SBT record transaction",
       metadata: "Metadata",
       locked: "Locked",
       checkContract: "Check contract",
       viewContract: "View contract on Basescan",
-      viewTransaction: "View mint transaction on Basescan",
+      viewTransaction: "View SBT transaction on Basescan",
       metadataLabel: "Proof metadata",
       metadataTitle: "Structured proof metadata is available.",
       metadataText:
-        "This proof has structured metadata and can be used for future badges, credentials, or optional SBT experiments.",
+        "This proof has structured metadata and can be used for achievement badges, credentials, or optional SBT experiments.",
       emailHidden: "Participant email is not shown on this public page.",
-      proofMeaning: "This proof represents event participation or contribution. It is not a financial asset.",
+      proofMeaning: "This proof represents event participation or community contribution.",
       testnet: "testnet",
       lockedBadge: "locked"
     },
@@ -137,26 +149,34 @@ export default async function CertificatePage({
       detailsUnavailableText: "証明レコードは存在しますが、関連するイベントまたは参加者が見つかりません。",
       revoked: "この証明は発行者によって取り消されているため、有効な証明として扱えません。",
       issuer: "発行者",
-      issuerName: "ProofPass Earn organizer",
+      issuerName: "ProofPass organizer",
       proofId: "証明ID",
       share: "この証明リンクをコミュニティ、ポートフォリオ、イベントレポートなどで共有できます。",
+      achievementsTitle: "達成バッジ",
+      cardPreviewTitle: "NFT/SBTスタイルの証明カード",
+      cardPreviewText:
+        "この生成画像は証明メタデータに含まれ、参加・登壇・貢献・主催の活動記録を表します。",
+      openImage: "証明画像を開く",
+      collectionTitle: "証明コレクション",
+      collectionText: "この参加者の公開証明を、コレクション形式で表示します。メールアドレスは表示されません。",
+      viewCollection: "証明コレクションを見る",
       advancedLabel: "高度な証明記録",
       sbtExplanation:
-        "この証明はBase Sepolia上の譲渡不可テストネットSBTとしても記録されています。パイロット検証用であり、金融資産ではありません。",
+        "この証明はBase Sepolia上の譲渡不可テストネットSBTとして、パイロット検証用に記録されています。",
       network: "ネットワーク",
       tokenId: "トークンID",
       contractAddress: "コントラクトアドレス",
-      mintTransaction: "発行トランザクション",
+      mintTransaction: "SBT記録トランザクション",
       metadata: "メタデータ",
       locked: "ロック状態",
       checkContract: "コントラクトを確認",
       viewContract: "Basescanでコントラクトを見る",
-      viewTransaction: "Basescanで発行トランザクションを見る",
+      viewTransaction: "BasescanでSBTトランザクションを見る",
       metadataLabel: "証明メタデータ",
       metadataTitle: "構造化された証明メタデータを利用できます。",
-      metadataText: "この証明は、将来のバッジ、資格情報、任意のテストネットSBT実験に活用できます。",
+      metadataText: "この証明は、達成バッジ、資格情報、任意のテストネットSBT実験に活用できます。",
       emailHidden: "この公開ページには参加者のメールアドレスは表示されません。",
-      proofMeaning: "この証明はイベント参加または貢献の記録です。金融資産ではありません。",
+      proofMeaning: "この証明はイベント参加またはコミュニティ貢献の記録です。",
       testnet: "テストネット",
       lockedBadge: "譲渡不可"
     }
@@ -234,7 +254,7 @@ export default async function CertificatePage({
         .select("title,starts_at,ends_at,location")
         .eq("id", certificate.event_id)
         .maybeSingle(),
-      supabase.from("participants").select("name,role").eq("id", certificate.participant_id).maybeSingle()
+      supabase.from("participants").select("name,role,email").eq("id", certificate.participant_id).maybeSingle()
     ]);
 
   if (eventError || participantError) {
@@ -268,8 +288,16 @@ export default async function CertificatePage({
   const revoked = certificate.status === "revoked";
   const proofUrl = `${appUrl}/cert/${certificate.public_slug}?lang=${lang}`;
   const metadataUrl = `${appUrl}/cert/${certificate.public_slug}/metadata`;
+  const proofImageUrl = `${appUrl}/cert/${certificate.public_slug}/image?lang=${lang}`;
   const tokenUri = certificate.token_uri ?? certificate.metadata_url ?? metadataUrl;
   const hasOnChainSbt = Boolean(certificate.contract_address && certificate.token_id);
+  const proofCollectionHref = withLanguage(`/profile/${getProfileHashForEmail(participant.email)}`, lang);
+  const achievementBadges = getProofAchievementBadges(lang, {
+    certificateType: certificate.certificate_type,
+    participantRole: participant.role,
+    hasTestnetSbt: hasOnChainSbt,
+    includeEarlySupporter: true
+  });
   const explorerUrl = getExplorerUrl(certificate);
   const contractUrl =
     explorerUrl && certificate.contract_address ? `${explorerUrl}/address/${certificate.contract_address}` : null;
@@ -303,6 +331,13 @@ export default async function CertificatePage({
                 <StatusPill tone="success">{labelProofType(lang, certificate.certificate_type)}</StatusPill>
               </div>
             </div>
+
+            <div>
+              <p className="text-sm font-semibold text-slate-500">{copy.achievementsTitle}</p>
+              <div className="mt-2">
+                <AchievementBadgeList badges={achievementBadges} />
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -316,6 +351,28 @@ export default async function CertificatePage({
             {copy.revoked}
           </div>
         ) : null}
+      </Card>
+
+      <Card className="space-y-4 overflow-hidden p-0 shadow-lift">
+        <div className="px-5 pt-5">
+          <p className="text-sm font-semibold uppercase tracking-wider text-mint">{copy.cardPreviewTitle}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-700">{copy.cardPreviewText}</p>
+        </div>
+        <object
+          data={proofImageUrl}
+          type="image/svg+xml"
+          aria-label={copy.cardPreviewTitle}
+          className="aspect-[1200/630] w-full border-y border-slate-200 bg-ink"
+        >
+          <a className="inline-flex p-5 font-bold text-mint hover:text-ink" href={proofImageUrl}>
+            {copy.openImage}
+          </a>
+        </object>
+        <div className="px-5 pb-5">
+          <a className="inline-flex font-bold text-mint hover:text-ink" href={proofImageUrl}>
+            {copy.openImage}
+          </a>
+        </div>
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -350,6 +407,19 @@ export default async function CertificatePage({
         </dl>
       </Card>
 
+      <Card className="space-y-4 border-cyan-200 bg-white">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wider text-mint">{copy.collectionTitle}</p>
+          <h2 className="mt-2 text-xl font-bold text-ink">{copy.collectionTitle}</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            {copy.collectionText}
+          </p>
+        </div>
+        <ButtonLink href={proofCollectionHref} variant="secondary">
+          {copy.viewCollection}
+        </ButtonLink>
+      </Card>
+
       <Card className="space-y-4">
         <div>
           <p className="text-sm font-semibold text-slate-500">{common.proofUrl}</p>
@@ -360,6 +430,8 @@ export default async function CertificatePage({
         </div>
         <CopyButton value={proofUrl} label={common.copyProofUrl} copiedLabel={common.copiedProofUrl} />
       </Card>
+
+      <EventBenefitPlaceholder lang={lang} />
 
       {hasOnChainSbt ? (
         <Card className="space-y-4 border-violet-200 bg-white">

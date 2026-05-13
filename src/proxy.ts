@@ -42,7 +42,7 @@ function unauthorizedResponse() {
   return new NextResponse("Authentication required.", {
     status: 401,
     headers: {
-      "WWW-Authenticate": 'Basic realm="ProofPass Earn Admin", charset="UTF-8"',
+      "WWW-Authenticate": 'Basic realm="ProofPass Admin", charset="UTF-8"',
       "Content-Type": "text/plain; charset=utf-8"
     }
   });

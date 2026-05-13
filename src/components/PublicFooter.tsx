@@ -13,7 +13,7 @@ export function PublicFooter({ lang = defaultLanguage }: { lang?: Language }) {
   return (
     <footer className="border-t border-slate-200 pt-6 text-sm text-slate-600">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p>ProofPass Earn pilot</p>
+        <p>ProofPass pilot</p>
         <nav className="flex flex-wrap gap-4 font-semibold">
           {footerLinks.map((link) => (
             <Link key={link.href} href={withLanguage(link.href, lang)} className="hover:text-ink">

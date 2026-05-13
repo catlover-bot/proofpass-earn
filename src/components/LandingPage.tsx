@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, ClipboardCheck, EyeOff, Layers3, Link2, QrCode, Users } from "lucide-react";
+import { AchievementBadgeList } from "@/components/AchievementBadgeList";
+import { EventBenefitPlaceholder } from "@/components/EventBenefitPlaceholder";
 import { PublicFooter } from "@/components/PublicFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
+import { getAchievementCatalog } from "@/lib/achievements";
 import { commonCopy, type Language, withLanguage } from "@/lib/i18n";
 
 const demoProofHref = "/cert/proof_xZ0Nb0iY9yMUf1";
@@ -11,19 +14,19 @@ const copy = {
   en: {
     hero: {
       badge: "No wallet required",
-      title: "QR check-in and proof pages for community events",
+      title: "Proof NFT/SBT-style records for community events",
       subtitle:
-        "Create an event, share a QR check-in, and issue public participation proofs without requiring participants to use a wallet.",
+        "Create an event, share a QR check-in, and issue wallet-free proof pages with NFT/SBT-style cards for attendance, speaking, contribution, and organizing.",
       primary: "Create an event",
       secondary: "View demo proof",
       roadmap: "How Web3 support works"
     },
     preview: {
-      label: "Proof preview",
+      label: "Proof collection preview",
       event: "Research Systems Night",
       participant: "Mika Tanaka",
-      role: "Speaker proof",
-      status: "Public URL ready",
+      role: "Speaker proof NFT/SBT",
+      status: "Proof image ready",
       participantLabel: "Participant",
       proofTypeLabel: "Proof type",
       proofUrlLabel: "Proof URL"
@@ -33,42 +36,46 @@ const copy = {
     whoLabel: "Who it is for",
     whoTitle: "Built for practical community formats.",
     audiences: ["Research events", "Study groups", "Hackathons", "Community meetups", "Internal workshops"],
-    proofLabel: "Proof types",
-    proofTitle: "Recognize the roles that make events work.",
-    proofTypes: ["Attendee", "Speaker", "Contributor", "Organizer"],
-    proofTypeBody: "Record this role as a public proof page.",
+    proofLabel: "Proof NFT/SBT roles",
+    proofTitle: "Issue proof records for the activity that makes events work.",
     whyLabel: "Why use this?",
     whyTitle: "Useful proof, without extra participant work.",
     reasons: [
       "Replace manual attendance lists",
-      "Give participants a shareable proof URL",
+      "Give participants a proof collection URL",
       "Keep participant email off public pages",
-      "Prepare for future badge and SBT experiments"
+      "Prepare for optional non-transferable SBT pilots"
     ],
+    collection: {
+      label: "Proof collection",
+      heading: "Public proof cards before wallet requirements",
+      body:
+        "A participant can share proof cards that feel like event NFTs while remaining wallet-free by default. Advanced pilots can attach non-transferable SBT records later."
+    },
     advanced: {
       label: "Advanced",
       heading: "Advanced proof infrastructure, when your community needs it",
       body:
-        "ProofPass starts as a wallet-free proof page. For pilots, the same proof can expose structured metadata and optional Base Sepolia testnet SBT records."
+        "ProofPass starts as a wallet-free proof page. For advanced pilots, the same proof can expose structured metadata and optional Base Sepolia non-transferable SBT records."
     },
     badges: ["Wallet-free", "Public proof URL", "Email hidden on public pages", "Optional testnet SBT"]
   },
   ja: {
     hero: {
       badge: "ウォレット不要",
-      title: "コミュニティイベントのQRチェックインと参加証明",
+      title: "コミュニティイベントのNFT/SBTスタイル証明",
       subtitle:
-        "イベントを作成し、QRチェックインを共有するだけで、参加者に公開できる参加証明ページを発行できます。ウォレットは不要です。",
+        "イベントを作成し、QRチェックインを共有するだけで、参加・登壇・貢献・主催のNFT/SBTスタイル証明カードをウォレット不要で発行できます。",
       primary: "イベントを作成する",
       secondary: "デモ証明を見る",
       roadmap: "Web3対応について"
     },
     preview: {
-      label: "証明プレビュー",
+      label: "証明コレクションプレビュー",
       event: "Research Systems Night",
       participant: "Mika Tanaka",
-      role: "登壇証明",
-      status: "公開URL発行済み",
+      role: "登壇者NFT/SBT証明",
+      status: "証明画像準備済み",
       participantLabel: "参加者",
       proofTypeLabel: "証明タイプ",
       proofUrlLabel: "証明URL"
@@ -78,23 +85,27 @@ const copy = {
     whoLabel: "対象イベント",
     whoTitle: "研究・学習・コミュニティの現場で使いやすい形です。",
     audiences: ["研究会", "勉強会", "ハッカソン", "コミュニティイベント", "社内ワークショップ"],
-    proofLabel: "証明タイプ",
-    proofTitle: "イベントを支える役割を証明として残せます。",
-    proofTypes: ["参加者", "登壇者", "貢献者", "主催者"],
-    proofTypeBody: "この役割を公開参加証明として記録します。",
+    proofLabel: "NFT/SBTスタイル証明",
+    proofTitle: "イベントを支える活動を証明記録として残せます。",
     whyLabel: "使う理由",
     whyTitle: "参加者に余計な手間を増やさず、イベント後にも残る証明を発行できます。",
     reasons: [
       "手作業の参加者リストを減らす",
-      "参加者に共有できる証明URLを渡せる",
+      "参加者に証明コレクションURLを渡せる",
       "公開ページにメールアドレスを表示しない",
-      "将来のバッジやSBT実験に拡張できる"
+      "任意の譲渡不可SBT実証に拡張できる"
     ],
+    collection: {
+      label: "証明コレクション",
+      heading: "まずはウォレット不要の公開証明カード",
+      body:
+        "参加者はイベントNFTのように見える証明カードを共有できます。標準フローはウォレット不要で、高度な実証では譲渡不可SBT記録を追加できます。"
+    },
     advanced: {
       label: "高度な証明",
       heading: "必要に応じて拡張できる証明インフラ",
       body:
-        "ProofPassはまずウォレット不要の証明ページとして使えます。実証では、同じ証明を構造化メタデータやBase Sepolia上のテストネットSBT記録に拡張できます。"
+        "ProofPassはまずウォレット不要の証明ページとして使えます。高度な実証では、同じ証明を構造化メタデータやBase Sepolia上の譲渡不可テストネットSBT記録に拡張できます。"
     },
     badges: ["ウォレット不要", "公開証明URL", "メール非公開", "任意のテストネットSBT"]
   }
@@ -106,6 +117,7 @@ const reasonIcons = [ClipboardCheck, Link2, EyeOff, Layers3];
 export function LandingPage({ lang }: { lang: Language }) {
   const t = copy[lang];
   const common = commonCopy[lang];
+  const achievementCatalog = getAchievementCatalog(lang);
 
   return (
     <PageShell className="space-y-14 py-7 sm:space-y-16 sm:py-10">
@@ -168,11 +180,7 @@ export function LandingPage({ lang }: { lang: Language }) {
               <p className="mt-2 break-all text-sm font-semibold">{demoProofHref}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {t.badges.map((badge, index) => (
-                <StatusPill key={badge} tone={index === 3 ? "testnet" : "neutral"}>
-                  {badge}
-                </StatusPill>
-              ))}
+              <AchievementBadgeList badges={achievementCatalog.slice(1, 6)} />
             </div>
           </div>
         </Card>
@@ -213,13 +221,23 @@ export function LandingPage({ lang }: { lang: Language }) {
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">{t.proofLabel}</p>
           <h2 className="mt-2 text-2xl font-bold text-ink">{t.proofTitle}</h2>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {t.proofTypes.map((type) => (
-            <Card key={type} className="p-5">
-              <StatusPill tone="success">{type}</StatusPill>
-              <p className="mt-4 text-sm leading-6 text-slate-700">{t.proofTypeBody}</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {achievementCatalog.map((badge) => (
+            <Card key={badge.key} className="p-5">
+              <AchievementBadgeList badges={[badge]} />
+              <p className="mt-4 text-sm leading-6 text-slate-700">{badge.description}</p>
             </Card>
           ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-cyan-200 bg-white/95 p-6 shadow-soft">
+        <div className="grid gap-5 md:grid-cols-[0.65fr_1.35fr]">
+          <div>
+            <StatusPill tone="info">{t.collection.label}</StatusPill>
+            <h2 className="mt-3 text-2xl font-bold text-ink">{t.collection.heading}</h2>
+          </div>
+          <p className="text-sm leading-7 text-slate-700">{t.collection.body}</p>
         </div>
       </section>
 
@@ -252,6 +270,8 @@ export function LandingPage({ lang }: { lang: Language }) {
           <p className="text-sm leading-7 text-slate-700">{t.advanced.body}</p>
         </div>
       </section>
+
+      <EventBenefitPlaceholder lang={lang} />
 
       <PublicFooter lang={lang} />
     </PageShell>

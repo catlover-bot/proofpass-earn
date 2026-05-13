@@ -1,6 +1,6 @@
 import type { ParticipantRole } from "@/lib/supabase/types";
 
-export const ROLE_POINTS: Record<ParticipantRole, number> = {
+export const ROLE_ACHIEVEMENT_WEIGHT: Record<ParticipantRole, number> = {
   attendee: 10,
   speaker: 50,
   contributor: 30,

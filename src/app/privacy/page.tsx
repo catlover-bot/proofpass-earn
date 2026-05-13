@@ -6,7 +6,7 @@ import { commonCopy, getLanguageFromSearchParams, type Language, type SearchPara
 const copy = {
   en: {
     title: "Privacy notice",
-    intro: "ProofPass Earn is currently for pilot and testing use by event organizers and participants.",
+    intro: "ProofPass is currently for pilot and testing use by event organizers and participants.",
     dataTitle: "Data collected",
     collectedData: [
       "Participant name",
@@ -23,7 +23,7 @@ const copy = {
   },
   ja: {
     title: "プライバシー通知",
-    intro: "ProofPass Earnは現在、イベント主催者と参加者によるパイロットおよびテスト利用を想定しています。",
+    intro: "ProofPassは現在、イベント主催者と参加者によるパイロットおよびテスト利用を想定しています。",
     dataTitle: "収集するデータ",
     collectedData: [
       "参加者名",

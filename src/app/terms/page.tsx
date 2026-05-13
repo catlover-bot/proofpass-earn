@@ -6,20 +6,20 @@ import { commonCopy, getLanguageFromSearchParams, type Language, type SearchPara
 const copy = {
   en: {
     title: "Pilot terms",
-    intro: "ProofPass Earn is a pilot service for event proof and contribution records.",
+    intro: "ProofPass is a pilot service for event proof and community contribution records.",
     paragraphs: [
-      "Proof pages are participation and contribution records. They are not financial assets, investment products, payment instruments, tradable rewards, or token exchange items.",
-      "The service has no token exchange, no payment flow, and no investment product. Organizers are responsible for using the service appropriately for their events.",
+      "Proof pages are participation, achievement, and community contribution records. They do not create ownership, payment, or transfer rights.",
+      "The service has no payment flow or wallet custody. Organizers are responsible for using the service appropriately for their events.",
       "Public proof URLs may be accessible to anyone with the link. The service may change during the pilot phase as organizer and participant feedback is reviewed.",
       "Future SBT support, if added, should be optional and non-transferable. Personal information should not be placed on-chain."
     ]
   },
   ja: {
     title: "パイロット利用規約",
-    intro: "ProofPass Earnは、イベント参加証明と貢献記録のためのパイロットサービスです。",
+    intro: "ProofPassは、イベント参加証明とコミュニティ貢献記録のためのパイロットサービスです。",
     paragraphs: [
-      "証明ページは参加および貢献の記録です。金融資産、投資商品、決済手段、取引可能な報酬、トークン交換の対象ではありません。",
-      "このサービスにはトークン交換、決済フロー、投資商品はありません。主催者は、自分たちのイベントに適した形でサービスを利用する責任があります。",
+      "証明ページは参加、達成、コミュニティ貢献の記録です。所有権、決済上の権利、譲渡権を発生させるものではありません。",
+      "このサービスには決済フローやウォレット管理はありません。主催者は、自分たちのイベントに適した形でサービスを利用する責任があります。",
       "公開証明URLは、リンクを知っている人がアクセスできる場合があります。サービスはパイロット期間中、主催者と参加者のフィードバックに基づいて変更される場合があります。",
       "将来SBT対応を追加する場合も、任意かつ譲渡不可であるべきです。個人情報をオンチェーンに載せるべきではありません。"
     ]

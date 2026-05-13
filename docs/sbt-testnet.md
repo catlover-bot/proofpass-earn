@@ -1,10 +1,10 @@
 # SBT Testnet Prototype
 
-This package includes a testnet-only ERC-5192-style SBT prototype for experiments. The current ProofPass Earn app remains wallet-free. Check-in, admin, and certificate pages do not require a wallet, and there is no production minting UI.
+This package includes a testnet-only ERC-5192-style SBT prototype for experiments. The current ProofPass app remains wallet-free. Check-in, admin, and certificate pages do not require a wallet, and there is no production minting UI.
 
 ## Purpose
 
-The prototype explores a non-transferable proof token that can point to an existing public certificate metadata URL. It is not a financial asset, not a tradable reward, and not part of any payment flow.
+The prototype explores a non-transferable proof token that can point to an existing public certificate metadata URL. It is not a financial asset, not transferable event access, and not part of any payment flow.
 
 ## Privacy Principles
 

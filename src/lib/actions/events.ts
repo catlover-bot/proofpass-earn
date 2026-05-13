@@ -50,7 +50,7 @@ async function ensureOrganization(supabase: SupabaseClient<Database>) {
   const { data: created, error: createError } = await supabase
     .from("organizations")
     .insert({
-      name: "ProofPass Earn Demo Organization",
+      name: "ProofPass Demo Organization",
       contact_email: "organizer@example.invalid"
     })
     .select("id")

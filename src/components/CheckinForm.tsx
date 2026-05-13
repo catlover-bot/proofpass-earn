@@ -12,16 +12,16 @@ import { checkinFormSchema, type CheckinFormValues } from "@/lib/validation/chec
 
 const roleOptions = {
   en: [
-    { value: "attendee", label: "Attendee", description: "receives attendance proof", points: 10 },
-    { value: "speaker", label: "Speaker", description: "receives speaker proof", points: 50 },
-    { value: "contributor", label: "Contributor", description: "receives contribution proof", points: 30 },
-    { value: "organizer", label: "Organizer", description: "receives organizer proof", points: 40 }
+    { value: "attendee", label: "Attendance", description: "adds an attendance achievement" },
+    { value: "speaker", label: "Speaker", description: "adds a speaker achievement" },
+    { value: "contributor", label: "Contributor", description: "adds a contributor achievement" },
+    { value: "organizer", label: "Organizer", description: "adds an organizer achievement" }
   ],
   ja: [
-    { value: "attendee", label: "参加者", description: "参加証明を受け取る", points: 10 },
-    { value: "speaker", label: "登壇者", description: "登壇証明を受け取る", points: 50 },
-    { value: "contributor", label: "貢献者", description: "貢献証明を受け取る", points: 30 },
-    { value: "organizer", label: "主催者", description: "主催証明を受け取る", points: 40 }
+    { value: "attendee", label: "参加", description: "参加バッジを追加します" },
+    { value: "speaker", label: "登壇者", description: "登壇者バッジを追加します" },
+    { value: "contributor", label: "貢献者", description: "貢献者バッジを追加します" },
+    { value: "organizer", label: "主催者", description: "主催者バッジを追加します" }
   ]
 } as const;
 
@@ -32,8 +32,8 @@ const formCopy = {
     email: "Email",
     emailPlaceholder: "Used for organizer records, not public proof",
     roleLegend: "How did you participate?",
-    roleHelp: "Your selected role determines the proof type issued.",
-    points: "pts",
+    roleHelp: "Your selected role determines the proof type and achievement badge.",
+    achievement: "achievement",
     completing: "Completing check-in...",
     submit: "Complete check-in"
   },
@@ -43,8 +43,8 @@ const formCopy = {
     email: "メールアドレス",
     emailPlaceholder: "主催者管理と重複確認に使用します",
     roleLegend: "どの形で参加しましたか？",
-    roleHelp: "選択した参加種別に応じて、発行される証明タイプが変わります。",
-    points: "pts",
+    roleHelp: "選択した参加種別に応じて、発行される証明タイプと達成バッジが変わります。",
+    achievement: "達成",
     completing: "チェックイン中...",
     submit: "チェックインを完了する"
   }
@@ -141,7 +141,7 @@ export function CheckinForm({
                 <span className="flex flex-wrap items-center gap-2">
                   <span className="font-bold text-ink">{role.label}</span>
                   <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
-                    {role.points} {t.points}
+                    {t.achievement}
                   </span>
                 </span>
                 <span className="mt-1 block text-sm leading-6 text-slate-600">{role.description}</span>

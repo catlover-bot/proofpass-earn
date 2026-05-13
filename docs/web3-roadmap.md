@@ -1,6 +1,6 @@
 # Web3 Roadmap
 
-ProofPass Earn is off-chain first. Web3 support should remain optional, non-speculative, and privacy-first.
+ProofPass is off-chain first. Web3 support should remain optional, non-speculative, and privacy-first.
 
 ## Phase 1: Off-Chain Proof Pages
 
@@ -27,7 +27,7 @@ ProofPass Earn is off-chain first. Web3 support should remain optional, non-spec
 - Prototype non-transferable SBT issuance on testnet only.
 - Use metadata that avoids personal information.
 - Do not add tradable token logic.
-- Do not add exchange or speculative reward mechanics.
+- Do not add exchange or speculative mechanics.
 
 ## Phase 5: Optional Production SBT Issuance
 

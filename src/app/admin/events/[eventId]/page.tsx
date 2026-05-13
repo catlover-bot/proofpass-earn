@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Award, CheckCircle2, ExternalLink, LinkIcon, MapPin, MessageSquareText, Users } from "lucide-react";
+import { AchievementBadgeList } from "@/components/AchievementBadgeList";
 import { CopyButton } from "@/components/CopyButton";
 import { EventInvitationForm } from "@/components/EventInvitationForm";
 import { QrCodePanel } from "@/components/QrCodePanel";
@@ -7,6 +8,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
+import { getProofAchievementBadges } from "@/lib/achievements";
 import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike, withLanguage } from "@/lib/i18n";
 import { labelProofType } from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
@@ -25,8 +27,25 @@ type InvitationRecord = {
   checked_in_at: string | null;
 };
 
+type ParticipantCertificate = {
+  public_slug: string;
+  status: string;
+  certificate_type: string;
+  contract_address?: string | null;
+  token_id?: string | null;
+  minted_at?: string | null;
+};
+
+type ParticipantCertificateRow = ParticipantCertificate & {
+  participant_id: string;
+};
+
 function isInvitationSetupError(message: string) {
   return message.includes("event_invitations") || message.includes("checkin_mode") || message.includes("schema cache");
+}
+
+function isMissingOptionalSbtColumn(message: string) {
+  return message.includes("contract_address") || message.includes("token_id") || message.includes("minted_at");
 }
 
 export default async function EventDetailPage({
@@ -48,7 +67,6 @@ export default async function EventDetailPage({
       unableEvent: "Unable to load event",
       unableParticipants: "Unable to load participants",
       unableProofs: "Unable to load proofs",
-      unablePoints: "Unable to load points",
       dateTime: "Date and time",
       ends: "Ends",
       participants: "Participants",
@@ -63,19 +81,26 @@ export default async function EventDetailPage({
       beforeText: "Open the check-in URL once, confirm the event details, and keep this page open during the event.",
       publicPages: "Public pages",
       publicText: "The check-in page and proof pages are public. Public proof pages do not show participant email.",
+      organizerProofTitle: "Organizer proof",
+      organizerProofIntro:
+        "Host activity can also be represented as a proof record for the people who make the event possible.",
+      organizerProofItems: ["Organizer proof", "Host proof record", "Future optional SBT/NFT issuance"],
+      organizerProofNote:
+        "This is a concept placeholder for advanced pilots. It does not create a production mint flow.",
       organizerMessage: "Organizer message",
       copyMessage: "Copy message",
       copiedMessage: "Message copied",
       shareText: (url: string) =>
         `Please check in here to receive your public participation proof: ${url}. Your email is used by the organizer and will not appear on the public proof page.`,
       participantNote:
-        "Participant email is hidden here and on public proof pages. Use this list to confirm check-ins, proof links, and points.",
+        "Participant email is hidden here and on public proof pages. Use this list to confirm check-ins, proof links, and achievement badges.",
       noParticipantsTitle: "No participants yet",
       noParticipantsText: "Share the QR code to start issuing proofs.",
       name: "Name",
       checkedIn: "Checked in",
       proofStatus: "Proof status",
       proofLink: "Proof link",
+      achievements: "Achievements",
       publicMode: "Public QR check-in",
       inviteOnlyMode: "Invite-only check-in",
       invitationsTitle: "Invitations",
@@ -106,7 +131,6 @@ export default async function EventDetailPage({
       unableEvent: "イベントを読み込めません",
       unableParticipants: "参加者を読み込めません",
       unableProofs: "証明を読み込めません",
-      unablePoints: "ポイントを読み込めません",
       dateTime: "日時",
       ends: "終了",
       participants: "参加者",
@@ -121,19 +145,26 @@ export default async function EventDetailPage({
       beforeText: "チェックインURLを一度開き、イベント情報を確認して、イベント中はこのページを開いておきます。",
       publicPages: "公開ページ",
       publicText: "チェックインページと証明ページは公開されます。公開証明ページには参加者のメールアドレスは表示されません。",
+      organizerProofTitle: "主催者証明",
+      organizerProofIntro:
+        "イベントを実現するホストの活動も、証明記録として扱えるようにします。",
+      organizerProofItems: ["主催者証明", "ホスト証明記録", "将来の任意SBT/NFT発行"],
+      organizerProofNote:
+        "高度な実証向けのコンセプトです。本番発行フローは作成しません。",
       organizerMessage: "主催者向け共有文",
       copyMessage: "共有文をコピー",
       copiedMessage: "共有文をコピーしました",
       shareText: (url: string) =>
         `参加証明を受け取るため、こちらからチェックインしてください: ${url}。メールアドレスは主催者側の管理に使用されますが、公開証明ページには表示されません。`,
       participantNote:
-        "参加者のメールアドレスはこの画面と公開証明ページには表示していません。この一覧でチェックイン、証明リンク、ポイントを確認できます。",
+        "参加者のメールアドレスはこの画面と公開証明ページには表示していません。この一覧でチェックイン、証明リンク、達成バッジを確認できます。",
       noParticipantsTitle: "まだ参加者はいません",
       noParticipantsText: "QRコードを共有して参加証明の発行を始めましょう。",
       name: "名前",
       checkedIn: "チェックイン日時",
       proofStatus: "証明ステータス",
       proofLink: "証明リンク",
+      achievements: "達成バッジ",
       publicMode: "公開QRチェックイン",
       inviteOnlyMode: "招待者限定チェックイン",
       invitationsTitle: "招待",
@@ -261,17 +292,30 @@ export default async function EventDetailPage({
   }
 
   const participantIds = participants.map((participant) => participant.id);
-  const certificatesByParticipant = new Map<string, { public_slug: string; status: string; certificate_type: string }>();
-  const pointsByParticipant = new Map<string, number>();
+  const certificatesByParticipant = new Map<string, ParticipantCertificate>();
   let invitations: InvitationRecord[] = [];
   let invitationErrorMessage: string | null = null;
 
   if (participantIds.length > 0) {
-    const { data: certificates, error: certificatesError } = await supabase
+    const certificateResult = await supabase
       .from("certificates")
-      .select("participant_id,public_slug,status,certificate_type")
+      .select("participant_id,public_slug,status,certificate_type,contract_address,token_id,minted_at")
       .eq("event_id", event.id)
       .in("participant_id", participantIds);
+
+    let certificates = certificateResult.data as ParticipantCertificateRow[] | null;
+    let certificatesError = certificateResult.error;
+
+    if (certificateResult.error && isMissingOptionalSbtColumn(certificateResult.error.message)) {
+      const fallbackCertificateResult = await supabase
+        .from("certificates")
+        .select("participant_id,public_slug,status,certificate_type")
+        .eq("event_id", event.id)
+        .in("participant_id", participantIds);
+
+      certificates = fallbackCertificateResult.data as ParticipantCertificateRow[] | null;
+      certificatesError = fallbackCertificateResult.error;
+    }
 
     if (certificatesError) {
       return (
@@ -282,31 +326,15 @@ export default async function EventDetailPage({
       );
     }
 
-    certificates.forEach((certificate) => {
+    (certificates ?? []).forEach((certificate) => {
       certificatesByParticipant.set(certificate.participant_id, {
         public_slug: certificate.public_slug,
         status: certificate.status,
-        certificate_type: certificate.certificate_type
+        certificate_type: certificate.certificate_type,
+        contract_address: "contract_address" in certificate ? certificate.contract_address : null,
+        token_id: "token_id" in certificate ? certificate.token_id : null,
+        minted_at: "minted_at" in certificate ? certificate.minted_at : null
       });
-    });
-
-    const { data: points, error: pointsError } = await supabase
-      .from("point_ledger")
-      .select("participant_id,points")
-      .eq("event_id", event.id)
-      .in("participant_id", participantIds);
-
-    if (pointsError) {
-      return (
-        <PageShell className="space-y-8">
-          <SiteHeader lang={lang} />
-          <SetupError title={copy.unablePoints} message={pointsError.message} />
-        </PageShell>
-      );
-    }
-
-    points.forEach((entry) => {
-      pointsByParticipant.set(entry.participant_id, (pointsByParticipant.get(entry.participant_id) ?? 0) + entry.points);
     });
   }
 
@@ -431,6 +459,24 @@ export default async function EventDetailPage({
         </div>
       </Card>
 
+      <Card className="space-y-4 border-violet-200 bg-white">
+        <div className="flex items-center gap-2">
+          <Award className="h-5 w-5 text-mint" />
+          <h2 className="text-xl font-bold text-ink">{copy.organizerProofTitle}</h2>
+        </div>
+        <p className="text-sm leading-6 text-slate-700">{copy.organizerProofIntro}</p>
+        <div className="flex flex-wrap gap-2">
+          {copy.organizerProofItems.map((item, index) => (
+            <StatusPill key={item} tone={index === 2 ? "testnet" : "info"}>
+              {item}
+            </StatusPill>
+          ))}
+        </div>
+        <p className="rounded-md border border-violet-200 bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-950">
+          {copy.organizerProofNote}
+        </p>
+      </Card>
+
       <Card className="space-y-5">
         <div>
           <h2 className="text-xl font-bold text-ink">{copy.invitationsTitle}</h2>
@@ -536,13 +582,18 @@ export default async function EventDetailPage({
                   <th className="py-3 pr-4 font-semibold">{copy.checkedIn}</th>
                   <th className="py-3 pr-4 font-semibold">{copy.proofStatus}</th>
                   <th className="py-3 pr-4 font-semibold">{copy.proofLink}</th>
-                  <th className="py-3 pr-4 text-right font-semibold">{common.points}</th>
+                  <th className="py-3 pr-4 font-semibold">{copy.achievements}</th>
                 </tr>
               </thead>
               <tbody>
                 {participants.map((participant) => {
                   const certificate = certificatesByParticipant.get(participant.id);
-                  const points = pointsByParticipant.get(participant.id) ?? 0;
+                  const badges = getProofAchievementBadges(lang, {
+                    certificateType: certificate?.certificate_type,
+                    participantRole: participant.role,
+                    hasTestnetSbt: Boolean(certificate?.contract_address && certificate.token_id) || Boolean(certificate?.minted_at),
+                    includeEarlySupporter: true
+                  });
 
                   return (
                     <tr key={participant.id} className="border-b border-slate-100 last:border-0">
@@ -574,7 +625,9 @@ export default async function EventDetailPage({
                           <span className="text-slate-500">{copy.notIssued}</span>
                         )}
                       </td>
-                      <td className="py-4 pr-4 text-right font-bold text-ink">{points}</td>
+                      <td className="py-4 pr-4">
+                        <AchievementBadgeList badges={badges} />
+                      </td>
                     </tr>
                   );
                 })}

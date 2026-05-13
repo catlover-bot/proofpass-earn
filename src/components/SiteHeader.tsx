@@ -13,7 +13,7 @@ export function SiteHeader({ lang }: { lang: Language }) {
         <span className="rounded-lg bg-ink p-2 text-white">
           <BadgeCheck className="h-5 w-5" />
         </span>
-        ProofPass Earn
+        ProofPass
       </Link>
       <div className="flex flex-wrap items-center gap-4">
         <nav className="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-700">

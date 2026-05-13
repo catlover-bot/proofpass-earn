@@ -3,8 +3,8 @@
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { ROLE_ACHIEVEMENT_WEIGHT } from "@/lib/achievement-ledger";
 import { normalizeEmail } from "@/lib/email";
-import { ROLE_POINTS } from "@/lib/points";
 import { ROLE_CERTIFICATE_TYPE } from "@/lib/proof-types";
 import { normalizeLanguage, withLanguage } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
@@ -168,7 +168,7 @@ async function markInvitationCheckedIn(
   }
 }
 
-async function ensureCheckinPoints(
+async function ensureCheckinAchievementLedger(
   supabase: SupabaseClient<Database>,
   event: { id: string; title: string },
   participantId: string,
@@ -195,7 +195,7 @@ async function ensureCheckinPoints(
     event_id: event.id,
     participant_id: participantId,
     action_type: "check_in",
-    points: ROLE_POINTS[role],
+    points: ROLE_ACHIEVEMENT_WEIGHT[role],
     reason: `${role} check-in for ${event.title}`
   });
 
@@ -328,7 +328,7 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
         const certificate = await createCertificate(supabase, event.id, existingParticipant.id, existingParticipant.role);
         certificateId = certificate.id;
         certificateSlug = certificate.public_slug;
-        await ensureCheckinPoints(supabase, event, existingParticipant.id, existingParticipant.role);
+        await ensureCheckinAchievementLedger(supabase, event, existingParticipant.id, existingParticipant.role);
       }
     } else {
       const participantRole = invitation?.role ?? parsed.data.role;
@@ -353,7 +353,7 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
       const certificate = await createCertificate(supabase, event.id, participant.id, participant.role);
       certificateId = certificate.id;
       certificateSlug = certificate.public_slug;
-      await ensureCheckinPoints(supabase, event, participant.id, participant.role);
+      await ensureCheckinAchievementLedger(supabase, event, participant.id, participant.role);
     }
 
     if (participantId) {

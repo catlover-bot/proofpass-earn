@@ -6,7 +6,7 @@ import { getLanguageFromSearchParams, type Language, type SearchParamsLike, with
 const copy = {
   en: {
     label: "Admin",
-    title: "ProofPass Earn dashboard",
+    title: "ProofPass dashboard",
     intro: "Manage events, create check-in links, and review participant proof status.",
     cardTitle: "Event management",
     cardText: "Create events, display QR check-in links, and inspect participants.",
@@ -14,7 +14,7 @@ const copy = {
   },
   ja: {
     label: "管理",
-    title: "ProofPass Earnダッシュボード",
+    title: "ProofPassダッシュボード",
     intro: "イベント管理、チェックインリンク作成、参加者の証明状況確認を行います。",
     cardTitle: "イベント管理",
     cardText: "イベントを作成し、QRチェックインリンクを表示して、参加者を確認します。",
