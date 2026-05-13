@@ -1,5 +1,12 @@
 export type ParticipantRole = "attendee" | "speaker" | "contributor" | "organizer";
-export type CertificateType = "attendance" | "speaker" | "contributor" | "organizer";
+export type CertificateType =
+  | "attendance"
+  | "speaking"
+  | "contribution"
+  | "organizing"
+  | "speaker"
+  | "contributor"
+  | "organizer";
 export type CertificateStatus = "valid" | "revoked";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];

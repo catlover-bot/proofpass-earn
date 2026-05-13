@@ -6,6 +6,7 @@ import { SetupError } from "@/components/SetupError";
 import { Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike } from "@/lib/i18n";
+import { labelProofType } from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
 export const dynamic = "force-dynamic";
@@ -299,7 +300,7 @@ export default async function CertificatePage({
             <div>
               <p className="text-sm font-semibold text-slate-500">{common.proofType}</p>
               <div className="mt-2">
-                <StatusPill tone="success">{labelForValue(lang, certificate.certificate_type)}</StatusPill>
+                <StatusPill tone="success">{labelProofType(lang, certificate.certificate_type)}</StatusPill>
               </div>
             </div>
           </div>

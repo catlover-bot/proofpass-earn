@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { labelRole } from "@/lib/points";
+import { labelProofType } from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
 export const dynamic = "force-dynamic";
@@ -57,7 +58,7 @@ export async function GET(
     external_url: `${appUrl}/cert/${certificate.public_slug}`,
     attributes: [
       { trait_type: "Event title", value: event.title },
-      { trait_type: "Certificate type", value: labelRole(certificate.certificate_type) },
+      { trait_type: "Certificate type", value: labelProofType("en", certificate.certificate_type) },
       { trait_type: "Participant role", value: labelRole(participant.role) },
       { trait_type: "Status", value: labelRole(certificate.status) },
       { trait_type: "Issued date", value: certificate.issued_at }

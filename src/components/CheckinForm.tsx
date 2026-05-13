@@ -11,16 +11,16 @@ import { checkinFormSchema, type CheckinFormValues } from "@/lib/validation/chec
 
 const roleOptions = {
   en: [
-    { value: "attendee", label: "Attendee", description: "joined the event", points: 10 },
-    { value: "speaker", label: "Speaker", description: "gave a talk or presentation", points: 50 },
-    { value: "contributor", label: "Contributor", description: "helped with the event or materials", points: 30 },
-    { value: "organizer", label: "Organizer", description: "organized or hosted the event", points: 40 }
+    { value: "attendee", label: "Attendee", description: "receives attendance proof", points: 10 },
+    { value: "speaker", label: "Speaker", description: "receives speaker proof", points: 50 },
+    { value: "contributor", label: "Contributor", description: "receives contribution proof", points: 30 },
+    { value: "organizer", label: "Organizer", description: "receives organizer proof", points: 40 }
   ],
   ja: [
-    { value: "attendee", label: "参加者", description: "イベントに参加した", points: 10 },
-    { value: "speaker", label: "登壇者", description: "発表やトークを行った", points: 50 },
-    { value: "contributor", label: "貢献者", description: "イベントや資料づくりを手伝った", points: 30 },
-    { value: "organizer", label: "主催者", description: "イベントを企画・運営した", points: 40 }
+    { value: "attendee", label: "参加者", description: "参加証明を受け取る", points: 10 },
+    { value: "speaker", label: "登壇者", description: "登壇証明を受け取る", points: 50 },
+    { value: "contributor", label: "貢献者", description: "貢献証明を受け取る", points: 30 },
+    { value: "organizer", label: "主催者", description: "主催証明を受け取る", points: 40 }
   ]
 } as const;
 
@@ -31,6 +31,7 @@ const formCopy = {
     email: "Email",
     emailPlaceholder: "Used for organizer records, not public proof",
     roleLegend: "How did you participate?",
+    roleHelp: "Your selected role determines the proof type issued.",
     points: "pts",
     completing: "Completing check-in...",
     submit: "Complete check-in"
@@ -41,6 +42,7 @@ const formCopy = {
     email: "メールアドレス",
     emailPlaceholder: "主催者管理と重複確認に使用します",
     roleLegend: "どの形で参加しましたか？",
+    roleHelp: "選択した参加種別に応じて、発行される証明タイプが変わります。",
     points: "pts",
     completing: "チェックイン中...",
     submit: "チェックインを完了する"
@@ -105,6 +107,7 @@ export function CheckinForm({ eventCode, lang }: { eventCode: string; lang: Lang
 
       <fieldset className="space-y-3">
         <legend className="text-sm font-semibold text-slate-800">{t.roleLegend}</legend>
+        <p className="text-sm leading-6 text-slate-600">{t.roleHelp}</p>
         <div className="grid gap-3">
           {roleOptions[lang].map((role) => (
             <label

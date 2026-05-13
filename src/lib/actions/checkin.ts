@@ -3,7 +3,8 @@
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ROLE_CERTIFICATE_TYPE, ROLE_POINTS } from "@/lib/points";
+import { ROLE_POINTS } from "@/lib/points";
+import { ROLE_CERTIFICATE_TYPE } from "@/lib/proof-types";
 import { normalizeLanguage, withLanguage } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import type { Database, ParticipantRole } from "@/lib/supabase/types";

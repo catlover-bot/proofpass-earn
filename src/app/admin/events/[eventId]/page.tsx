@@ -7,6 +7,7 @@ import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike, withLanguage } from "@/lib/i18n";
+import { labelProofType } from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import { isValidUuid } from "@/lib/validation/uuid";
 
@@ -57,6 +58,8 @@ export default async function EventDetailPage({
       noParticipantsText: "Share the QR code to start issuing proofs.",
       name: "Name",
       checkedIn: "Checked in",
+      proofStatus: "Proof status",
+      proofLink: "Proof link",
       notIssued: "Not issued"
     },
     ja: {
@@ -93,6 +96,8 @@ export default async function EventDetailPage({
       noParticipantsText: "QRコードを共有して参加証明の発行を始めましょう。",
       name: "名前",
       checkedIn: "チェックイン日時",
+      proofStatus: "証明ステータス",
+      proofLink: "証明リンク",
       notIssued: "未発行"
     }
   }[lang];
@@ -184,13 +189,13 @@ export default async function EventDetailPage({
   }
 
   const participantIds = participants.map((participant) => participant.id);
-  const certificatesByParticipant = new Map<string, { public_slug: string; status: string }>();
+  const certificatesByParticipant = new Map<string, { public_slug: string; status: string; certificate_type: string }>();
   const pointsByParticipant = new Map<string, number>();
 
   if (participantIds.length > 0) {
     const { data: certificates, error: certificatesError } = await supabase
       .from("certificates")
-      .select("participant_id,public_slug,status")
+      .select("participant_id,public_slug,status,certificate_type")
       .eq("event_id", event.id)
       .in("participant_id", participantIds);
 
@@ -206,7 +211,8 @@ export default async function EventDetailPage({
     certificates.forEach((certificate) => {
       certificatesByParticipant.set(certificate.participant_id, {
         public_slug: certificate.public_slug,
-        status: certificate.status
+        status: certificate.status,
+        certificate_type: certificate.certificate_type
       });
     });
 
@@ -358,13 +364,15 @@ export default async function EventDetailPage({
           </div>
         ) : (
           <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[900px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500">
                   <th className="py-3 pr-4 font-semibold">{copy.name}</th>
                   <th className="py-3 pr-4 font-semibold">{common.role}</th>
+                  <th className="py-3 pr-4 font-semibold">{common.proofType}</th>
                   <th className="py-3 pr-4 font-semibold">{copy.checkedIn}</th>
-                  <th className="py-3 pr-4 font-semibold">{common.proof}</th>
+                  <th className="py-3 pr-4 font-semibold">{copy.proofStatus}</th>
+                  <th className="py-3 pr-4 font-semibold">{copy.proofLink}</th>
                   <th className="py-3 pr-4 text-right font-semibold">{common.points}</th>
                 </tr>
               </thead>
@@ -377,21 +385,28 @@ export default async function EventDetailPage({
                     <tr key={participant.id} className="border-b border-slate-100 last:border-0">
                       <td className="py-4 pr-4 font-semibold text-ink">{participant.name}</td>
                       <td className="py-4 pr-4 text-slate-700">{labelForValue(lang, participant.role)}</td>
+                      <td className="py-4 pr-4 text-slate-700">
+                        {certificate ? labelProofType(lang, certificate.certificate_type) : copy.notIssued}
+                      </td>
                       <td className="py-4 pr-4 text-slate-700">{formatDateTime(participant.checked_in_at)}</td>
                       <td className="py-4 pr-4">
                         {certificate ? (
-                          <div className="flex flex-wrap items-center gap-3">
-                            <StatusPill tone={certificate.status === "valid" ? "success" : "danger"}>
-                              {labelForValue(lang, certificate.status)}
-                            </StatusPill>
-                            <Link
-                              href={withLanguage(`/cert/${certificate.public_slug}`, lang)}
-                              className="inline-flex items-center gap-2 font-semibold text-mint hover:text-ink"
-                            >
-                              {common.openProof}
-                              <ExternalLink className="h-4 w-4" />
-                            </Link>
-                          </div>
+                          <StatusPill tone={certificate.status === "valid" ? "success" : "danger"}>
+                            {labelForValue(lang, certificate.status)}
+                          </StatusPill>
+                        ) : (
+                          <span className="text-slate-500">{copy.notIssued}</span>
+                        )}
+                      </td>
+                      <td className="py-4 pr-4">
+                        {certificate ? (
+                          <Link
+                            href={withLanguage(`/cert/${certificate.public_slug}`, lang)}
+                            className="inline-flex items-center gap-2 font-semibold text-mint hover:text-ink"
+                          >
+                            {common.openProof}
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
                         ) : (
                           <span className="text-slate-500">{copy.notIssued}</span>
                         )}

@@ -9,7 +9,15 @@ end $$;
 
 do $$
 begin
-  create type certificate_type as enum ('attendance', 'speaker', 'contributor', 'organizer');
+  create type certificate_type as enum (
+    'attendance',
+    'speaking',
+    'contribution',
+    'organizing',
+    'speaker',
+    'contributor',
+    'organizer'
+  );
 exception
   when duplicate_object then null;
 end $$;
