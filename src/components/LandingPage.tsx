@@ -19,6 +19,7 @@ const copy = {
         "Create an event, share a QR check-in, and issue wallet-free proof pages with NFT/SBT-style cards for attendance, speaking, contribution, and organizing.",
       primary: "Create an event",
       secondary: "View demo proof",
+      pilot: "Try public pilot",
       roadmap: "How Web3 support works"
     },
     preview: {
@@ -68,6 +69,7 @@ const copy = {
         "イベントを作成し、QRチェックインを共有するだけで、参加・登壇・貢献・主催のNFT/SBTスタイル証明カードをウォレット不要で発行できます。",
       primary: "イベントを作成する",
       secondary: "デモ証明を見る",
+      pilot: "公開パイロットを試す",
       roadmap: "Web3対応について"
     },
     preview: {
@@ -142,6 +144,9 @@ export function LandingPage({ lang }: { lang: Language }) {
             </ButtonLink>
             <ButtonLink href={withLanguage(demoProofHref, lang)} variant="secondary">
               {t.hero.secondary}
+            </ButtonLink>
+            <ButtonLink href={withLanguage("/pilot", lang)} variant="subtle">
+              {t.hero.pilot}
             </ButtonLink>
             <Link
               href={withLanguage("/web3-roadmap", lang)}
