@@ -2,9 +2,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { BadgeCheck } from "lucide-react";
 import { LanguageToggle } from "@/components/LanguageToggle";
+import { logoutAction } from "@/lib/actions/auth";
 import { commonCopy, type Language, withLanguage } from "@/lib/i18n";
 
-export function SiteHeader({ lang }: { lang: Language }) {
+export function SiteHeader({ lang, adminEmail }: { lang: Language; adminEmail?: string }) {
   const t = commonCopy[lang];
 
   return (
@@ -37,6 +38,20 @@ export function SiteHeader({ lang }: { lang: Language }) {
         >
           <LanguageToggle lang={lang} />
         </Suspense>
+        {adminEmail ? (
+          <form action={logoutAction} className="flex items-center gap-2">
+            <input type="hidden" name="lang" value={lang} />
+            <span className="hidden max-w-48 truncate text-xs font-semibold text-slate-500 sm:inline">
+              {adminEmail}
+            </span>
+            <button
+              type="submit"
+              className="inline-flex min-h-10 items-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-ink shadow-sm transition hover:bg-slate-50"
+            >
+              {t.logout}
+            </button>
+          </form>
+        ) : null}
       </div>
     </header>
   );

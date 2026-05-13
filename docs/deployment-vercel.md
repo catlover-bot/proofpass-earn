@@ -8,20 +8,18 @@ Set these in the Vercel project before the first production build:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_APP_URL=https://your-production-domain.example
-ADMIN_BASIC_AUTH_USER=
-ADMIN_BASIC_AUTH_PASSWORD=
 ```
 
 `NEXT_PUBLIC_APP_URL` must match the production domain so generated QR check-in URLs point to the deployed app.
-`ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_PASSWORD` are server-only values and must not use the `NEXT_PUBLIC` prefix.
 
 ## Supabase Setup Order
 
 1. Create or select the production Supabase project.
 2. Run `supabase/schema.sql`.
-3. Run `supabase/seed.sql` only if a demo event is useful for the deployment.
-4. Confirm the `events`, `participants`, `certificates`, and `point_ledger` tables exist.
-5. Add production RLS policies before using admin routes with real participant data.
+3. Run `supabase/organizer-auth.sql` for existing databases.
+4. Run `supabase/seed.sql` only if a demo event is useful for the deployment.
+5. Confirm the `organizations`, `organizer_members`, `events`, `participants`, `certificates`, and `point_ledger` tables exist.
+6. Add production RLS policies before using admin routes with real participant data.
 
 ## Vercel Import Steps
 
@@ -34,11 +32,11 @@ ADMIN_BASIC_AUTH_PASSWORD=
 ## Production Smoke Test Checklist
 
 - Landing page loads.
-- `/admin/events` requires Basic Auth, then loads and either shows events or a clear empty state.
+- `/admin/events` redirects logged-out users to `/login`, then loads only the organizer's events.
 - `/admin/events/new` creates an event.
 - Event detail page displays a QR code and check-in URL.
 - Check-in URL accepts participant details and redirects to a certificate page.
 - Certificate page does not expose participant email.
 - Invalid check-in and certificate URLs show safe fallback states.
 
-Do not use production participant data until authentication, ownership checks, and RLS policies are in place.
+Do not use production participant data until RLS policies and operational security review are in place.

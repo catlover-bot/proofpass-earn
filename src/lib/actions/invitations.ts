@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { normalizeEmail } from "@/lib/email";
 import { normalizeLanguage } from "@/lib/i18n";
+import { assertOrganizerCanAccessEvent, getOrganizerSupabaseClient, requireOrganizer } from "@/lib/organizer-auth";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import type { Database, ParticipantRole } from "@/lib/supabase/types";
 import {
@@ -131,7 +132,8 @@ export async function addInvitationAction(values: InvitationFormValues): Promise
     };
   }
 
-  const supabase = getSupabaseClient();
+  const organizer = await requireOrganizer(lang);
+  const supabase = getOrganizerSupabaseClient(organizer) ?? getSupabaseClient();
   if (!supabase) {
     return {
       error: "Supabase is not configured yet."
@@ -139,6 +141,14 @@ export async function addInvitationAction(values: InvitationFormValues): Promise
   }
 
   try {
+    const canAccessEvent = await assertOrganizerCanAccessEvent(supabase, organizer, parsed.data.eventId);
+
+    if (!canAccessEvent) {
+      return {
+        error: lang === "ja" ? "このイベントを管理する権限がありません。" : "You do not have access to this event."
+      };
+    }
+
     await upsertInvitation(supabase, {
       eventId: parsed.data.eventId,
       email: parsed.data.email,
@@ -184,7 +194,8 @@ export async function addBulkInvitationsAction(values: BulkInvitationFormValues)
     };
   }
 
-  const supabase = getSupabaseClient();
+  const organizer = await requireOrganizer(lang);
+  const supabase = getOrganizerSupabaseClient(organizer) ?? getSupabaseClient();
   if (!supabase) {
     return {
       error: "Supabase is not configured yet."
@@ -203,6 +214,14 @@ export async function addBulkInvitationsAction(values: BulkInvitationFormValues)
   }
 
   try {
+    const canAccessEvent = await assertOrganizerCanAccessEvent(supabase, organizer, parsed.data.eventId);
+
+    if (!canAccessEvent) {
+      return {
+        error: lang === "ja" ? "このイベントを管理する権限がありません。" : "You do not have access to this event."
+      };
+    }
+
     for (const invitation of invitations) {
       const checked = invitationFormSchema.parse({
         eventId: parsed.data.eventId,

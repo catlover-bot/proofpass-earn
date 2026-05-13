@@ -5,7 +5,7 @@ Use this checklist before pilot sharing and after check-in changes.
 ## Core Routes
 
 - Open `/setup` and confirm required variables show set or missing without values.
-- Open `/admin/events` and confirm Basic Auth protects the admin route in the deployed app.
+- Open `/admin/events` while logged out and confirm it redirects to `/login`.
 - Open `/admin/events/new` and create an event.
 - Open `/admin/events/[eventId]` and confirm QR code, copyable check-in URL, organizer copy, participant list, and pilot checklist appear.
 - Open `/checkin/[eventCode]` and confirm event details and privacy explanation appear.
@@ -49,7 +49,7 @@ Expected behavior:
 
 - `/` loads.
 - `/privacy`, `/terms`, and `/contact` load.
-- `/admin/events` requires Basic Auth.
+- `/admin/events` requires organizer login.
 - `/admin/events/new` creates an event after authentication.
 - `/checkin/[eventCode]` is public.
 - `/cert/[slug]` is public and does not expose participant email.

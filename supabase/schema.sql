@@ -39,6 +39,7 @@ create table if not exists organizations (
 create table if not exists organizer_members (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references organizations(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
   email text not null,
   role text not null default 'owner',
   created_at timestamptz not null default now()
@@ -132,3 +133,5 @@ create index if not exists event_invitations_invite_token_idx on event_invitatio
 create index if not exists event_invitations_normalized_email_idx on event_invitations(event_id, normalized_email);
 create index if not exists point_ledger_event_id_idx on point_ledger(event_id);
 create index if not exists point_ledger_participant_id_idx on point_ledger(participant_id);
+create index if not exists organizer_members_user_id_idx on organizer_members(user_id);
+create index if not exists organizer_members_email_idx on organizer_members(email);

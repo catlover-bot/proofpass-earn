@@ -82,7 +82,8 @@ export const commonCopy = {
     backToEvents: "Back to events",
     openProof: "Open proof",
     viewMetadata: "View metadata",
-    selected: "selected"
+    selected: "selected",
+    logout: "Logout"
   },
   ja: {
     home: "ホーム",
@@ -128,7 +129,8 @@ export const commonCopy = {
     backToEvents: "イベント一覧に戻る",
     openProof: "証明を開く",
     viewMetadata: "メタデータを見る",
-    selected: "選択中"
+    selected: "選択中",
+    logout: "ログアウト"
   }
 } satisfies Record<Language, Record<string, string>>;
 

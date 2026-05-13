@@ -1,5 +1,5 @@
 import { ArrowRight, CalendarDays } from "lucide-react";
-import { SiteHeader } from "@/components/SiteHeader";
+import { AdminHeader } from "@/components/AdminHeader";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
 import { getLanguageFromSearchParams, type Language, type SearchParamsLike, withLanguage } from "@/lib/i18n";
 
@@ -32,7 +32,7 @@ export default async function AdminPage({
 
   return (
     <PageShell className="space-y-8">
-      <SiteHeader lang={lang} />
+      <AdminHeader lang={lang} />
 
       <div className="space-y-3">
         <p className="text-sm font-semibold uppercase tracking-wider text-mint">{t.label}</p>

@@ -2,11 +2,11 @@
 
 ProofPass is currently suitable only for test and pilot data.
 
-The admin area uses temporary HTTP Basic Auth. This is useful for a first deployment, but it is not a complete production security model.
+The admin area uses Supabase Auth for organizer login. Participant check-in and public proof pages remain account-free.
 
 Before using real participant data at scale, add:
 
-- Supabase Auth for organizer login
+- Supabase Auth email/password settings for organizer login
 - Organization membership checks
 - Event ownership checks
 - Strict RLS on all tables

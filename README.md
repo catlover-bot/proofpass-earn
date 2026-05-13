@@ -7,6 +7,7 @@ Organizers can create events, generate QR check-in links, collect participant ch
 ## MVP Scope
 
 - Event creation and event list views
+- Supabase Auth organizer signup/login for admin pages
 - QR check-in URLs for each event
 - Participant check-in with name, email, and role
 - Public certificate pages for attendance, speaker, contributor, and organizer proofs
@@ -55,12 +56,15 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 1. Create a Supabase project.
 2. Open the SQL editor.
 3. Run `supabase/schema.sql`.
-4. Run `supabase/seed.sql`.
-5. Copy the project URL and anon key into `.env.local`.
+4. For existing databases, run `supabase/organizer-auth.sql`.
+5. Run `supabase/seed.sql` if demo data is useful.
+6. Copy the project URL and anon key into `.env.local`.
 
 ## Routes
 
 - `/` landing page
+- `/login` organizer login
+- `/signup` organizer signup
 - `/admin` admin entry page
 - `/admin/events` event list
 - `/admin/events/new` event creation
@@ -85,7 +89,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Public certificate pages do not expose participant email.
 - Public certificate pages do not expose internal ledger details.
 - The public proof collection route does not expose raw email.
-- Admin routes are not production-secure until authentication, authorization, ownership checks, and RLS policies are added.
+- Admin routes require organizer login. Participant check-in and public proof pages remain account-free.
 - No personal information is intended for future on-chain metadata.
 
 ## Validation

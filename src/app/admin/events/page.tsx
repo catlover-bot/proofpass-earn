@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { CalendarPlus, CheckCircle2, MapPin, Users } from "lucide-react";
-import { SiteHeader } from "@/components/SiteHeader";
+import { AdminHeader } from "@/components/AdminHeader";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { commonCopy, getLanguageFromSearchParams, type SearchParamsLike, withLanguage } from "@/lib/i18n";
+import { getOrganizerSupabaseClient, requireOrganizer } from "@/lib/organizer-auth";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import type { EventCheckinMode } from "@/lib/supabase/types";
 
@@ -33,7 +34,7 @@ export default async function EventsPage({
       label: "Events",
       subtitle: "Create QR check-ins and manage issued proof pages.",
       newEvent: "New event",
-      pilot: "Admin access currently uses temporary Basic Auth for the pilot.",
+      auth: "Admin access is protected by organizer login.",
       emptyTitle: "Create your first event",
       emptyText: "Generate a QR check-in and start issuing proof pages.",
       checkinReady: "Check-in ready",
@@ -50,7 +51,7 @@ export default async function EventsPage({
       label: "イベント",
       subtitle: "QRチェックインを作成し、参加証明ページを管理します。",
       newEvent: "新規イベント",
-      pilot: "管理画面はパイロット用のBasic認証で保護されています。",
+      auth: "管理画面は主催者ログインで保護されています。",
       emptyTitle: "最初のイベントを作成",
       emptyText: "QRチェックインを作成して、参加証明ページの発行を始めましょう。",
       checkinReady: "チェックイン準備済み",
@@ -69,26 +70,31 @@ export default async function EventsPage({
   if (missing.length > 0) {
     return (
       <PageShell className="space-y-8">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <SetupError missing={missing} />
       </PageShell>
     );
   }
 
-  const supabase = getSupabaseClient();
+  const organizer = await requireOrganizer(lang);
+  const supabase = getOrganizerSupabaseClient(organizer) ?? getSupabaseClient();
   if (!supabase) {
     return (
       <PageShell className="space-y-8">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <SetupError message="Supabase is not configured yet." />
       </PageShell>
     );
   }
 
-  const eventsResult = await supabase
-    .from("events")
-    .select("id,title,description,location,starts_at,ends_at,checkin_code,checkin_mode")
-    .order("starts_at", { ascending: false });
+  const eventsResult =
+    organizer.organizationIds.length > 0
+      ? await supabase
+          .from("events")
+          .select("id,title,description,location,starts_at,ends_at,checkin_code,checkin_mode")
+          .in("organization_id", organizer.organizationIds)
+          .order("starts_at", { ascending: false })
+      : { data: [], error: null };
 
   let events: EventListRecord[] = [];
   let error = eventsResult.error;
@@ -97,6 +103,7 @@ export default async function EventsPage({
     const fallbackResult = await supabase
       .from("events")
       .select("id,title,description,location,starts_at,ends_at,checkin_code")
+      .in("organization_id", organizer.organizationIds)
       .order("starts_at", { ascending: false });
 
     error = fallbackResult.error;
@@ -111,7 +118,7 @@ export default async function EventsPage({
   if (error) {
     return (
       <PageShell className="space-y-8">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <SetupError title={copy.unableEvents} message={error.message} />
       </PageShell>
     );
@@ -129,7 +136,7 @@ export default async function EventsPage({
     if (participantCountError) {
       return (
         <PageShell className="space-y-8">
-          <SiteHeader lang={lang} />
+          <AdminHeader lang={lang} />
           <SetupError title={copy.unableCounts} message={participantCountError.message} />
         </PageShell>
       );
@@ -142,7 +149,7 @@ export default async function EventsPage({
 
   return (
     <PageShell className="space-y-8">
-      <SiteHeader lang={lang} />
+      <AdminHeader lang={lang} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -160,7 +167,7 @@ export default async function EventsPage({
 
       <Card className="border-amber-200 bg-amber-50 p-4 shadow-none">
         <p className="text-sm font-semibold text-amber-950">
-          {copy.pilot}
+          {copy.auth}
         </p>
       </Card>
 

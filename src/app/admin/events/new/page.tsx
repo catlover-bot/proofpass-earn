@@ -1,5 +1,5 @@
 import { EventForm } from "@/components/EventForm";
-import { SiteHeader } from "@/components/SiteHeader";
+import { AdminHeader } from "@/components/AdminHeader";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell } from "@/components/ui";
 import { commonCopy, getLanguageFromSearchParams, type SearchParamsLike, withLanguage } from "@/lib/i18n";
@@ -28,7 +28,7 @@ export default async function NewEventPage({
 
   return (
     <PageShell className="space-y-8">
-      <SiteHeader lang={lang} />
+      <AdminHeader lang={lang} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>

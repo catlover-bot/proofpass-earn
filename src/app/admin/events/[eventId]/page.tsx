@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { Award, CheckCircle2, ExternalLink, LinkIcon, MapPin, MessageSquareText, Users } from "lucide-react";
 import { AchievementBadgeList } from "@/components/AchievementBadgeList";
+import { AdminHeader } from "@/components/AdminHeader";
 import { CopyButton } from "@/components/CopyButton";
 import { EventInvitationForm } from "@/components/EventInvitationForm";
 import { QrCodePanel } from "@/components/QrCodePanel";
-import { SiteHeader } from "@/components/SiteHeader";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { getProofAchievementBadges } from "@/lib/achievements";
 import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike, withLanguage } from "@/lib/i18n";
+import { getOrganizerSupabaseClient, requireOrganizer } from "@/lib/organizer-auth";
 import { labelProofType } from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import { isValidUuid } from "@/lib/validation/uuid";
@@ -192,7 +193,7 @@ export default async function EventDetailPage({
   if (!isValidUuid(eventId)) {
     return (
       <PageShell className="space-y-6">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <Card>
           <h1 className="text-2xl font-bold text-ink">{copy.invalidTitle}</h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
@@ -210,19 +211,20 @@ export default async function EventDetailPage({
   if (missing.length > 0) {
     return (
       <PageShell className="space-y-8">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <SetupError missing={missing} />
       </PageShell>
     );
   }
 
-  const supabase = getSupabaseClient();
+  const organizer = await requireOrganizer(lang);
+  const supabase = getOrganizerSupabaseClient(organizer) ?? getSupabaseClient();
   const appUrl = getAppUrl();
 
   if (!supabase || !appUrl) {
     return (
       <PageShell className="space-y-8">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <SetupError message="Supabase or the app URL is not configured yet." />
       </PageShell>
     );
@@ -232,6 +234,7 @@ export default async function EventDetailPage({
     .from("events")
     .select("id,title,description,location,starts_at,ends_at,checkin_code,checkin_mode")
     .eq("id", eventId)
+    .in("organization_id", organizer.organizationIds)
     .maybeSingle();
 
   if (eventResult.error && eventResult.error.message.includes("checkin_mode")) {
@@ -239,6 +242,7 @@ export default async function EventDetailPage({
       .from("events")
       .select("id,title,description,location,starts_at,ends_at,checkin_code")
       .eq("id", eventId)
+      .in("organization_id", organizer.organizationIds)
       .maybeSingle();
   }
 
@@ -253,7 +257,7 @@ export default async function EventDetailPage({
   if (eventError) {
     return (
       <PageShell className="space-y-8">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <SetupError title={copy.unableEvent} message={eventError.message} />
       </PageShell>
     );
@@ -262,7 +266,7 @@ export default async function EventDetailPage({
   if (!event) {
     return (
       <PageShell className="space-y-6">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <Card>
           <h1 className="text-2xl font-bold text-ink">{copy.notFoundTitle}</h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
@@ -285,7 +289,7 @@ export default async function EventDetailPage({
   if (participantsError) {
     return (
       <PageShell className="space-y-8">
-        <SiteHeader lang={lang} />
+        <AdminHeader lang={lang} />
         <SetupError title={copy.unableParticipants} message={participantsError.message} />
       </PageShell>
     );
@@ -320,7 +324,7 @@ export default async function EventDetailPage({
     if (certificatesError) {
       return (
         <PageShell className="space-y-8">
-          <SiteHeader lang={lang} />
+          <AdminHeader lang={lang} />
           <SetupError title={copy.unableProofs} message={certificatesError.message} />
         </PageShell>
       );
@@ -355,7 +359,7 @@ export default async function EventDetailPage({
 
   return (
     <PageShell className="space-y-8">
-      <SiteHeader lang={lang} />
+      <AdminHeader lang={lang} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>

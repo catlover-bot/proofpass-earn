@@ -2,11 +2,10 @@
 
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { eventFormSchema, type EventFormValues } from "@/lib/validation/event";
 import { normalizeLanguage, withLanguage } from "@/lib/i18n";
+import { getOrganizerSupabaseClient, requireOrganizer } from "@/lib/organizer-auth";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
-import type { Database } from "@/lib/supabase/types";
 
 export type ActionResult = {
   error?: string;
@@ -31,42 +30,6 @@ function formatCreateError(message: string) {
   return message;
 }
 
-async function ensureOrganization(supabase: SupabaseClient<Database>) {
-  const { data: existing, error: existingError } = await supabase
-    .from("organizations")
-    .select("id")
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (existingError) {
-    throw new Error(existingError.message);
-  }
-
-  if (existing) {
-    return existing.id;
-  }
-
-  const { data: created, error: createError } = await supabase
-    .from("organizations")
-    .insert({
-      name: "ProofPass Demo Organization",
-      contact_email: "organizer@example.invalid"
-    })
-    .select("id")
-    .single();
-
-  if (createError) {
-    throw new Error(createError.message);
-  }
-
-  if (!created?.id) {
-    throw new Error("Organization was not created correctly. No organization id was returned.");
-  }
-
-  return created.id;
-}
-
 export async function createEventAction(values: EventFormValues): Promise<ActionResult | void> {
   const parsed = eventFormSchema.safeParse(values);
   const lang = normalizeLanguage(values.lang);
@@ -85,7 +48,8 @@ export async function createEventAction(values: EventFormValues): Promise<Action
     };
   }
 
-  const supabase = getSupabaseClient();
+  const organizer = await requireOrganizer(lang);
+  const supabase = getOrganizerSupabaseClient(organizer) ?? getSupabaseClient();
   if (!supabase) {
     return {
       error: "Supabase is not configured yet."
@@ -95,7 +59,14 @@ export async function createEventAction(values: EventFormValues): Promise<Action
   let eventId: string;
 
   try {
-    const organizationId = await ensureOrganization(supabase);
+    const organizationId = organizer.organizationIds[0];
+
+    if (!organizationId) {
+      return {
+        error: "Organizer membership is not ready yet. Log out and sign in again."
+      };
+    }
+
     const { data, error } = await supabase
       .from("events")
       .insert({

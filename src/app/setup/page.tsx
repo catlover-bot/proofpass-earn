@@ -1,7 +1,6 @@
 import { CheckCircle2, CircleAlert } from "lucide-react";
 import { Card, PageShell, StatusPill } from "@/components/ui";
 import { REQUIRED_ENV } from "@/lib/supabase/client";
-import { ADMIN_BASIC_AUTH_ENV } from "@/lib/admin-env";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,11 +10,6 @@ export default function SetupPage() {
     ...REQUIRED_ENV.map((name) => ({
       name,
       scope: "Public browser variable",
-      isSet: Boolean(process.env[name])
-    })),
-    ...ADMIN_BASIC_AUTH_ENV.map((name) => ({
-      name,
-      scope: "Server-only variable",
       isSet: Boolean(process.env[name])
     }))
   ];

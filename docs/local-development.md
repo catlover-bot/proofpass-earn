@@ -19,8 +19,6 @@ Create a Supabase project, then set:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3001
-ADMIN_BASIC_AUTH_USER=
-ADMIN_BASIC_AUTH_PASSWORD=
 ```
 
 ## Environment Troubleshooting
@@ -36,6 +34,7 @@ Run the SQL files in this order from the Supabase SQL editor:
 
 ```bash
 supabase/schema.sql
+supabase/organizer-auth.sql
 supabase/seed.sql
 ```
 
@@ -61,6 +60,8 @@ Expected localhost URLs:
 - `http://localhost:3001/admin`
 - `http://localhost:3001/admin/events`
 - `http://localhost:3001/admin/events/new`
+- `http://localhost:3001/login`
+- `http://localhost:3001/signup`
 - `http://localhost:3001/checkin/demo-study-group`
 
 ## Local Happy Path

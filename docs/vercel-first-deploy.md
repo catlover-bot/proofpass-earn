@@ -23,19 +23,15 @@ Required Vercel environment variables:
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_APP_URL=
-ADMIN_BASIC_AUTH_USER=
-ADMIN_BASIC_AUTH_PASSWORD=
 ```
-
-`ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_PASSWORD` are server-only variables. Do not prefix them with `NEXT_PUBLIC`.
 
 ## Smoke Test
 
 - `/` loads.
 - `/setup` shows all required variables as `Set` or `Missing` without exposing values.
-- `/admin/events` requires Basic Auth.
+- `/admin/events` redirects logged-out users to `/login`.
 - `/admin/events/new` can create an event after auth.
 - `/checkin/[eventCode]` is public.
 - `/cert/[slug]` is public and does not expose participant email.
 
-Use test or pilot data only until Supabase Auth, ownership checks, and strict RLS are in place.
+Use test or pilot data only until strict RLS policies and operational security review are in place.
