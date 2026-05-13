@@ -53,6 +53,7 @@ create table if not exists events (
   starts_at timestamptz not null,
   ends_at timestamptz not null,
   checkin_code text not null unique,
+  checkin_mode text not null default 'public' check (checkin_mode in ('public', 'invite_only')),
   created_at timestamptz not null default now()
 );
 
@@ -87,6 +88,23 @@ create table if not exists certificates (
   unique (event_id, participant_id)
 );
 
+create table if not exists event_invitations (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references events(id) on delete cascade,
+  email text not null,
+  normalized_email text not null,
+  name text,
+  role participant_role,
+  invite_token text not null unique,
+  status text not null default 'invited' check (status in ('invited', 'checked_in', 'revoked')),
+  invited_at timestamptz not null default now(),
+  checked_in_at timestamptz,
+  participant_id uuid references participants(id) on delete set null,
+  certificate_id uuid references certificates(id) on delete set null,
+  created_at timestamptz not null default now(),
+  unique (event_id, normalized_email)
+);
+
 create table if not exists point_ledger (
   id uuid primary key default gen_random_uuid(),
   participant_id uuid not null references participants(id) on delete cascade,
@@ -109,5 +127,8 @@ create table if not exists badges (
 create index if not exists events_checkin_code_idx on events(checkin_code);
 create index if not exists certificates_public_slug_idx on certificates(public_slug);
 create index if not exists participants_event_id_idx on participants(event_id);
+create index if not exists event_invitations_event_id_idx on event_invitations(event_id);
+create index if not exists event_invitations_invite_token_idx on event_invitations(invite_token);
+create index if not exists event_invitations_normalized_email_idx on event_invitations(event_id, normalized_email);
 create index if not exists point_ledger_event_id_idx on point_ledger(event_id);
 create index if not exists point_ledger_participant_id_idx on point_ledger(participant_id);

@@ -6,8 +6,20 @@ import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { commonCopy, getLanguageFromSearchParams, type SearchParamsLike, withLanguage } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
+import type { EventCheckinMode } from "@/lib/supabase/types";
 
 export const dynamic = "force-dynamic";
+
+type EventListRecord = {
+  id: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  starts_at: string;
+  ends_at: string;
+  checkin_code: string;
+  checkin_mode: EventCheckinMode;
+};
 
 export default async function EventsPage({
   searchParams
@@ -28,6 +40,8 @@ export default async function EventsPage({
       participants: "participants",
       ends: "Ends",
       checkedIn: "checked in",
+      publicMode: "Public QR check-in",
+      inviteOnlyMode: "Invite-only check-in",
       open: "Open dashboard",
       unableEvents: "Unable to load events",
       unableCounts: "Unable to load participant counts"
@@ -43,6 +57,8 @@ export default async function EventsPage({
       participants: "参加者",
       ends: "終了",
       checkedIn: "チェックイン済み",
+      publicMode: "公開QRチェックイン",
+      inviteOnlyMode: "招待者限定チェックイン",
       open: "ダッシュボードを開く",
       unableEvents: "イベントを読み込めません",
       unableCounts: "参加者数を読み込めません"
@@ -69,10 +85,28 @@ export default async function EventsPage({
     );
   }
 
-  const { data: events, error } = await supabase
+  const eventsResult = await supabase
     .from("events")
-    .select("id,title,description,location,starts_at,ends_at,checkin_code")
+    .select("id,title,description,location,starts_at,ends_at,checkin_code,checkin_mode")
     .order("starts_at", { ascending: false });
+
+  let events: EventListRecord[] = [];
+  let error = eventsResult.error;
+
+  if (eventsResult.error && eventsResult.error.message.includes("checkin_mode")) {
+    const fallbackResult = await supabase
+      .from("events")
+      .select("id,title,description,location,starts_at,ends_at,checkin_code")
+      .order("starts_at", { ascending: false });
+
+    error = fallbackResult.error;
+    events = (fallbackResult.data ?? []).map((event) => ({
+      ...event,
+      checkin_mode: "public"
+    }));
+  } else {
+    events = eventsResult.data ?? [];
+  }
 
   if (error) {
     return (
@@ -151,6 +185,9 @@ export default async function EventsPage({
                   <div>
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                       <StatusPill tone="success">{copy.checkinReady}</StatusPill>
+                      <StatusPill tone={event.checkin_mode === "invite_only" ? "warning" : "info"}>
+                        {event.checkin_mode === "invite_only" ? copy.inviteOnlyMode : copy.publicMode}
+                      </StatusPill>
                       <StatusPill>
                         {participantCount} {copy.participants}
                       </StatusPill>

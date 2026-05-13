@@ -12,6 +12,7 @@ export const eventFormSchema = z
     location: z.string().trim().min(2, "Enter a location."),
     starts_at: dateTimeValue,
     ends_at: dateTimeValue,
+    checkin_mode: z.enum(["public", "invite_only"]).optional().default("public"),
     lang: z.enum(["en", "ja"]).optional()
   })
   .refine((value) => new Date(value.ends_at).getTime() > new Date(value.starts_at).getTime(), {

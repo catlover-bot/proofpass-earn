@@ -7,6 +7,7 @@ import { BadgeCheck, Loader2 } from "lucide-react";
 import { Button, FieldError } from "@/components/ui";
 import { checkInAction } from "@/lib/actions/checkin";
 import { type Language } from "@/lib/i18n";
+import type { ParticipantRole } from "@/lib/supabase/types";
 import { checkinFormSchema, type CheckinFormValues } from "@/lib/validation/checkin";
 
 const roleOptions = {
@@ -49,7 +50,21 @@ const formCopy = {
   }
 } satisfies Record<Language, Record<string, string>>;
 
-export function CheckinForm({ eventCode, lang }: { eventCode: string; lang: Language }) {
+export function CheckinForm({
+  eventCode,
+  lang,
+  inviteToken,
+  defaultName = "",
+  defaultEmail = "",
+  defaultRole = "attendee"
+}: {
+  eventCode: string;
+  lang: Language;
+  inviteToken?: string;
+  defaultName?: string;
+  defaultEmail?: string;
+  defaultRole?: ParticipantRole;
+}) {
   const t = formCopy[lang];
   const [serverError, setServerError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -61,9 +76,10 @@ export function CheckinForm({ eventCode, lang }: { eventCode: string; lang: Lang
     resolver: zodResolver(checkinFormSchema),
     defaultValues: {
       eventCode,
-      name: "",
-      email: "",
-      role: "attendee",
+      name: defaultName,
+      email: defaultEmail,
+      role: defaultRole,
+      inviteToken,
       lang
     }
   });
@@ -82,6 +98,7 @@ export function CheckinForm({ eventCode, lang }: { eventCode: string; lang: Lang
   return (
     <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
       <input type="hidden" {...register("eventCode")} />
+      <input type="hidden" value={inviteToken ?? ""} {...register("inviteToken")} />
       <input type="hidden" value={lang} {...register("lang")} />
 
       <label className="block space-y-2">

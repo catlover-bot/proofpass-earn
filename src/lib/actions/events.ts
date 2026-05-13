@@ -105,7 +105,8 @@ export async function createEventAction(values: EventFormValues): Promise<Action
         location: parsed.data.location,
         starts_at: new Date(parsed.data.starts_at).toISOString(),
         ends_at: new Date(parsed.data.ends_at).toISOString(),
-        checkin_code: `evt_${nanoid(12)}`
+        checkin_code: `evt_${nanoid(12)}`,
+        checkin_mode: parsed.data.checkin_mode
       })
       .select("id")
       .single();

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Award, CheckCircle2, ExternalLink, LinkIcon, MapPin, MessageSquareText, Users } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
+import { EventInvitationForm } from "@/components/EventInvitationForm";
 import { QrCodePanel } from "@/components/QrCodePanel";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SetupError } from "@/components/SetupError";
@@ -12,6 +13,21 @@ import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/clie
 import { isValidUuid } from "@/lib/validation/uuid";
 
 export const dynamic = "force-dynamic";
+
+type InvitationRecord = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: string | null;
+  invite_token: string;
+  status: string;
+  invited_at: string;
+  checked_in_at: string | null;
+};
+
+function isInvitationSetupError(message: string) {
+  return message.includes("event_invitations") || message.includes("checkin_mode") || message.includes("schema cache");
+}
 
 export default async function EventDetailPage({
   params,
@@ -60,6 +76,26 @@ export default async function EventDetailPage({
       checkedIn: "Checked in",
       proofStatus: "Proof status",
       proofLink: "Proof link",
+      publicMode: "Public QR check-in",
+      inviteOnlyMode: "Invite-only check-in",
+      invitationsTitle: "Invitations",
+      invitationsIntro:
+        "Add optional invitations for this event. The app does not send email yet, so copy invite links and share them yourself.",
+      invitationPrivacy:
+        "Invitation emails are shown only on this admin page. Do not publish invitation or participant lists without consent.",
+      inviteSetup: "Invitation setup is not ready. Run supabase/invitations.sql in Supabase.",
+      noInvitationsTitle: "No invitations yet",
+      noInvitationsText: "Add one invitation or paste a simple list to generate invite links.",
+      invitee: "Invitee",
+      invitedAt: "Invited",
+      inviteLink: "Invite link",
+      copyInviteLink: "Copy invite link",
+      copiedInviteLink: "Invite link copied",
+      invitationStatus: {
+        invited: "Invited",
+        checked_in: "Checked in",
+        revoked: "Revoked"
+      },
       notIssued: "Not issued"
     },
     ja: {
@@ -98,6 +134,26 @@ export default async function EventDetailPage({
       checkedIn: "チェックイン日時",
       proofStatus: "証明ステータス",
       proofLink: "証明リンク",
+      publicMode: "公開QRチェックイン",
+      inviteOnlyMode: "招待者限定チェックイン",
+      invitationsTitle: "招待",
+      invitationsIntro:
+        "このイベントの招待リンクを作成できます。アプリからメール送信はしないため、招待リンクをコピーして共有してください。",
+      invitationPrivacy:
+        "招待メールアドレスはこの管理画面でのみ表示されます。同意なく招待者一覧や参加者一覧を公開しないでください。",
+      inviteSetup: "招待機能の準備が完了していません。Supabaseで supabase/invitations.sql を実行してください。",
+      noInvitationsTitle: "まだ招待はありません",
+      noInvitationsText: "1件ずつ追加するか、リストを貼り付けて招待リンクを作成できます。",
+      invitee: "招待者",
+      invitedAt: "招待日時",
+      inviteLink: "招待リンク",
+      copyInviteLink: "招待リンクをコピー",
+      copiedInviteLink: "招待リンクをコピーしました",
+      invitationStatus: {
+        invited: "招待済み",
+        checked_in: "チェックイン済み",
+        revoked: "取り消し済み"
+      },
       notIssued: "未発行"
     }
   }[lang];
@@ -141,11 +197,27 @@ export default async function EventDetailPage({
     );
   }
 
-  const { data: event, error: eventError } = await supabase
+  let eventResult = await supabase
     .from("events")
-    .select("id,title,description,location,starts_at,ends_at,checkin_code")
+    .select("id,title,description,location,starts_at,ends_at,checkin_code,checkin_mode")
     .eq("id", eventId)
     .maybeSingle();
+
+  if (eventResult.error && eventResult.error.message.includes("checkin_mode")) {
+    eventResult = await supabase
+      .from("events")
+      .select("id,title,description,location,starts_at,ends_at,checkin_code")
+      .eq("id", eventId)
+      .maybeSingle();
+  }
+
+  const event = eventResult.data
+    ? {
+        ...eventResult.data,
+        checkin_mode: "checkin_mode" in eventResult.data ? eventResult.data.checkin_mode : "public"
+      }
+    : null;
+  const eventError = eventResult.error;
 
   if (eventError) {
     return (
@@ -191,6 +263,8 @@ export default async function EventDetailPage({
   const participantIds = participants.map((participant) => participant.id);
   const certificatesByParticipant = new Map<string, { public_slug: string; status: string; certificate_type: string }>();
   const pointsByParticipant = new Map<string, number>();
+  let invitations: InvitationRecord[] = [];
+  let invitationErrorMessage: string | null = null;
 
   if (participantIds.length > 0) {
     const { data: certificates, error: certificatesError } = await supabase
@@ -236,6 +310,18 @@ export default async function EventDetailPage({
     });
   }
 
+  const { data: invitationData, error: invitationError } = await supabase
+    .from("event_invitations")
+    .select("id,email,name,role,invite_token,status,invited_at,checked_in_at")
+    .eq("event_id", event.id)
+    .order("created_at", { ascending: false });
+
+  if (invitationError) {
+    invitationErrorMessage = isInvitationSetupError(invitationError.message) ? copy.inviteSetup : invitationError.message;
+  } else {
+    invitations = invitationData;
+  }
+
   const checkinUrl = `${appUrl}/checkin/${event.checkin_code}?lang=${lang}`;
   const organizerShareText = copy.shareText(checkinUrl);
 
@@ -248,6 +334,11 @@ export default async function EventDetailPage({
           <p className="text-sm font-semibold uppercase tracking-wider text-mint">{common.eventDashboard}</p>
           <h1 className="mt-2 text-3xl font-bold text-ink">{event.title}</h1>
           <p className="mt-2 max-w-3xl text-slate-700">{event.description}</p>
+          <div className="mt-3">
+            <StatusPill tone={event.checkin_mode === "invite_only" ? "warning" : "info"}>
+              {event.checkin_mode === "invite_only" ? copy.inviteOnlyMode : copy.publicMode}
+            </StatusPill>
+          </div>
         </div>
         <ButtonLink href={withLanguage("/admin/events", lang)} variant="secondary">
           {common.backToEvents}
@@ -338,6 +429,78 @@ export default async function EventDetailPage({
             <CopyButton value={organizerShareText} label={copy.copyMessage} copiedLabel={copy.copiedMessage} />
           </div>
         </div>
+      </Card>
+
+      <Card className="space-y-5">
+        <div>
+          <h2 className="text-xl font-bold text-ink">{copy.invitationsTitle}</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-700">{copy.invitationsIntro}</p>
+          <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-950">
+            {copy.invitationPrivacy}
+          </p>
+        </div>
+
+        {invitationErrorMessage ? (
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-950">
+            {invitationErrorMessage}
+          </div>
+        ) : (
+          <>
+            <EventInvitationForm eventId={event.id} lang={lang} />
+
+            {invitations.length === 0 ? (
+              <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+                <h3 className="text-lg font-bold text-ink">{copy.noInvitationsTitle}</h3>
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-700">
+                  {copy.noInvitationsText}
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[920px] border-collapse text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-500">
+                      <th className="py-3 pr-4 font-semibold">{copy.invitee}</th>
+                      <th className="py-3 pr-4 font-semibold">{common.email}</th>
+                      <th className="py-3 pr-4 font-semibold">{common.role}</th>
+                      <th className="py-3 pr-4 font-semibold">{common.status}</th>
+                      <th className="py-3 pr-4 font-semibold">{copy.invitedAt}</th>
+                      <th className="py-3 pr-4 font-semibold">{copy.inviteLink}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invitations.map((invitation) => {
+                      const inviteUrl = `${appUrl}/checkin/${event.checkin_code}?lang=${lang}&invite=${invitation.invite_token}`;
+                      return (
+                        <tr key={invitation.id} className="border-b border-slate-100 last:border-0">
+                          <td className="py-4 pr-4 font-semibold text-ink">{invitation.name || "-"}</td>
+                          <td className="py-4 pr-4 text-slate-700">{invitation.email}</td>
+                          <td className="py-4 pr-4 text-slate-700">
+                            {invitation.role ? labelForValue(lang, invitation.role) : "-"}
+                          </td>
+                          <td className="py-4 pr-4">
+                            <StatusPill tone={invitation.status === "checked_in" ? "success" : "neutral"}>
+                              {copy.invitationStatus[invitation.status as keyof typeof copy.invitationStatus] ??
+                                invitation.status}
+                            </StatusPill>
+                          </td>
+                          <td className="py-4 pr-4 text-slate-700">{formatDateTime(invitation.invited_at)}</td>
+                          <td className="py-4 pr-4">
+                            <CopyButton
+                              value={inviteUrl}
+                              label={copy.copyInviteLink}
+                              copiedLabel={copy.copiedInviteLink}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
       </Card>
 
       <Card>

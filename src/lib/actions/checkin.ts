@@ -3,6 +3,7 @@
 import { nanoid } from "nanoid";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { normalizeEmail } from "@/lib/email";
 import { ROLE_POINTS } from "@/lib/points";
 import { ROLE_CERTIFICATE_TYPE } from "@/lib/proof-types";
 import { normalizeLanguage, withLanguage } from "@/lib/i18n";
@@ -16,10 +17,6 @@ export type CheckinActionResult = {
 };
 
 const CHECKIN_ERROR = "Unable to complete check-in. Please try again or contact the event organizer.";
-
-function normalizeEmail(email: string) {
-  return email.trim().toLowerCase();
-}
 
 async function findExistingParticipant(
   supabase: SupabaseClient<Database>,
@@ -46,7 +43,7 @@ async function findValidCertificate(
 ) {
   const { data, error } = await supabase
     .from("certificates")
-    .select("public_slug")
+    .select("id,public_slug")
     .eq("event_id", eventId)
     .eq("participant_id", participantId)
     .eq("status", "valid")
@@ -68,7 +65,7 @@ async function findAnyCertificate(
 ) {
   const { data, error } = await supabase
     .from("certificates")
-    .select("public_slug,status")
+    .select("id,public_slug,status")
     .eq("event_id", eventId)
     .eq("participant_id", participantId)
     .order("issued_at", { ascending: true })
@@ -89,19 +86,86 @@ async function createCertificate(
   role: ParticipantRole
 ) {
   const certificateSlug = `proof_${nanoid(14)}`;
-  const { error } = await supabase.from("certificates").insert({
-    event_id: eventId,
-    participant_id: participantId,
-    public_slug: certificateSlug,
-    certificate_type: ROLE_CERTIFICATE_TYPE[role],
-    status: "valid"
-  });
+  const { data, error } = await supabase
+    .from("certificates")
+    .insert({
+      event_id: eventId,
+      participant_id: participantId,
+      public_slug: certificateSlug,
+      certificate_type: ROLE_CERTIFICATE_TYPE[role],
+      status: "valid"
+    })
+    .select("id,public_slug")
+    .single();
+
+  if (error || !data) {
+    throw new Error(CHECKIN_ERROR);
+  }
+
+  return data;
+}
+
+async function findInvitation(
+  supabase: SupabaseClient<Database>,
+  eventId: string,
+  input: { inviteToken?: string; normalizedEmail: string }
+) {
+  if (input.inviteToken) {
+    const { data, error } = await supabase
+      .from("event_invitations")
+      .select("id,email,normalized_email,name,role,status")
+      .eq("event_id", eventId)
+      .eq("invite_token", input.inviteToken)
+      .neq("status", "revoked")
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    if (data) {
+      return data;
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("event_invitations")
+    .select("id,email,normalized_email,name,role,status")
+    .eq("event_id", eventId)
+    .eq("normalized_email", input.normalizedEmail)
+    .neq("status", "revoked")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+async function markInvitationCheckedIn(
+  supabase: SupabaseClient<Database>,
+  invitationId: string | undefined,
+  participantId: string,
+  certificateId: string | undefined
+) {
+  if (!invitationId) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("event_invitations")
+    .update({
+      status: "checked_in",
+      checked_in_at: new Date().toISOString(),
+      participant_id: participantId,
+      certificate_id: certificateId ?? null
+    })
+    .eq("id", invitationId);
 
   if (error) {
     throw new Error(CHECKIN_ERROR);
   }
-
-  return certificateSlug;
 }
 
 async function ensureCheckinPoints(
@@ -166,14 +230,33 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
   }
 
   let certificateSlug: string;
+  let certificateId: string | undefined;
+  let participantId: string | undefined;
+  let invitationId: string | undefined;
 
   try {
     const normalizedEmail = normalizeEmail(parsed.data.email);
-    const { data: event, error: eventError } = await supabase
+    let eventResult = await supabase
       .from("events")
-      .select("id,title")
+      .select("id,title,checkin_mode")
       .eq("checkin_code", parsed.data.eventCode)
       .maybeSingle();
+
+    if (eventResult.error && eventResult.error.message.includes("checkin_mode")) {
+      eventResult = await supabase
+        .from("events")
+        .select("id,title")
+        .eq("checkin_code", parsed.data.eventCode)
+        .maybeSingle();
+    }
+
+    const event = eventResult.data
+      ? {
+          ...eventResult.data,
+          checkin_mode: "checkin_mode" in eventResult.data ? eventResult.data.checkin_mode : "public"
+        }
+      : null;
+    const eventError = eventResult.error;
 
     if (eventError) {
       return {
@@ -187,12 +270,48 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
       };
     }
 
+    let invitation:
+      | {
+          id: string;
+          role: ParticipantRole | null;
+          status: string;
+        }
+      | null = null;
+
+    try {
+      invitation = await findInvitation(supabase, event.id, {
+        inviteToken: parsed.data.inviteToken,
+        normalizedEmail
+      });
+      invitationId = invitation?.id;
+    } catch {
+      if (event.checkin_mode === "invite_only") {
+        return {
+          error:
+            lang === "ja"
+              ? "招待情報を確認できません。主催者にお問い合わせください。"
+              : "Unable to verify the invitation. Please contact the organizer."
+        };
+      }
+    }
+
+    if (event.checkin_mode === "invite_only" && !invitation) {
+      return {
+        error:
+          lang === "ja"
+            ? "このイベントは招待者限定です。招待リンクを使用するか、主催者にお問い合わせください。"
+            : "This event is invite-only. Please use your invitation link or contact the organizer."
+      };
+    }
+
     const existingParticipant = await findExistingParticipant(supabase, event.id, normalizedEmail);
 
     if (existingParticipant) {
+      participantId = existingParticipant.id;
       const validCertificate = await findValidCertificate(supabase, event.id, existingParticipant.id);
 
       if (validCertificate) {
+        certificateId = validCertificate.id;
         certificateSlug = validCertificate.public_slug;
       } else {
         const existingCertificate = await findAnyCertificate(supabase, event.id, existingParticipant.id);
@@ -206,17 +325,20 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
           };
         }
 
-        certificateSlug = await createCertificate(supabase, event.id, existingParticipant.id, existingParticipant.role);
+        const certificate = await createCertificate(supabase, event.id, existingParticipant.id, existingParticipant.role);
+        certificateId = certificate.id;
+        certificateSlug = certificate.public_slug;
         await ensureCheckinPoints(supabase, event, existingParticipant.id, existingParticipant.role);
       }
     } else {
+      const participantRole = invitation?.role ?? parsed.data.role;
       const { data: participant, error: participantError } = await supabase
         .from("participants")
         .insert({
           event_id: event.id,
           name: parsed.data.name.trim(),
           email: normalizedEmail,
-          role: parsed.data.role
+          role: participantRole
         })
         .select("id,role")
         .single();
@@ -227,8 +349,15 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
         };
       }
 
-      certificateSlug = await createCertificate(supabase, event.id, participant.id, participant.role);
+      participantId = participant.id;
+      const certificate = await createCertificate(supabase, event.id, participant.id, participant.role);
+      certificateId = certificate.id;
+      certificateSlug = certificate.public_slug;
       await ensureCheckinPoints(supabase, event, participant.id, participant.role);
+    }
+
+    if (participantId) {
+      await markInvitationCheckedIn(supabase, invitationId, participantId, certificateId);
     }
   } catch (error) {
     return {

@@ -21,6 +21,11 @@ const formCopy = {
     startsHelp: "Use the local event time.",
     endsAt: "Ends at",
     endsHelp: "Must be after the start time.",
+    modeLabel: "Check-in mode",
+    publicMode: "Public QR check-in",
+    publicModeHelp: "Anyone with the QR link can check in.",
+    inviteOnlyMode: "Invite-only check-in",
+    inviteOnlyModeHelp: "Participants use an invitation link or matching invited email.",
     helper: "You can create a new event if details change during the pilot.",
     creating: "Creating event...",
     submit: "Create event and generate QR"
@@ -36,6 +41,11 @@ const formCopy = {
     startsHelp: "イベントの現地時間で入力してください。",
     endsAt: "終了日時",
     endsHelp: "開始日時より後にしてください。",
+    modeLabel: "チェックイン方式",
+    publicMode: "公開QRチェックイン",
+    publicModeHelp: "QRリンクを知っている人がチェックインできます。",
+    inviteOnlyMode: "招待者限定チェックイン",
+    inviteOnlyModeHelp: "招待リンク、または招待済みメールアドレスでチェックインします。",
     helper: "パイロット中に内容が大きく変わった場合は、新しいイベントを作成してください。",
     creating: "イベントを作成中...",
     submit: "イベントを作成してQRを生成"
@@ -58,6 +68,7 @@ export function EventForm({ lang }: { lang: Language }) {
       location: "",
       starts_at: "",
       ends_at: "",
+      checkin_mode: "public",
       lang
     }
   });
@@ -130,6 +141,37 @@ export function EventForm({ lang }: { lang: Language }) {
           <p className="text-xs leading-5 text-slate-500">{t.endsHelp}</p>
           <FieldError message={errors.ends_at?.message} />
         </label>
+
+        <fieldset className="space-y-3 md:col-span-2">
+          <legend className="text-sm font-semibold text-slate-800">{t.modeLabel}</legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-mint/50 has-[:checked]:border-mint has-[:checked]:bg-emerald-50/60">
+              <input
+                type="radio"
+                value="public"
+                className="mt-1 h-4 w-4 accent-mint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                {...register("checkin_mode")}
+              />
+              <span>
+                <span className="block font-bold text-ink">{t.publicMode}</span>
+                <span className="mt-1 block text-sm leading-6 text-slate-600">{t.publicModeHelp}</span>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-mint/50 has-[:checked]:border-mint has-[:checked]:bg-emerald-50/60">
+              <input
+                type="radio"
+                value="invite_only"
+                className="mt-1 h-4 w-4 accent-mint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                {...register("checkin_mode")}
+              />
+              <span>
+                <span className="block font-bold text-ink">{t.inviteOnlyMode}</span>
+                <span className="mt-1 block text-sm leading-6 text-slate-600">{t.inviteOnlyModeHelp}</span>
+              </span>
+            </label>
+          </div>
+          <FieldError message={errors.checkin_mode?.message} />
+        </fieldset>
       </div>
 
       <p className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-700">

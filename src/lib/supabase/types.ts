@@ -1,4 +1,5 @@
 export type ParticipantRole = "attendee" | "speaker" | "contributor" | "organizer";
+export type EventCheckinMode = "public" | "invite_only";
 export type CertificateType =
   | "attendance"
   | "speaking"
@@ -69,6 +70,7 @@ export type Database = {
           starts_at: string;
           ends_at: string;
           checkin_code: string;
+          checkin_mode: EventCheckinMode;
           created_at: string;
         };
         Insert: {
@@ -80,6 +82,7 @@ export type Database = {
           starts_at: string;
           ends_at: string;
           checkin_code: string;
+          checkin_mode?: EventCheckinMode;
           created_at?: string;
         };
         Update: {
@@ -91,6 +94,7 @@ export type Database = {
           starts_at?: string;
           ends_at?: string;
           checkin_code?: string;
+          checkin_mode?: EventCheckinMode;
           created_at?: string;
         };
         Relationships: [];
@@ -182,6 +186,54 @@ export type Database = {
           token_uri?: string | null;
           minted_at?: string | null;
           sbt_status?: string | null;
+        };
+        Relationships: [];
+      };
+      event_invitations: {
+        Row: {
+          id: string;
+          event_id: string;
+          email: string;
+          normalized_email: string;
+          name: string | null;
+          role: ParticipantRole | null;
+          invite_token: string;
+          status: string;
+          invited_at: string;
+          checked_in_at: string | null;
+          participant_id: string | null;
+          certificate_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          email: string;
+          normalized_email: string;
+          name?: string | null;
+          role?: ParticipantRole | null;
+          invite_token: string;
+          status?: string;
+          invited_at?: string;
+          checked_in_at?: string | null;
+          participant_id?: string | null;
+          certificate_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          email?: string;
+          normalized_email?: string;
+          name?: string | null;
+          role?: ParticipantRole | null;
+          invite_token?: string;
+          status?: string;
+          invited_at?: string;
+          checked_in_at?: string | null;
+          participant_id?: string | null;
+          certificate_id?: string | null;
+          created_at?: string;
         };
         Relationships: [];
       };

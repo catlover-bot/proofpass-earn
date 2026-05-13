@@ -6,6 +6,7 @@ import { Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { commonCopy, getLanguageFromSearchParams, type SearchParamsLike } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
+import type { ParticipantRole } from "@/lib/supabase/types";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,15 @@ export default async function CheckinPage({
   searchParams: Promise<SearchParamsLike>;
 }) {
   const { eventCode } = await params;
-  const lang = getLanguageFromSearchParams(await searchParams);
+  const resolvedSearchParams = await searchParams;
+  const lang = getLanguageFromSearchParams(resolvedSearchParams);
+  const rawInviteToken =
+    resolvedSearchParams instanceof URLSearchParams
+      ? resolvedSearchParams.get("invite")
+      : Array.isArray(resolvedSearchParams?.invite)
+        ? resolvedSearchParams.invite[0]
+        : resolvedSearchParams?.invite;
+  const inviteToken = rawInviteToken?.trim() || undefined;
   const common = commonCopy[lang];
   const copy = {
     en: {
@@ -30,6 +39,10 @@ export default async function CheckinPage({
       duplicate: "Duplicate check-ins with the same email return the existing proof when possible.",
       points:
         "Choose the role that best matches how you participated. Points are shown for organizer summaries during the pilot.",
+      inviteNote: "You are checking in with an invitation link.",
+      inviteOnlyNote: "This event is invite-only. Please use your invitation link or contact the organizer.",
+      publicMode: "Public QR check-in",
+      inviteOnlyMode: "Invite-only check-in",
       to: "to"
     },
     ja: {
@@ -41,6 +54,10 @@ export default async function CheckinPage({
       beforeTitle: "チェックイン前の確認",
       duplicate: "同じメールアドレスで再度チェックインした場合は、可能な限り既存の証明ページへ移動します。",
       points: "参加方法に最も近い役割を選んでください。ポイントはパイロット中の主催者向け集計に使われます。",
+      inviteNote: "招待リンクからチェックインしています。",
+      inviteOnlyNote: "このイベントは招待者限定です。招待リンクを使用するか、主催者にお問い合わせください。",
+      publicMode: "公開QRチェックイン",
+      inviteOnlyMode: "招待者限定チェックイン",
       to: "から"
     }
   }[lang];
@@ -65,11 +82,27 @@ export default async function CheckinPage({
     );
   }
 
-  const { data: event, error } = await supabase
+  let eventResult = await supabase
     .from("events")
-    .select("id,title,description,location,starts_at,ends_at,checkin_code")
+    .select("id,title,description,location,starts_at,ends_at,checkin_code,checkin_mode")
     .eq("checkin_code", eventCode)
     .maybeSingle();
+
+  if (eventResult.error && eventResult.error.message.includes("checkin_mode")) {
+    eventResult = await supabase
+      .from("events")
+      .select("id,title,description,location,starts_at,ends_at,checkin_code")
+      .eq("checkin_code", eventCode)
+      .maybeSingle();
+  }
+
+  const event = eventResult.data
+    ? {
+        ...eventResult.data,
+        checkin_mode: "checkin_mode" in eventResult.data ? eventResult.data.checkin_mode : "public"
+      }
+    : null;
+  const error = eventResult.error;
 
   if (error) {
     return (
@@ -94,6 +127,20 @@ export default async function CheckinPage({
     );
   }
 
+  let invitation: { email: string; name: string | null; role: ParticipantRole | null } | null = null;
+
+  if (inviteToken) {
+    const { data } = await supabase
+      .from("event_invitations")
+      .select("email,name,role,status")
+      .eq("event_id", event.id)
+      .eq("invite_token", inviteToken)
+      .neq("status", "revoked")
+      .maybeSingle();
+
+    invitation = data ?? null;
+  }
+
   return (
     <PageShell className="space-y-8">
       <SiteHeader lang={lang} />
@@ -103,6 +150,9 @@ export default async function CheckinPage({
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold uppercase tracking-wider text-mint">{common.checkIn}</p>
             <StatusPill tone="success">{common.walletFree}</StatusPill>
+            <StatusPill tone={event.checkin_mode === "invite_only" ? "warning" : "info"}>
+              {event.checkin_mode === "invite_only" ? copy.inviteOnlyMode : copy.publicMode}
+            </StatusPill>
           </div>
           <div>
             <h1 className="text-3xl font-bold text-ink">{copy.title}</h1>
@@ -128,6 +178,15 @@ export default async function CheckinPage({
         </Card>
 
         <div className="space-y-5">
+          {invitation ? (
+            <Card className="border-cyan-200 bg-cyan-50/60 p-4 shadow-none">
+              <p className="text-sm font-semibold text-cyan-950">{copy.inviteNote}</p>
+            </Card>
+          ) : event.checkin_mode === "invite_only" ? (
+            <Card className="border-amber-200 bg-amber-50 p-4 shadow-none">
+              <p className="text-sm font-semibold text-amber-950">{copy.inviteOnlyNote}</p>
+            </Card>
+          ) : null}
           <Card className="space-y-3 bg-paper/80 shadow-none">
             <div className="flex items-center gap-2">
               <BadgeCheck className="h-5 w-5 text-mint" />
@@ -137,7 +196,14 @@ export default async function CheckinPage({
             <p className="text-sm leading-6 text-slate-700">{copy.points}</p>
           </Card>
           <Card className="shadow-lift">
-            <CheckinForm eventCode={event.checkin_code} lang={lang} />
+            <CheckinForm
+              eventCode={event.checkin_code}
+              lang={lang}
+              inviteToken={inviteToken}
+              defaultEmail={invitation?.email ?? ""}
+              defaultName={invitation?.name ?? ""}
+              defaultRole={invitation?.role ?? "attendee"}
+            />
           </Card>
         </div>
       </div>

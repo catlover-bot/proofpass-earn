@@ -5,6 +5,7 @@ export const checkinFormSchema = z.object({
   name: z.string().trim().min(2, "Enter your name."),
   email: z.string().trim().email("Enter a valid email address."),
   role: z.enum(["attendee", "speaker", "contributor", "organizer"]),
+  inviteToken: z.string().trim().optional(),
   lang: z.enum(["en", "ja"]).optional()
 });
 
