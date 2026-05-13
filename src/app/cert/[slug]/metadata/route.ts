@@ -71,7 +71,7 @@ export async function GET(
       { trait_type: "Event title", value: event.title },
       { trait_type: "Certificate type", value: labelProofType("en", certificate.certificate_type) },
       { trait_type: "Participant role", value: labelRole(participant.role) },
-      { trait_type: "Achievement badges", value: achievements.map((achievement) => achievement.label).join(", ") },
+      { trait_type: "Proof labels", value: achievements.map((achievement) => achievement.label).join(", ") },
       { trait_type: "Proof media", value: "NFT/SBT-style proof card image" },
       { trait_type: "Status", value: labelRole(certificate.status) },
       { trait_type: "Issued date", value: certificate.issued_at }

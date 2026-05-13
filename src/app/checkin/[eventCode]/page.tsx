@@ -38,7 +38,7 @@ export default async function CheckinPage({
       beforeTitle: "Before you check in",
       duplicate: "Duplicate check-ins with the same email return the existing proof when possible.",
       achievement:
-        "Choose the role that best matches how you participated. ProofPass will add a matching achievement badge.",
+        "Choose the role that best matches how you participated. ProofPass will add a matching proof label.",
       inviteNote: "You are checking in with an invitation link.",
       inviteOnlyNote: "This event is invite-only. Please use your invitation link or contact the organizer.",
       publicMode: "Public QR check-in",
@@ -53,7 +53,7 @@ export default async function CheckinPage({
         "名前とメールアドレスを入力してください。メールアドレスは主催者側の管理と重複確認に使用され、公開証明ページには表示されません。",
       beforeTitle: "チェックイン前の確認",
       duplicate: "同じメールアドレスで再度チェックインした場合は、可能な限り既存の証明ページへ移動します。",
-      achievement: "参加方法に最も近い役割を選んでください。対応する達成バッジが証明に追加されます。",
+      achievement: "参加方法に最も近い役割を選んでください。対応する証明ラベルが証明に追加されます。",
       inviteNote: "招待リンクからチェックインしています。",
       inviteOnlyNote: "このイベントは招待者限定です。招待リンクを使用するか、主催者にお問い合わせください。",
       publicMode: "公開QRチェックイン",

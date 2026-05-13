@@ -93,7 +93,7 @@ export default async function EventDetailPage({
       shareText: (url: string) =>
         `Please check in here to receive your public participation proof: ${url}. Your email is used by the organizer and will not appear on the public proof page.`,
       participantNote:
-        "Participant email is hidden here and on public proof pages. Use this list to confirm check-ins, proof links, and achievement badges.",
+        "Participant email is hidden here and on public proof pages. Use this list to confirm check-ins, proof links, and proof labels.",
       noParticipantsTitle: "No participants yet",
       noParticipantsText: "Share the QR code to start issuing proofs.",
       name: "Name",
@@ -157,14 +157,14 @@ export default async function EventDetailPage({
       shareText: (url: string) =>
         `参加証明を受け取るため、こちらからチェックインしてください: ${url}。メールアドレスは主催者側の管理に使用されますが、公開証明ページには表示されません。`,
       participantNote:
-        "参加者のメールアドレスはこの画面と公開証明ページには表示していません。この一覧でチェックイン、証明リンク、達成バッジを確認できます。",
+        "参加者のメールアドレスはこの画面と公開証明ページには表示していません。この一覧でチェックイン、証明リンク、証明ラベルを確認できます。",
       noParticipantsTitle: "まだ参加者はいません",
       noParticipantsText: "QRコードを共有して参加証明の発行を始めましょう。",
       name: "名前",
       checkedIn: "チェックイン日時",
       proofStatus: "証明ステータス",
       proofLink: "証明リンク",
-      achievements: "達成バッジ",
+      achievements: "証明ラベル",
       publicMode: "公開QRチェックイン",
       inviteOnlyMode: "招待者限定チェックイン",
       invitationsTitle: "招待",

@@ -71,7 +71,7 @@ const copy = {
       roadmap: "Web3対応について"
     },
     preview: {
-      label: "証明コレクションプレビュー",
+      label: "証明カードプレビュー",
       event: "Research Systems Night",
       participant: "Mika Tanaka",
       role: "登壇者NFT/SBT証明",

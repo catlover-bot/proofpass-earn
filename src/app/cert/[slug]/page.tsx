@@ -111,7 +111,7 @@ export default async function CertificatePage({
       issuerName: "ProofPass organizer",
       proofId: "Proof ID",
       share: "Share this proof link with your community, portfolio, or event recap.",
-      achievementsTitle: "Achievement badges",
+      achievementsTitle: "Proof labels",
       cardPreviewTitle: "NFT/SBT-style proof card",
       cardPreviewText:
         "This generated image is included in the proof metadata and can represent attendance, speaking, contribution, or organizing activity.",
@@ -134,7 +134,7 @@ export default async function CertificatePage({
       metadataLabel: "Proof metadata",
       metadataTitle: "Structured proof metadata is available.",
       metadataText:
-        "This proof has structured metadata and can be used for achievement badges, credentials, or optional SBT experiments.",
+        "This proof has structured metadata and can be used for proof labels, credentials, or optional SBT experiments.",
       emailHidden: "Participant email is not shown on this public page.",
       proofMeaning: "This proof represents event participation or community contribution.",
       testnet: "testnet",
@@ -152,7 +152,7 @@ export default async function CertificatePage({
       issuerName: "ProofPass organizer",
       proofId: "証明ID",
       share: "この証明リンクをコミュニティ、ポートフォリオ、イベントレポートなどで共有できます。",
-      achievementsTitle: "達成バッジ",
+      achievementsTitle: "証明ラベル",
       cardPreviewTitle: "NFT/SBTスタイルの証明カード",
       cardPreviewText:
         "この生成画像は証明メタデータに含まれ、参加・登壇・貢献・主催の活動記録を表します。",
@@ -174,7 +174,7 @@ export default async function CertificatePage({
       viewTransaction: "BasescanでSBTトランザクションを見る",
       metadataLabel: "証明メタデータ",
       metadataTitle: "構造化された証明メタデータを利用できます。",
-      metadataText: "この証明は、達成バッジ、資格情報、任意のテストネットSBT実験に活用できます。",
+      metadataText: "この証明は、証明ラベル、資格情報、任意のテストネットSBT実験に活用できます。",
       emailHidden: "この公開ページには参加者のメールアドレスは表示されません。",
       proofMeaning: "この証明はイベント参加またはコミュニティ貢献の記録です。",
       testnet: "テストネット",

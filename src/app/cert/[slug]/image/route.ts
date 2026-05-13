@@ -22,31 +22,37 @@ const SBT_CERTIFICATE_SELECT = `${BASE_CERTIFICATE_SELECT},contract_address,toke
 
 const copy = {
   en: {
-    title: "ProofPass Proof",
+    title: "PROOFPASS EVENT PROOF CARD",
+    brand: "PROOFPASS",
+    cardType: "EVENT PROOF CARD",
     subtitle: "NFT/SBT-style event proof record",
     participant: "Participant",
     event: "Event",
     type: "Proof type",
     issued: "Issued",
     status: "Status",
+    walletFirst: "WALLET-FREE",
     privacy: "Wallet-free public proof page first",
     advanced: "Optional non-transferable SBT for advanced pilots",
-    sbtReady: "Testnet SBT recorded",
+    sbtReady: "TESTNET SBT",
     proofId: "Proof ID",
     missingTitle: "Proof image unavailable",
     missingText: "This proof card could not be generated."
   },
   ja: {
-    title: "ProofPass証明",
+    title: "PROOFPASS EVENT PROOF CARD",
+    brand: "PROOFPASS",
+    cardType: "EVENT PROOF CARD",
     subtitle: "NFT/SBTスタイルのイベント証明記録",
     participant: "参加者",
     event: "イベント",
     type: "証明タイプ",
     issued: "発行日",
     status: "ステータス",
+    walletFirst: "WALLET-FREE",
     privacy: "まずはウォレット不要の公開証明ページ",
     advanced: "高度な実証では任意の譲渡不可SBT",
-    sbtReady: "テストネットSBT記録済み",
+    sbtReady: "TESTNET SBT",
     proofId: "証明ID",
     missingTitle: "証明画像を生成できません",
     missingText: "この証明カードは現在表示できません。"
@@ -128,12 +134,12 @@ function renderProofCard(input: {
     <rect x="160" y="84" width="880" height="462" rx="30" fill="url(#card)"/>
   </g>
   <path d="M196 146H1004" stroke="#0F172A" stroke-opacity="0.08" stroke-width="2"/>
-  <rect x="198" y="116" width="190" height="40" rx="20" fill="#0F172A"/>
-  <text x="222" y="142" fill="#FFFFFF" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="800" letter-spacing="1.8">${escapeXml(t.title.toUpperCase())}</text>
-  <rect x="810" y="116" width="194" height="40" rx="20" fill="${hasTestnetSbt ? "#F5F3FF" : "#ECFEFF"}" stroke="${hasTestnetSbt ? "#C4B5FD" : "#A5F3FC"}"/>
-  <text x="836" y="142" fill="${hasTestnetSbt ? "#5B21B6" : "#155E75"}" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="800">${escapeXml(hasTestnetSbt ? t.sbtReady : t.privacy)}</text>
-  <text x="198" y="210" fill="#0F172A" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="58" font-weight="900" letter-spacing="-0.5">${escapeXml(eventTitle)}</text>
-  <text x="198" y="254" fill="#475569" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="24" font-weight="700">${escapeXml(t.subtitle)}</text>
+  <text x="198" y="132" fill="#0F172A" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="900" letter-spacing="2.2">${escapeXml(t.brand)}</text>
+  <text x="198" y="168" fill="#0F172A" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="30" font-weight="900" letter-spacing="1.3">${escapeXml(t.cardType)}</text>
+  <rect x="826" y="116" width="178" height="40" rx="20" fill="${hasTestnetSbt ? "#F5F3FF" : "#ECFEFF"}" stroke="${hasTestnetSbt ? "#C4B5FD" : "#A5F3FC"}"/>
+  <text x="852" y="142" fill="${hasTestnetSbt ? "#5B21B6" : "#155E75"}" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="900" letter-spacing="0.8">${escapeXml(hasTestnetSbt ? t.sbtReady : t.walletFirst)}</text>
+  <text x="198" y="236" fill="#0F172A" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="54" font-weight="900">${escapeXml(eventTitle)}</text>
+  <text x="198" y="280" fill="#475569" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="24" font-weight="700">${escapeXml(t.subtitle)}</text>
   <g>
     <rect x="198" y="310" width="382" height="86" rx="18" fill="#F8FAFC" stroke="#E2E8F0"/>
     <text x="224" y="340" fill="#64748B" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="800" letter-spacing="1.2">${escapeXml(t.participant.toUpperCase())}</text>

@@ -32,7 +32,7 @@ const formCopy = {
     email: "Email",
     emailPlaceholder: "Used for organizer records, not public proof",
     roleLegend: "How did you participate?",
-    roleHelp: "Your selected role determines the proof type and achievement badge.",
+    roleHelp: "Your selected role determines the proof type and proof label.",
     achievement: "achievement",
     completing: "Completing check-in...",
     submit: "Complete check-in"
@@ -43,7 +43,7 @@ const formCopy = {
     email: "メールアドレス",
     emailPlaceholder: "主催者管理と重複確認に使用します",
     roleLegend: "どの形で参加しましたか？",
-    roleHelp: "選択した参加種別に応じて、発行される証明タイプと達成バッジが変わります。",
+    roleHelp: "選択した参加種別に応じて、発行される証明タイプと証明ラベルが変わります。",
     achievement: "達成",
     completing: "チェックイン中...",
     submit: "チェックインを完了する"

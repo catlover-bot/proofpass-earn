@@ -2,7 +2,7 @@
 
 ProofPass is a proof collection and community contribution platform for research events, study groups, hackathons, and technical communities.
 
-Organizers can create events, generate QR check-in links, collect participant check-ins, issue public proof pages with NFT/SBT-style proof card images, and review achievement badges.
+Organizers can create events, generate QR check-in links, collect participant check-ins, issue public proof pages with NFT/SBT-style proof card images, and review proof labels.
 
 ## MVP Scope
 
@@ -11,7 +11,7 @@ Organizers can create events, generate QR check-in links, collect participant ch
 - Participant check-in with name, email, and role
 - Public certificate pages for attendance, speaker, contributor, and organizer proofs
 - Generated `/cert/[slug]/image` proof cards for metadata and page previews
-- Achievement badges for attendance, speaker, contributor, organizer, early supporter, and testnet SBT records
+- Proof labels for attendance, speaker, contributor, organizer, early supporter, and testnet SBT records
 - Public proof collection pages keyed by a hashed profile value
 - Optional event benefit placeholder for proof holder access
 - Supabase schema and local development seed data
@@ -78,7 +78,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 4. Share or scan the QR check-in URL.
 5. Submit participant name, email, and role.
 6. Confirm the redirect to the public certificate page.
-7. Return to the event detail page to review participant status and achievement badges.
+7. Return to the event detail page to review participant status and proof labels.
 
 ## Privacy Notes
 

@@ -42,7 +42,7 @@ const copy = {
     label: "ロードマップ",
     title: "Web3ロードマップ",
     intro:
-      "ProofPassはウォレット不要の証明ページから始め、イベントIDに役立つ範囲でNFT/SBTスタイルの証明記録を追加します。",
+      "ProofPassはウォレット不要の証明ページから始め、必要に応じてNFT/SBTスタイルの証明記録へ拡張できます。",
     phases: [
       {
         title: "現在",
