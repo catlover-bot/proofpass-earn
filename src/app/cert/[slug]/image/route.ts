@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { formatDate } from "@/lib/format";
 import { getLanguageFromSearchParams, labelForValue, type Language, type SearchParamsLike } from "@/lib/i18n";
-import { labelProofType } from "@/lib/proof-types";
+import { labelProofType, labelVerificationLevel } from "@/lib/proof-types";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
 export const dynamic = "force-dynamic";
@@ -11,13 +11,16 @@ type CertificateRecord = {
   participant_id: string;
   public_slug: string;
   certificate_type: string;
+  verification_level: string;
+  approval_status: string;
   status: string;
   issued_at: string;
   contract_address?: string | null;
   token_id?: string | null;
 };
 
-const BASE_CERTIFICATE_SELECT = "event_id,participant_id,public_slug,certificate_type,status,issued_at";
+const LEGACY_CERTIFICATE_SELECT = "event_id,participant_id,public_slug,certificate_type,status,issued_at";
+const BASE_CERTIFICATE_SELECT = `${LEGACY_CERTIFICATE_SELECT},verification_level,approval_status`;
 const SBT_CERTIFICATE_SELECT = `${BASE_CERTIFICATE_SELECT},contract_address,token_id`;
 
 const copy = {
@@ -33,7 +36,7 @@ const copy = {
     status: "Status",
     walletFirst: "WALLET-FREE",
     privacy: "Wallet-free public proof page first",
-    advanced: "Optional non-transferable SBT for advanced pilots",
+    advanced: "SBT/NFT optional after organizer approval",
     sbtReady: "TESTNET SBT",
     proofId: "Proof ID",
     missingTitle: "Proof image unavailable",
@@ -51,7 +54,7 @@ const copy = {
     status: "ステータス",
     walletFirst: "WALLET-FREE",
     privacy: "まずはウォレット不要の公開証明ページ",
-    advanced: "高度な実証では任意の譲渡不可SBT",
+    advanced: "SBT/NFTは主催者承認後の任意アップグレード",
     sbtReady: "TESTNET SBT",
     proofId: "証明ID",
     missingTitle: "証明画像を生成できません",
@@ -90,9 +93,11 @@ function renderProofCard(input: {
   participantRole: string;
 }) {
   const t = copy[input.lang];
-  const hasTestnetSbt = Boolean(input.certificate.contract_address && input.certificate.token_id);
+  const hasTestnetSbt =
+    input.certificate.verification_level === "onchain_sbt" ||
+    Boolean(input.certificate.contract_address && input.certificate.token_id);
   const proofType = labelProofType(input.lang, input.certificate.certificate_type);
-  const role = labelForValue(input.lang, input.participantRole);
+  const verification = labelVerificationLevel(input.lang, input.certificate.verification_level);
   const status = labelForValue(input.lang, input.certificate.status);
   const eventTitle = truncate(input.eventTitle, 46);
   const participantName = truncate(input.participantName, 34);
@@ -148,7 +153,7 @@ function renderProofCard(input: {
   <g>
     <rect x="620" y="310" width="384" height="86" rx="18" fill="#F8FAFC" stroke="#E2E8F0"/>
     <text x="646" y="340" fill="#64748B" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="16" font-weight="800" letter-spacing="1.2">${escapeXml(t.type.toUpperCase())}</text>
-    <text x="646" y="374" fill="#0F172A" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="28" font-weight="900">${escapeXml(proofType)} · ${escapeXml(role)}</text>
+    <text x="646" y="374" fill="#0F172A" font-family="Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="28" font-weight="900">${escapeXml(proofType)} · ${escapeXml(verification)}</text>
   </g>
   <g>
     <rect x="198" y="424" width="244" height="74" rx="18" fill="#ECFDF5" stroke="#A7F3D0"/>
@@ -186,7 +191,14 @@ function renderFallback(lang: Language, status = 404) {
 function isMissingOptionalSbtColumn(error: { code?: string; message?: string }) {
   const message = error.message ?? "";
 
-  return error.code === "42703" || error.code === "PGRST204" || message.includes("contract_address") || message.includes("token_id");
+  return (
+    error.code === "42703" ||
+    error.code === "PGRST204" ||
+    message.includes("contract_address") ||
+    message.includes("token_id") ||
+    message.includes("verification_level") ||
+    message.includes("approval_status")
+  );
 }
 
 export async function GET(
@@ -219,13 +231,23 @@ export async function GET(
   let certificateError = certificateResult.error;
 
   if (certificateError && isMissingOptionalSbtColumn(certificateError)) {
+    const missingTrustColumn =
+      certificateError.message.includes("verification_level") || certificateError.message.includes("approval_status");
     const fallbackCertificateResult = await supabase
       .from("certificates")
-      .select(BASE_CERTIFICATE_SELECT)
+      .select(missingTrustColumn ? LEGACY_CERTIFICATE_SELECT : BASE_CERTIFICATE_SELECT)
       .eq("public_slug", slug)
       .maybeSingle();
 
-    certificate = fallbackCertificateResult.data as CertificateRecord | null;
+    const rawFallbackCertificate = fallbackCertificateResult.data as Partial<CertificateRecord> | null;
+
+    certificate = rawFallbackCertificate
+      ? ({
+          ...rawFallbackCertificate,
+          verification_level: rawFallbackCertificate.verification_level ?? "checkin",
+          approval_status: rawFallbackCertificate.approval_status ?? "approved"
+        } as CertificateRecord)
+      : null;
     certificateError = fallbackCertificateResult.error;
   }
 

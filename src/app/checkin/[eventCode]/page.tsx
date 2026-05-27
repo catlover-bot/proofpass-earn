@@ -6,7 +6,6 @@ import { Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { commonCopy, getLanguageFromSearchParams, type SearchParamsLike } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
-import type { ParticipantRole } from "@/lib/supabase/types";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +37,7 @@ export default async function CheckinPage({
       beforeTitle: "Before you check in",
       duplicate: "Duplicate check-ins with the same email return the existing proof when possible.",
       achievement:
-        "Choose the role that best matches how you participated. ProofPass will add a matching proof label.",
+        "QR check-in issues attendance proof only. Speaker, contributor, supporter, mentor, and winner labels require organizer approval.",
       inviteNote: "You are checking in with an invitation link.",
       inviteOnlyNote: "This event is invite-only. Please use your invitation link or contact the organizer.",
       publicMode: "Public QR check-in",
@@ -53,7 +52,8 @@ export default async function CheckinPage({
         "名前とメールアドレスを入力してください。メールアドレスは主催者側の管理と重複確認に使用され、公開証明ページには表示されません。",
       beforeTitle: "チェックイン前の確認",
       duplicate: "同じメールアドレスで再度チェックインした場合は、可能な限り既存の証明ページへ移動します。",
-      achievement: "参加方法に最も近い役割を選んでください。対応する証明ラベルが証明に追加されます。",
+      achievement:
+        "QRチェックインで発行されるのは「参加」と「QRチェックイン済み」のみです。登壇者・貢献者などのラベルは主催者承認後に追加されます。",
       inviteNote: "招待リンクからチェックインしています。",
       inviteOnlyNote: "このイベントは招待者限定です。招待リンクを使用するか、主催者にお問い合わせください。",
       publicMode: "公開QRチェックイン",
@@ -127,12 +127,12 @@ export default async function CheckinPage({
     );
   }
 
-  let invitation: { email: string; name: string | null; role: ParticipantRole | null } | null = null;
+  let invitation: { email: string; name: string | null } | null = null;
 
   if (inviteToken) {
     const { data } = await supabase
       .from("event_invitations")
-      .select("email,name,role,status")
+      .select("email,name,status")
       .eq("event_id", event.id)
       .eq("invite_token", inviteToken)
       .neq("status", "revoked")
@@ -202,7 +202,6 @@ export default async function CheckinPage({
               inviteToken={inviteToken}
               defaultEmail={invitation?.email ?? ""}
               defaultName={invitation?.name ?? ""}
-              defaultRole={invitation?.role ?? "attendee"}
             />
           </Card>
         </div>

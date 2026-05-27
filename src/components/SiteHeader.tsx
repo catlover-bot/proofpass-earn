@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { BadgeCheck } from "lucide-react";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { logoutAction } from "@/lib/actions/auth";
+import { maskEmail } from "@/lib/email";
 import { commonCopy, type Language, withLanguage } from "@/lib/i18n";
 
 export function SiteHeader({ lang, adminEmail }: { lang: Language; adminEmail?: string }) {
@@ -42,7 +43,7 @@ export function SiteHeader({ lang, adminEmail }: { lang: Language; adminEmail?: 
           <form action={logoutAction} className="flex items-center gap-2">
             <input type="hidden" name="lang" value={lang} />
             <span className="hidden max-w-48 truncate text-xs font-semibold text-slate-500 sm:inline">
-              {adminEmail}
+              {maskEmail(adminEmail)}
             </span>
             <button
               type="submit"

@@ -9,6 +9,8 @@ export type CertificateType =
   | "contributor"
   | "organizer";
 export type CertificateStatus = "valid" | "revoked";
+export type CertificateVerificationLevel = "checkin" | "organizer_approved" | "evidence_verified" | "onchain_sbt";
+export type CertificateApprovalStatus = "approved" | "pending" | "rejected";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
@@ -139,6 +141,8 @@ export type Database = {
           participant_id: string;
           public_slug: string;
           certificate_type: CertificateType;
+          verification_level: CertificateVerificationLevel;
+          approval_status: CertificateApprovalStatus;
           status: CertificateStatus;
           issued_at: string;
           created_at: string;
@@ -158,6 +162,8 @@ export type Database = {
           participant_id: string;
           public_slug: string;
           certificate_type: CertificateType;
+          verification_level?: CertificateVerificationLevel;
+          approval_status?: CertificateApprovalStatus;
           status?: CertificateStatus;
           issued_at?: string;
           created_at?: string;
@@ -177,6 +183,8 @@ export type Database = {
           participant_id?: string;
           public_slug?: string;
           certificate_type?: CertificateType;
+          verification_level?: CertificateVerificationLevel;
+          approval_status?: CertificateApprovalStatus;
           status?: CertificateStatus;
           issued_at?: string;
           created_at?: string;

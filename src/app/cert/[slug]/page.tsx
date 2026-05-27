@@ -5,12 +5,18 @@ import { EventBenefitPlaceholder } from "@/components/EventBenefitPlaceholder";
 import { PublicFooter } from "@/components/PublicFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SetupError } from "@/components/SetupError";
-import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
+import { Card, PageShell, StatusPill } from "@/components/ui";
 import { getProofAchievementBadges } from "@/lib/achievements";
 import { formatDate, formatDateTime } from "@/lib/format";
-import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike, withLanguage } from "@/lib/i18n";
-import { getProfileHashForEmail } from "@/lib/profile";
-import { labelProofType } from "@/lib/proof-types";
+import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike } from "@/lib/i18n";
+import {
+  PROOF_LABEL_KEYS,
+  canOfferSbtUpgrade,
+  labelApprovalStatus,
+  labelProofType,
+  labelVerificationLevel,
+  summarizeVerificationLevel
+} from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +27,8 @@ type CertificateRecord = {
   participant_id: string;
   public_slug: string;
   certificate_type: string;
+  verification_level: string;
+  approval_status: string;
   status: string;
   issued_at: string;
   chain_id: number | string | null;
@@ -34,8 +42,9 @@ type CertificateRecord = {
   sbt_status?: string | null;
 };
 
-const BASE_CERTIFICATE_SELECT =
+const LEGACY_CERTIFICATE_SELECT =
   "id,event_id,participant_id,public_slug,certificate_type,status,issued_at,chain_id,contract_address,token_id,tx_hash,metadata_url";
+const BASE_CERTIFICATE_SELECT = `${LEGACY_CERTIFICATE_SELECT},verification_level,approval_status`;
 const SBT_CERTIFICATE_SELECT = `${BASE_CERTIFICATE_SELECT},chain_name,token_uri,minted_at,sbt_status`;
 const BASE_SEPOLIA_CHAIN_ID = "84532";
 const BASE_SEPOLIA_EXPLORER_URL = "https://sepolia.basescan.org";
@@ -49,7 +58,9 @@ function isMissingOptionalSbtColumn(error: { code?: string; message?: string }) 
     message.includes("chain_name") ||
     message.includes("token_uri") ||
     message.includes("minted_at") ||
-    message.includes("sbt_status")
+    message.includes("sbt_status") ||
+    message.includes("verification_level") ||
+    message.includes("approval_status")
   );
 }
 
@@ -112,13 +123,12 @@ export default async function CertificatePage({
       proofId: "Proof ID",
       share: "Share this proof link with your community, portfolio, or event recap.",
       achievementsTitle: "Proof labels",
+      verificationTitle: "Verification level",
+      approvalTitle: "Approval status",
       cardPreviewTitle: "NFT/SBT-style proof card",
       cardPreviewText:
-        "This generated image is included in the proof metadata and can represent attendance, speaking, contribution, or organizing activity.",
+        "This generated image is included in the proof metadata. SBT/NFT issuance is optional and never automatic.",
       openImage: "Open proof image",
-      collectionTitle: "Proof collection",
-      collectionText: "View this participant's public proofs as a collectible proof collection. Email stays hidden.",
-      viewCollection: "View proof collection",
       advancedLabel: "Advanced proof record",
       sbtExplanation:
         "This proof was also recorded on Base Sepolia as a non-transferable testnet SBT for pilot verification.",
@@ -134,8 +144,14 @@ export default async function CertificatePage({
       metadataLabel: "Proof metadata",
       metadataTitle: "Structured proof metadata is available.",
       metadataText:
-        "This proof has structured metadata and can be used for proof labels, credentials, or optional SBT experiments.",
-      emailHidden: "Participant email is not shown on this public page.",
+        "This proof has structured metadata for public proof labels and credentials. No SBT/NFT is minted automatically.",
+      sbtUpgradeTitle: "Optional SBT/NFT upgrade",
+      sbtUpgradeEligible:
+        "This proof is approved enough for a future optional SBT/NFT upgrade if the organizer chooses to issue one.",
+      sbtUpgradeNeedsApproval:
+        "SBT/NFT issuance is a future optional upgrade and requires organizer approval or evidence verification first.",
+      emailHidden: "Email is not shown on this public proof page.",
+      nicknameNote: "Use a nickname if you do not want your real name to appear publicly.",
       proofMeaning: "This proof represents event participation or community contribution.",
       testnet: "testnet",
       lockedBadge: "locked"
@@ -153,13 +169,12 @@ export default async function CertificatePage({
       proofId: "証明ID",
       share: "この証明リンクをコミュニティ、ポートフォリオ、イベントレポートなどで共有できます。",
       achievementsTitle: "証明ラベル",
+      verificationTitle: "確認レベル",
+      approvalTitle: "承認ステータス",
       cardPreviewTitle: "NFT/SBTスタイルの証明カード",
       cardPreviewText:
-        "この生成画像は証明メタデータに含まれ、参加・登壇・貢献・主催の活動記録を表します。",
+        "この生成画像は証明メタデータに含まれます。SBT/NFTは任意であり、自動発行されません。",
       openImage: "証明画像を開く",
-      collectionTitle: "証明コレクション",
-      collectionText: "この参加者の公開証明を、コレクション形式で表示します。メールアドレスは表示されません。",
-      viewCollection: "証明コレクションを見る",
       advancedLabel: "高度な証明記録",
       sbtExplanation:
         "この証明はBase Sepolia上の譲渡不可テストネットSBTとして、パイロット検証用に記録されています。",
@@ -174,8 +189,14 @@ export default async function CertificatePage({
       viewTransaction: "BasescanでSBTトランザクションを見る",
       metadataLabel: "証明メタデータ",
       metadataTitle: "構造化された証明メタデータを利用できます。",
-      metadataText: "この証明は、証明ラベル、資格情報、任意のテストネットSBT実験に活用できます。",
-      emailHidden: "この公開ページには参加者のメールアドレスは表示されません。",
+      metadataText: "この証明は、公開証明ラベルや資格情報に使える構造化メタデータを持ちます。SBT/NFTは自動発行されません。",
+      sbtUpgradeTitle: "任意のSBT/NFTアップグレード",
+      sbtUpgradeEligible:
+        "この証明は主催者承認以上のため、主催者が選択した場合に将来SBT/NFTへアップグレードできます。",
+      sbtUpgradeNeedsApproval:
+        "SBT/NFT発行は将来の任意アップグレードであり、先に主催者承認または提出物確認が必要です。",
+      emailHidden: "メールアドレスはこの公開証明ページには表示されません。",
+      nicknameNote: "表示名を公開したくない場合は、ニックネームでの利用を推奨します。",
       proofMeaning: "この証明はイベント参加またはコミュニティ貢献の記録です。",
       testnet: "テストネット",
       lockedBadge: "譲渡不可"
@@ -212,14 +233,24 @@ export default async function CertificatePage({
     .maybeSingle();
 
   if (certificateResult.error && isMissingOptionalSbtColumn(certificateResult.error)) {
+    const missingTrustColumn =
+      certificateResult.error.message.includes("verification_level") ||
+      certificateResult.error.message.includes("approval_status");
     certificateResult = await supabase
       .from("certificates")
-      .select(BASE_CERTIFICATE_SELECT)
+      .select(missingTrustColumn ? LEGACY_CERTIFICATE_SELECT : BASE_CERTIFICATE_SELECT)
       .eq("public_slug", slug)
       .maybeSingle();
   }
 
-  const certificate = certificateResult.data as CertificateRecord | null;
+  const rawCertificate = certificateResult.data as Partial<CertificateRecord> | null;
+  const certificate = rawCertificate
+    ? ({
+        ...rawCertificate,
+        verification_level: rawCertificate.verification_level ?? "checkin",
+        approval_status: rawCertificate.approval_status ?? "approved"
+      } as CertificateRecord)
+    : null;
   const certificateError = certificateResult.error;
 
   if (certificateError) {
@@ -254,7 +285,7 @@ export default async function CertificatePage({
         .select("title,starts_at,ends_at,location")
         .eq("id", certificate.event_id)
         .maybeSingle(),
-      supabase.from("participants").select("name,role,email").eq("id", certificate.participant_id).maybeSingle()
+      supabase.from("participants").select("name,role").eq("id", certificate.participant_id).maybeSingle()
     ]);
 
   if (eventError || participantError) {
@@ -285,19 +316,35 @@ export default async function CertificatePage({
     );
   }
 
+  const { data: proofLabelRows, error: proofLabelError } = await supabase
+    .from("badges")
+    .select("badge_type")
+    .eq("participant_id", certificate.participant_id)
+    .in("badge_type", [...PROOF_LABEL_KEYS]);
+
+  if (proofLabelError) {
+    return (
+      <PageShell className="space-y-6">
+        <SiteHeader lang={lang} />
+        <SetupError title={copy.unableDetails} message={proofLabelError.message} />
+        <PublicFooter lang={lang} />
+      </PageShell>
+    );
+  }
+
+  const proofLabels = (proofLabelRows ?? []).map((row) => row.badge_type);
   const revoked = certificate.status === "revoked";
   const proofUrl = `${appUrl}/cert/${certificate.public_slug}?lang=${lang}`;
   const metadataUrl = `${appUrl}/cert/${certificate.public_slug}/metadata`;
   const proofImageUrl = `${appUrl}/cert/${certificate.public_slug}/image?lang=${lang}`;
   const tokenUri = certificate.token_uri ?? certificate.metadata_url ?? metadataUrl;
-  const hasOnChainSbt = Boolean(certificate.contract_address && certificate.token_id);
-  const proofCollectionHref = withLanguage(`/profile/${getProfileHashForEmail(participant.email)}`, lang);
+  const hasOnChainSbt = certificate.verification_level === "onchain_sbt" || Boolean(certificate.contract_address && certificate.token_id);
   const achievementBadges = getProofAchievementBadges(lang, {
-    certificateType: certificate.certificate_type,
-    participantRole: participant.role,
-    hasTestnetSbt: hasOnChainSbt,
-    includeEarlySupporter: true
+    proofLabels,
+    verificationLevel: certificate.verification_level,
+    hasTestnetSbt: hasOnChainSbt
   });
+  const showOptionalSbtUpgrade = canOfferSbtUpgrade(certificate.verification_level);
   const explorerUrl = getExplorerUrl(certificate);
   const contractUrl =
     explorerUrl && certificate.contract_address ? `${explorerUrl}/address/${certificate.contract_address}` : null;
@@ -330,6 +377,21 @@ export default async function CertificatePage({
               <div className="mt-2">
                 <StatusPill tone="success">{labelProofType(lang, certificate.certificate_type)}</StatusPill>
               </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-slate-500">{copy.verificationTitle}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <StatusPill tone={certificate.verification_level === "checkin" ? "info" : "success"}>
+                  {labelVerificationLevel(lang, certificate.verification_level)}
+                </StatusPill>
+                <StatusPill tone={certificate.approval_status === "approved" ? "success" : "warning"}>
+                  {labelApprovalStatus(lang, certificate.approval_status)}
+                </StatusPill>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-slate-700">
+                {summarizeVerificationLevel(lang, certificate.verification_level)}
+              </p>
             </div>
 
             <div>
@@ -407,19 +469,6 @@ export default async function CertificatePage({
         </dl>
       </Card>
 
-      <Card className="space-y-4 border-cyan-200 bg-white">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wider text-mint">{copy.collectionTitle}</p>
-          <h2 className="mt-2 text-xl font-bold text-ink">{copy.collectionTitle}</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-700">
-            {copy.collectionText}
-          </p>
-        </div>
-        <ButtonLink href={proofCollectionHref} variant="secondary">
-          {copy.viewCollection}
-        </ButtonLink>
-      </Card>
-
       <Card className="space-y-4">
         <div>
           <p className="text-sm font-semibold text-slate-500">{common.proofUrl}</p>
@@ -493,7 +542,7 @@ export default async function CertificatePage({
           </dl>
         </Card>
       ) : (
-        <Card className="space-y-4 border-cyan-200 bg-white">
+        <Card className={`space-y-4 bg-white ${showOptionalSbtUpgrade ? "border-violet-200" : "border-cyan-200"}`}>
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-mint">{copy.metadataLabel}</p>
             <h2 className="mt-2 text-xl font-bold text-ink">{copy.metadataTitle}</h2>
@@ -501,6 +550,17 @@ export default async function CertificatePage({
           <p className="text-sm leading-6 text-slate-700">
             {copy.metadataText}
           </p>
+          <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-bold text-ink">{copy.sbtUpgradeTitle}</p>
+              <StatusPill tone={showOptionalSbtUpgrade ? "testnet" : "neutral"}>
+                {labelVerificationLevel(lang, certificate.verification_level)}
+              </StatusPill>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              {showOptionalSbtUpgrade ? copy.sbtUpgradeEligible : copy.sbtUpgradeNeedsApproval}
+            </p>
+          </div>
           <a className="inline-flex font-bold text-mint hover:text-ink" href={metadataUrl}>
             {common.viewMetadata}
           </a>
@@ -510,6 +570,9 @@ export default async function CertificatePage({
       <Card className="bg-paper/80 shadow-none">
         <p className="text-sm font-semibold text-slate-700">
           {copy.emailHidden}
+        </p>
+        <p className="mt-2 text-sm leading-6 text-slate-700">
+          {copy.nicknameNote}
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-700">
           {copy.proofMeaning}

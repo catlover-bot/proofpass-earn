@@ -16,7 +16,7 @@ import {
   type SearchParamsLike,
   withLanguage
 } from "@/lib/i18n";
-import { labelProofType } from "@/lib/proof-types";
+import { PROOF_LABEL_KEYS, labelProofType, labelVerificationLevel } from "@/lib/proof-types";
 import { getProfileHashForEmail, normalizeProfileHash } from "@/lib/profile";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
@@ -37,6 +37,8 @@ type CertificateRecord = {
   participant_id: string;
   public_slug: string;
   certificate_type: string;
+  verification_level: string;
+  approval_status: string;
   status: string;
   issued_at: string;
   contract_address: string | null;
@@ -54,8 +56,9 @@ type EventRecord = {
   location: string | null;
 };
 
-const BASE_CERTIFICATE_SELECT =
+const LEGACY_CERTIFICATE_SELECT =
   "id,event_id,participant_id,public_slug,certificate_type,status,issued_at,contract_address,token_id";
+const BASE_CERTIFICATE_SELECT = `${LEGACY_CERTIFICATE_SELECT},verification_level,approval_status`;
 const SBT_CERTIFICATE_SELECT = `${BASE_CERTIFICATE_SELECT},minted_at,sbt_status`;
 
 const copy = {
@@ -64,12 +67,11 @@ const copy = {
     title: "Public proof collection",
     intro:
       "A collectible view of public proofs, proof labels, and community contribution records. Participant email is not shown.",
-    profileKey: "Collection key",
     owner: "Participant",
     proofs: "Proof cards",
     noProofsTitle: "No public proofs available",
     noProofsText:
-      "This collection key does not currently match any public proof cards, or the organizer has not issued proofs yet.",
+      "This public collection does not currently match any public proof cards, or the organizer has not issued proofs yet.",
     unableParticipants: "Unable to load proof collection",
     unableProofs: "Unable to load public proofs",
     unableEvents: "Unable to load proof events",
@@ -81,7 +83,7 @@ const copy = {
     checkedIn: "Checked in",
     viewProof: "Open public proof",
     privacyTitle: "Privacy note",
-    privacyText: "This page is built from a hashed profile key. It does not show participant email.",
+    privacyText: "This page does not show participant email or the internal collection key.",
     sbtNote: "non-transferable SBT"
   },
   ja: {
@@ -89,12 +91,11 @@ const copy = {
     title: "公開証明コレクション",
     intro:
       "公開証明、証明ラベル、コミュニティ貢献記録をカード形式で表示します。参加者メールアドレスは表示されません。",
-    profileKey: "コレクションキー",
     owner: "参加者",
     proofs: "証明カード",
     noProofsTitle: "公開証明はまだありません",
     noProofsText:
-      "このコレクションキーに一致する公開証明カードがないか、主催者がまだ証明を発行していません。",
+      "この公開コレクションに一致する公開証明カードがないか、主催者がまだ証明を発行していません。",
     unableParticipants: "証明コレクションを読み込めません",
     unableProofs: "公開証明を読み込めません",
     unableEvents: "証明イベントを読み込めません",
@@ -106,7 +107,7 @@ const copy = {
     checkedIn: "チェックイン",
     viewProof: "公開証明を開く",
     privacyTitle: "プライバシーについて",
-    privacyText: "このページはハッシュ化されたコレクションキーから作成され、参加者メールアドレスは表示しません。",
+    privacyText: "このページには参加者メールアドレスや内部コレクションキーは表示されません。",
     sbtNote: "譲渡不可SBT"
   }
 } satisfies Record<Language, Record<string, string>>;
@@ -114,11 +115,18 @@ const copy = {
 function isMissingOptionalSbtColumn(error: { code?: string; message?: string }) {
   const message = error.message ?? "";
 
-  return error.code === "42703" || error.code === "PGRST204" || message.includes("minted_at") || message.includes("sbt_status");
+  return (
+    error.code === "42703" ||
+    error.code === "PGRST204" ||
+    message.includes("minted_at") ||
+    message.includes("sbt_status") ||
+    message.includes("verification_level") ||
+    message.includes("approval_status")
+  );
 }
 
 function hasTestnetSbt(certificate: CertificateRecord) {
-  return Boolean(certificate.contract_address && certificate.token_id) || Boolean(certificate.minted_at);
+  return certificate.verification_level === "onchain_sbt" || Boolean(certificate.contract_address && certificate.token_id) || Boolean(certificate.minted_at);
 }
 
 export default async function ProofCollectionPage({
@@ -190,13 +198,26 @@ export default async function ProofCollectionPage({
     let certificateError = certificateResult.error;
 
     if (certificateResult.error && isMissingOptionalSbtColumn(certificateResult.error)) {
+      const missingTrustColumn =
+        certificateResult.error.message.includes("verification_level") ||
+        certificateResult.error.message.includes("approval_status");
       const fallbackCertificateResult = await supabase
         .from("certificates")
-        .select(BASE_CERTIFICATE_SELECT)
+        .select(missingTrustColumn ? LEGACY_CERTIFICATE_SELECT : BASE_CERTIFICATE_SELECT)
         .in("participant_id", participantIds)
         .order("issued_at", { ascending: false });
 
-      certificateRows = fallbackCertificateResult.data as CertificateRow[] | null;
+      certificateRows = fallbackCertificateResult.data
+        ? (fallbackCertificateResult.data.map((certificate) => {
+            const rawCertificate = certificate as Partial<CertificateRecord>;
+
+            return {
+              ...rawCertificate,
+              verification_level: rawCertificate.verification_level ?? "checkin",
+              approval_status: rawCertificate.approval_status ?? "approved"
+            };
+          }) as CertificateRow[])
+        : null;
       certificateError = fallbackCertificateResult.error;
     }
 
@@ -210,7 +231,38 @@ export default async function ProofCollectionPage({
       );
     }
 
-    certificates = certificateRows ?? [];
+    certificates =
+      certificateRows?.map((certificate) => ({
+        ...certificate,
+        verification_level: certificate.verification_level ?? "checkin",
+        approval_status: certificate.approval_status ?? "approved"
+      })) ?? [];
+  }
+
+  const badgesByParticipant = new Map<string, string[]>();
+
+  if (participantIds.length > 0) {
+    const { data: proofLabelRows, error: proofLabelError } = await supabase
+      .from("badges")
+      .select("participant_id,badge_type")
+      .in("participant_id", participantIds)
+      .in("badge_type", [...PROOF_LABEL_KEYS]);
+
+    if (proofLabelError) {
+      return (
+        <PageShell className="space-y-6">
+          <SiteHeader lang={lang} />
+          <SetupError title={t.unableProofs} message={proofLabelError.message} />
+          <PublicFooter lang={lang} />
+        </PageShell>
+      );
+    }
+
+    (proofLabelRows ?? []).forEach((badge) => {
+      const existing = badgesByParticipant.get(badge.participant_id) ?? [];
+
+      badgesByParticipant.set(badge.participant_id, [...existing, badge.badge_type]);
+    });
   }
 
   const eventIds = Array.from(new Set(certificates.map((certificate) => certificate.event_id)));
@@ -257,8 +309,8 @@ export default async function ProofCollectionPage({
               <dd className="mt-1 font-bold text-ink">{profileName}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-500">{t.profileKey}</dt>
-              <dd className="mt-1 break-all font-bold text-ink">{profileKey}</dd>
+              <dt className="font-semibold text-slate-500">{common.emailHiddenPublic}</dt>
+              <dd className="mt-1 font-bold text-ink">{common.walletFree}</dd>
             </div>
           </dl>
         </Card>
@@ -290,10 +342,9 @@ export default async function ProofCollectionPage({
               const participant = participantsById.get(certificate.participant_id);
               const event = eventsById.get(certificate.event_id);
               const badges = getProofAchievementBadges(lang, {
-                certificateType: certificate.certificate_type,
-                participantRole: participant?.role,
-                hasTestnetSbt: hasTestnetSbt(certificate),
-                includeEarlySupporter: true
+                proofLabels: badgesByParticipant.get(certificate.participant_id) ?? [],
+                verificationLevel: certificate.verification_level,
+                hasTestnetSbt: hasTestnetSbt(certificate)
               });
 
               return (
@@ -307,6 +358,11 @@ export default async function ProofCollectionPage({
                   <div>
                     <p className="text-sm font-semibold text-slate-500">{labelProofType(lang, certificate.certificate_type)}</p>
                     <h3 className="mt-1 text-2xl font-bold text-ink">{event?.title ?? common.publicProof}</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <StatusPill tone={certificate.verification_level === "checkin" ? "info" : "success"}>
+                      {labelVerificationLevel(lang, certificate.verification_level)}
+                    </StatusPill>
                   </div>
                   <AchievementBadgeList badges={badges} />
                   <dl className="grid gap-3 text-sm sm:grid-cols-2">

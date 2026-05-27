@@ -6,12 +6,19 @@ import { CopyButton } from "@/components/CopyButton";
 import { EventInvitationForm } from "@/components/EventInvitationForm";
 import { QrCodePanel } from "@/components/QrCodePanel";
 import { SetupError } from "@/components/SetupError";
-import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
+import { Button, ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
+import { updateParticipantProofLabelAction } from "@/lib/actions/proof-labels";
 import { formatDateTime } from "@/lib/format";
-import { getProofAchievementBadges } from "@/lib/achievements";
+import { getAchievementBadge, getProofAchievementBadges } from "@/lib/achievements";
 import { commonCopy, getLanguageFromSearchParams, labelForValue, type SearchParamsLike, withLanguage } from "@/lib/i18n";
 import { getOrganizerSupabaseClient, requireOrganizer } from "@/lib/organizer-auth";
-import { labelProofType } from "@/lib/proof-types";
+import {
+  PROOF_LABEL_KEYS,
+  labelApprovalStatus,
+  labelProofType,
+  labelVerificationLevel,
+  type ProofLabelKey
+} from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import { isValidUuid } from "@/lib/validation/uuid";
 
@@ -32,6 +39,8 @@ type ParticipantCertificate = {
   public_slug: string;
   status: string;
   certificate_type: string;
+  verification_level: string;
+  approval_status: string;
   contract_address?: string | null;
   token_id?: string | null;
   minted_at?: string | null;
@@ -41,12 +50,23 @@ type ParticipantCertificateRow = ParticipantCertificate & {
   participant_id: string;
 };
 
+type ParticipantBadgeRow = {
+  participant_id: string;
+  badge_type: string;
+};
+
 function isInvitationSetupError(message: string) {
   return message.includes("event_invitations") || message.includes("checkin_mode") || message.includes("schema cache");
 }
 
-function isMissingOptionalSbtColumn(message: string) {
-  return message.includes("contract_address") || message.includes("token_id") || message.includes("minted_at");
+function isMissingOptionalCertificateColumn(message: string) {
+  return (
+    message.includes("contract_address") ||
+    message.includes("token_id") ||
+    message.includes("minted_at") ||
+    message.includes("verification_level") ||
+    message.includes("approval_status")
+  );
 }
 
 export default async function EventDetailPage({
@@ -68,6 +88,7 @@ export default async function EventDetailPage({
       unableEvent: "Unable to load event",
       unableParticipants: "Unable to load participants",
       unableProofs: "Unable to load proofs",
+      unableLabels: "Unable to load proof labels",
       dateTime: "Date and time",
       ends: "Ends",
       participants: "Participants",
@@ -101,7 +122,17 @@ export default async function EventDetailPage({
       checkedIn: "Checked in",
       proofStatus: "Proof status",
       proofLink: "Proof link",
-      achievements: "Achievements",
+      achievements: "Proof labels",
+      verification: "Verification",
+      manageProofLabels: "Manage labels",
+      removeLabel: "Remove label",
+      labelActions: {
+        speaker: "Mark speaker",
+        contributor: "Mark contributor",
+        supporter: "Mark supporter",
+        mentor: "Mark mentor",
+        winner: "Mark winner"
+      },
       publicMode: "Public QR check-in",
       inviteOnlyMode: "Invite-only check-in",
       invitationsTitle: "Invitations",
@@ -132,6 +163,7 @@ export default async function EventDetailPage({
       unableEvent: "イベントを読み込めません",
       unableParticipants: "参加者を読み込めません",
       unableProofs: "証明を読み込めません",
+      unableLabels: "証明ラベルを読み込めません",
       dateTime: "日時",
       ends: "終了",
       participants: "参加者",
@@ -166,6 +198,16 @@ export default async function EventDetailPage({
       proofStatus: "証明ステータス",
       proofLink: "証明リンク",
       achievements: "証明ラベル",
+      verification: "確認レベル",
+      manageProofLabels: "ラベル管理",
+      removeLabel: "ラベル削除",
+      labelActions: {
+        speaker: "登壇者にする",
+        contributor: "貢献者にする",
+        supporter: "サポーターにする",
+        mentor: "メンターにする",
+        winner: "受賞者にする"
+      },
       publicMode: "公開QRチェックイン",
       inviteOnlyMode: "招待者限定チェックイン",
       invitationsTitle: "招待",
@@ -297,20 +339,23 @@ export default async function EventDetailPage({
 
   const participantIds = participants.map((participant) => participant.id);
   const certificatesByParticipant = new Map<string, ParticipantCertificate>();
+  const badgesByParticipant = new Map<string, string[]>();
   let invitations: InvitationRecord[] = [];
   let invitationErrorMessage: string | null = null;
 
   if (participantIds.length > 0) {
     const certificateResult = await supabase
       .from("certificates")
-      .select("participant_id,public_slug,status,certificate_type,contract_address,token_id,minted_at")
+      .select(
+        "participant_id,public_slug,status,certificate_type,verification_level,approval_status,contract_address,token_id,minted_at"
+      )
       .eq("event_id", event.id)
       .in("participant_id", participantIds);
 
     let certificates = certificateResult.data as ParticipantCertificateRow[] | null;
     let certificatesError = certificateResult.error;
 
-    if (certificateResult.error && isMissingOptionalSbtColumn(certificateResult.error.message)) {
+    if (certificateResult.error && isMissingOptionalCertificateColumn(certificateResult.error.message)) {
       const fallbackCertificateResult = await supabase
         .from("certificates")
         .select("participant_id,public_slug,status,certificate_type")
@@ -335,10 +380,33 @@ export default async function EventDetailPage({
         public_slug: certificate.public_slug,
         status: certificate.status,
         certificate_type: certificate.certificate_type,
+        verification_level: "verification_level" in certificate ? certificate.verification_level : "checkin",
+        approval_status: "approval_status" in certificate ? certificate.approval_status : "approved",
         contract_address: "contract_address" in certificate ? certificate.contract_address : null,
         token_id: "token_id" in certificate ? certificate.token_id : null,
         minted_at: "minted_at" in certificate ? certificate.minted_at : null
       });
+    });
+
+    const { data: badgeRows, error: badgeError } = await supabase
+      .from("badges")
+      .select("participant_id,badge_type")
+      .in("participant_id", participantIds)
+      .in("badge_type", [...PROOF_LABEL_KEYS]);
+
+    if (badgeError) {
+      return (
+        <PageShell className="space-y-8">
+          <AdminHeader lang={lang} />
+          <SetupError title={copy.unableLabels} message={badgeError.message} />
+        </PageShell>
+      );
+    }
+
+    (badgeRows as ParticipantBadgeRow[] | null)?.forEach((badge) => {
+      const existing = badgesByParticipant.get(badge.participant_id) ?? [];
+
+      badgesByParticipant.set(badge.participant_id, [...existing, badge.badge_type]);
     });
   }
 
@@ -577,26 +645,31 @@ export default async function EventDetailPage({
           </div>
         ) : (
           <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[900px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[1180px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500">
                   <th className="py-3 pr-4 font-semibold">{copy.name}</th>
                   <th className="py-3 pr-4 font-semibold">{common.role}</th>
                   <th className="py-3 pr-4 font-semibold">{common.proofType}</th>
+                  <th className="py-3 pr-4 font-semibold">{copy.verification}</th>
                   <th className="py-3 pr-4 font-semibold">{copy.checkedIn}</th>
                   <th className="py-3 pr-4 font-semibold">{copy.proofStatus}</th>
                   <th className="py-3 pr-4 font-semibold">{copy.proofLink}</th>
                   <th className="py-3 pr-4 font-semibold">{copy.achievements}</th>
+                  <th className="py-3 pr-4 font-semibold">{copy.manageProofLabels}</th>
                 </tr>
               </thead>
               <tbody>
                 {participants.map((participant) => {
                   const certificate = certificatesByParticipant.get(participant.id);
+                  const proofLabels = badgesByParticipant.get(participant.id) ?? [];
                   const badges = getProofAchievementBadges(lang, {
-                    certificateType: certificate?.certificate_type,
-                    participantRole: participant.role,
-                    hasTestnetSbt: Boolean(certificate?.contract_address && certificate.token_id) || Boolean(certificate?.minted_at),
-                    includeEarlySupporter: true
+                    proofLabels,
+                    verificationLevel: certificate?.verification_level,
+                    hasTestnetSbt:
+                      certificate?.verification_level === "onchain_sbt" ||
+                      Boolean(certificate?.contract_address && certificate.token_id) ||
+                      Boolean(certificate?.minted_at)
                   });
 
                   return (
@@ -605,6 +678,20 @@ export default async function EventDetailPage({
                       <td className="py-4 pr-4 text-slate-700">{labelForValue(lang, participant.role)}</td>
                       <td className="py-4 pr-4 text-slate-700">
                         {certificate ? labelProofType(lang, certificate.certificate_type) : copy.notIssued}
+                      </td>
+                      <td className="py-4 pr-4">
+                        {certificate ? (
+                          <div className="flex flex-wrap gap-2">
+                            <StatusPill tone={certificate.verification_level === "checkin" ? "info" : "success"}>
+                              {labelVerificationLevel(lang, certificate.verification_level)}
+                            </StatusPill>
+                            <StatusPill tone={certificate.approval_status === "approved" ? "success" : "warning"}>
+                              {labelApprovalStatus(lang, certificate.approval_status)}
+                            </StatusPill>
+                          </div>
+                        ) : (
+                          <span className="text-slate-500">{copy.notIssued}</span>
+                        )}
                       </td>
                       <td className="py-4 pr-4 text-slate-700">{formatDateTime(participant.checked_in_at)}</td>
                       <td className="py-4 pr-4">
@@ -631,6 +718,35 @@ export default async function EventDetailPage({
                       </td>
                       <td className="py-4 pr-4">
                         <AchievementBadgeList badges={badges} />
+                      </td>
+                      <td className="py-4 pr-4">
+                        <div className="flex max-w-[320px] flex-wrap gap-2">
+                          {PROOF_LABEL_KEYS.map((labelKey) => (
+                            <form key={labelKey} action={updateParticipantProofLabelAction}>
+                              <input type="hidden" name="eventId" value={event.id} />
+                              <input type="hidden" name="participantId" value={participant.id} />
+                              <input type="hidden" name="labelKey" value={labelKey} />
+                              <input type="hidden" name="lang" value={lang} />
+                              <Button
+                                type="submit"
+                                variant={proofLabels.includes(labelKey) ? "primary" : "secondary"}
+                                className="min-h-9 px-3 text-xs"
+                              >
+                                {copy.labelActions[labelKey as ProofLabelKey] ??
+                                  getAchievementBadge(lang, labelKey).label}
+                              </Button>
+                            </form>
+                          ))}
+                          <form action={updateParticipantProofLabelAction}>
+                            <input type="hidden" name="eventId" value={event.id} />
+                            <input type="hidden" name="participantId" value={participant.id} />
+                            <input type="hidden" name="labelKey" value="" />
+                            <input type="hidden" name="lang" value={lang} />
+                            <Button type="submit" variant="subtle" className="min-h-9 px-3 text-xs">
+                              {copy.removeLabel}
+                            </Button>
+                          </form>
+                        </div>
                       </td>
                     </tr>
                   );

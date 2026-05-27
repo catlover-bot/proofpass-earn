@@ -4,8 +4,12 @@ import type { AchievementBadge, AchievementKey } from "@/lib/achievements";
 
 const achievementIcons: Record<AchievementKey, typeof BadgeCheck> = {
   attendance: BadgeCheck,
+  qr_checked_in: BadgeCheck,
   speaker: Mic2,
   contributor: Handshake,
+  supporter: Award,
+  mentor: Handshake,
+  winner: Award,
   organizer: Crown,
   early_supporter: Award,
   testnet_sbt_minted: ShieldCheck

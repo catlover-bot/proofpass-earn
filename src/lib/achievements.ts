@@ -1,9 +1,14 @@
 import type { Language } from "@/lib/i18n";
+import { isProofLabelKey } from "@/lib/proof-types";
 
 export type AchievementKey =
   | "attendance"
+  | "qr_checked_in"
   | "speaker"
   | "contributor"
+  | "supporter"
+  | "mentor"
+  | "winner"
   | "organizer"
   | "early_supporter"
   | "testnet_sbt_minted";
@@ -19,8 +24,12 @@ export type AchievementBadge = {
 
 const achievementTone: Record<AchievementKey, AchievementTone> = {
   attendance: "success",
+  qr_checked_in: "info",
   speaker: "info",
   contributor: "warning",
+  supporter: "success",
+  mentor: "pilot",
+  winner: "warning",
   organizer: "pilot",
   early_supporter: "success",
   testnet_sbt_minted: "testnet"
@@ -32,6 +41,10 @@ const achievementCopy = {
       label: "Attendance",
       description: "Checked in and received a public participation proof."
     },
+    qr_checked_in: {
+      label: "QR checked in",
+      description: "Confirmed by the event QR check-in flow."
+    },
     speaker: {
       label: "Speaker",
       description: "Shared knowledge with the community."
@@ -39,6 +52,18 @@ const achievementCopy = {
     contributor: {
       label: "Contributor",
       description: "Made a visible community contribution."
+    },
+    supporter: {
+      label: "Supporter",
+      description: "Recognized by the organizer as an event supporter."
+    },
+    mentor: {
+      label: "Mentor",
+      description: "Recognized by the organizer for mentoring others."
+    },
+    winner: {
+      label: "Winner",
+      description: "Recognized by the organizer as an award recipient."
     },
     organizer: {
       label: "Organizer",
@@ -58,6 +83,10 @@ const achievementCopy = {
       label: "参加",
       description: "チェックインし、公開参加証明を受け取りました。"
     },
+    qr_checked_in: {
+      label: "QRチェックイン済み",
+      description: "イベントのQRチェックインで確認されました。"
+    },
     speaker: {
       label: "登壇者",
       description: "コミュニティに知見を共有しました。"
@@ -65,6 +94,18 @@ const achievementCopy = {
     contributor: {
       label: "貢献者",
       description: "見える形でコミュニティに貢献しました。"
+    },
+    supporter: {
+      label: "サポーター",
+      description: "イベントのサポーターとして主催者に承認されました。"
+    },
+    mentor: {
+      label: "メンター",
+      description: "メンタリングの貢献として主催者に承認されました。"
+    },
+    winner: {
+      label: "受賞者",
+      description: "受賞者として主催者に承認されました。"
     },
     organizer: {
       label: "主催者",
@@ -83,8 +124,12 @@ const achievementCopy = {
 
 export const achievementOrder: AchievementKey[] = [
   "attendance",
+  "qr_checked_in",
   "speaker",
   "contributor",
+  "supporter",
+  "mentor",
+  "winner",
   "organizer",
   "early_supporter",
   "testnet_sbt_minted"
@@ -136,16 +181,24 @@ export function getProofAchievementBadges(
   input: {
     certificateType?: string | null;
     participantRole?: string | null;
+    proofLabels?: Array<string | null | undefined>;
+    verificationLevel?: string | null;
     hasTestnetSbt?: boolean;
     includeEarlySupporter?: boolean;
   }
 ) {
   const keys = new Set<AchievementKey>();
-  keys.add(
-    input.certificateType
-      ? achievementKeyForCertificateType(input.certificateType)
-      : achievementKeyForParticipantRole(input.participantRole)
-  );
+  const proofLabels = input.proofLabels?.filter(isProofLabelKey) ?? [];
+
+  keys.add("attendance");
+
+  proofLabels.forEach((label) => {
+    keys.add(label);
+  });
+
+  if (proofLabels.length === 0) {
+    keys.add("qr_checked_in");
+  }
 
   if (input.includeEarlySupporter) {
     keys.add("early_supporter");

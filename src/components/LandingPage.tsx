@@ -25,7 +25,7 @@ const copy = {
     preview: {
       label: "Proof collection preview",
       event: "Research Systems Night",
-      participant: "Mika Tanaka",
+      participant: "Demo Participant",
       role: "Speaker proof NFT/SBT",
       status: "Proof image ready",
       participantLabel: "Participant",
@@ -75,7 +75,7 @@ const copy = {
     preview: {
       label: "証明カードプレビュー",
       event: "Research Systems Night",
-      participant: "Mika Tanaka",
+      participant: "デモ参加者",
       role: "登壇者NFT/SBT証明",
       status: "証明画像準備済み",
       participantLabel: "参加者",

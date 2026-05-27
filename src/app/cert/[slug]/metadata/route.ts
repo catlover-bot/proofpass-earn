@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProofAchievementBadges } from "@/lib/achievements";
 import { labelRole } from "@/lib/achievement-ledger";
-import { labelProofType } from "@/lib/proof-types";
+import { PROOF_LABEL_KEYS, labelApprovalStatus, labelProofType, labelVerificationLevel } from "@/lib/proof-types";
 import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +32,7 @@ export async function GET(
 
   const { data: certificate, error: certificateError } = await supabase
     .from("certificates")
-    .select("event_id,participant_id,public_slug,certificate_type,status,issued_at")
+    .select("event_id,participant_id,public_slug,certificate_type,verification_level,approval_status,status,issued_at")
     .eq("public_slug", slug)
     .maybeSingle();
 
@@ -54,10 +54,19 @@ export async function GET(
     return NextResponse.json({ error: "Unable to load proof metadata." }, { status: 500 });
   }
 
+  const { data: proofLabelRows, error: proofLabelError } = await supabase
+    .from("badges")
+    .select("badge_type")
+    .eq("participant_id", certificate.participant_id)
+    .in("badge_type", [...PROOF_LABEL_KEYS]);
+
+  if (proofLabelError) {
+    return NextResponse.json({ error: "Unable to load proof metadata." }, { status: 500 });
+  }
+
   const achievements = getProofAchievementBadges("en", {
-    certificateType: certificate.certificate_type,
-    participantRole: participant.role,
-    includeEarlySupporter: true
+    proofLabels: (proofLabelRows ?? []).map((row) => row.badge_type),
+    verificationLevel: certificate.verification_level
   });
   const proofImageUrl = `${PUBLIC_METADATA_BASE_URL}/cert/${certificate.public_slug}/image`;
 
@@ -72,6 +81,8 @@ export async function GET(
       { trait_type: "Certificate type", value: labelProofType("en", certificate.certificate_type) },
       { trait_type: "Participant role", value: labelRole(participant.role) },
       { trait_type: "Proof labels", value: achievements.map((achievement) => achievement.label).join(", ") },
+      { trait_type: "Verification level", value: labelVerificationLevel("en", certificate.verification_level) },
+      { trait_type: "Approval status", value: labelApprovalStatus("en", certificate.approval_status) },
       { trait_type: "Proof media", value: "NFT/SBT-style proof card image" },
       { trait_type: "Status", value: labelRole(certificate.status) },
       { trait_type: "Issued date", value: certificate.issued_at }

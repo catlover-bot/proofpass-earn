@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ROLE_ACHIEVEMENT_WEIGHT } from "@/lib/achievement-ledger";
 import { normalizeEmail } from "@/lib/email";
-import { ROLE_CERTIFICATE_TYPE } from "@/lib/proof-types";
 import { normalizeLanguage, withLanguage } from "@/lib/i18n";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import type { Database, ParticipantRole } from "@/lib/supabase/types";
@@ -82,8 +81,7 @@ async function findAnyCertificate(
 async function createCertificate(
   supabase: SupabaseClient<Database>,
   eventId: string,
-  participantId: string,
-  role: ParticipantRole
+  participantId: string
 ) {
   const certificateSlug = `proof_${nanoid(14)}`;
   const { data, error } = await supabase
@@ -92,7 +90,9 @@ async function createCertificate(
       event_id: eventId,
       participant_id: participantId,
       public_slug: certificateSlug,
-      certificate_type: ROLE_CERTIFICATE_TYPE[role],
+      certificate_type: "attendance",
+      verification_level: "checkin",
+      approval_status: "approved",
       status: "valid"
     })
     .select("id,public_slug")
@@ -171,8 +171,7 @@ async function markInvitationCheckedIn(
 async function ensureCheckinAchievementLedger(
   supabase: SupabaseClient<Database>,
   event: { id: string; title: string },
-  participantId: string,
-  role: ParticipantRole
+  participantId: string
 ) {
   const { data: existingPoint, error: pointLookupError } = await supabase
     .from("point_ledger")
@@ -195,8 +194,8 @@ async function ensureCheckinAchievementLedger(
     event_id: event.id,
     participant_id: participantId,
     action_type: "check_in",
-    points: ROLE_ACHIEVEMENT_WEIGHT[role],
-    reason: `${role} check-in for ${event.title}`
+    points: ROLE_ACHIEVEMENT_WEIGHT.attendee,
+    reason: `attendance check-in for ${event.title}`
   });
 
   if (pointError) {
@@ -325,20 +324,19 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
           };
         }
 
-        const certificate = await createCertificate(supabase, event.id, existingParticipant.id, existingParticipant.role);
+        const certificate = await createCertificate(supabase, event.id, existingParticipant.id);
         certificateId = certificate.id;
         certificateSlug = certificate.public_slug;
-        await ensureCheckinAchievementLedger(supabase, event, existingParticipant.id, existingParticipant.role);
+        await ensureCheckinAchievementLedger(supabase, event, existingParticipant.id);
       }
     } else {
-      const participantRole = invitation?.role ?? parsed.data.role;
       const { data: participant, error: participantError } = await supabase
         .from("participants")
         .insert({
           event_id: event.id,
           name: parsed.data.name.trim(),
           email: normalizedEmail,
-          role: participantRole
+          role: "attendee"
         })
         .select("id,role")
         .single();
@@ -350,10 +348,10 @@ export async function checkInAction(values: CheckinFormValues): Promise<CheckinA
       }
 
       participantId = participant.id;
-      const certificate = await createCertificate(supabase, event.id, participant.id, participant.role);
+      const certificate = await createCertificate(supabase, event.id, participant.id);
       certificateId = certificate.id;
       certificateSlug = certificate.public_slug;
-      await ensureCheckinAchievementLedger(supabase, event, participant.id, participant.role);
+      await ensureCheckinAchievementLedger(supabase, event, participant.id);
     }
 
     if (participantId) {
