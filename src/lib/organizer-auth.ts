@@ -34,7 +34,7 @@ function isMissingUserIdColumn(error: { message?: string } | null | undefined) {
   return (error?.message ?? "").includes("user_id");
 }
 
-function organizationNameFromEmail(email: string) {
+function defaultOrganizerLabelFromEmail(email: string) {
   const localPart = email.split("@")[0]?.replace(/[._-]+/g, " ").trim();
   const baseName = localPart ? localPart.replace(/\b\w/g, (match) => match.toUpperCase()) : "ProofPass Organizer";
 
@@ -118,7 +118,7 @@ async function findMembershipByEmail(supabase: SupabaseClient<Database>, email: 
   return data;
 }
 
-async function getOrCreateOrganization(supabase: SupabaseClient<Database>, email: string, organizationName?: string) {
+async function getOrCreateOrganization(supabase: SupabaseClient<Database>, email: string) {
   const { data: existing, error: existingError } = await supabase
     .from("organizations")
     .select("id")
@@ -138,7 +138,7 @@ async function getOrCreateOrganization(supabase: SupabaseClient<Database>, email
   const { data: created, error: createError } = await supabase
     .from("organizations")
     .insert({
-      name: organizationName?.trim() || organizationNameFromEmail(email),
+      name: defaultOrganizerLabelFromEmail(email),
       contact_email: email
     })
     .select("id")
@@ -157,16 +157,10 @@ async function getOrCreateOrganization(supabase: SupabaseClient<Database>, email
 
 export async function ensureOrganizerMembershipForUser(
   user: Pick<User, "id" | "email">,
-  organizationName?: string,
-  supabaseInput?: SupabaseClient<Database>
+  supabase: SupabaseClient<Database>
 ) {
   if (!user.email) {
     throw new Error("Organizer account does not have an email address.");
-  }
-
-  const supabase = supabaseInput ?? getSupabaseClient();
-  if (!supabase) {
-    throw new Error("Supabase is not configured yet.");
   }
 
   const email = normalizeEmail(user.email);
@@ -180,13 +174,17 @@ export async function ensureOrganizerMembershipForUser(
 
   if (byEmail) {
     if (byUserId.userIdColumnAvailable) {
-      await supabase.from("organizer_members").update({ user_id: user.id }).eq("id", byEmail.id);
+      const { error } = await supabase.from("organizer_members").update({ user_id: user.id }).eq("id", byEmail.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
     }
 
     return byEmail.organization_id;
   }
 
-  const organizationId = await getOrCreateOrganization(supabase, email, organizationName);
+  const organizationId = await getOrCreateOrganization(supabase, email);
   const insertPayload: Database["public"]["Tables"]["organizer_members"]["Insert"] = {
     organization_id: organizationId,
     email,
@@ -226,7 +224,7 @@ export async function getCurrentOrganizer(): Promise<OrganizerContext | null> {
     return null;
   }
 
-  await ensureOrganizerMembershipForUser(data.user, undefined, supabase);
+  await ensureOrganizerMembershipForUser(data.user, supabase);
 
   const byUserId = await findMembershipByUserId(supabase, data.user.id);
   let memberships: OrganizerMemberRecord[] = [];

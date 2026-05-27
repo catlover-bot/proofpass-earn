@@ -5,10 +5,9 @@ import { normalizeEmail } from "@/lib/email";
 import {
   clearAuthCookies,
   ensureOrganizerMembershipForUser,
-  sanitizeAdminRedirect,
   setAuthCookies
 } from "@/lib/organizer-auth";
-import { getSupabaseClient } from "@/lib/supabase/client";
+import { getSupabaseClient, getSupabaseClientForAccessToken } from "@/lib/supabase/client";
 import { normalizeLanguage, withLanguage } from "@/lib/i18n";
 
 function getString(formData: FormData, key: string) {
@@ -31,17 +30,16 @@ function authRedirect(path: string, lang: "en" | "ja", params: Record<string, st
 
 export async function loginAction(formData: FormData) {
   const lang = normalizeLanguage(formData.get("lang"));
-  const next = sanitizeAdminRedirect(formData.get("next"));
   const email = normalizeEmail(getString(formData, "email"));
   const password = getString(formData, "password");
   const supabase = getSupabaseClient();
 
   if (!supabase) {
-    authRedirect("/login", lang, { error: "setup", next });
+    authRedirect("/login", lang, { error: "setup" });
   }
 
   if (!email || !password) {
-    authRedirect("/login", lang, { error: "missing", next });
+    authRedirect("/login", lang, { error: "missing" });
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -50,7 +48,7 @@ export async function loginAction(formData: FormData) {
   });
 
   if (error || !data.session || !data.user.email) {
-    authRedirect("/login", lang, { error: "invalid", next });
+    authRedirect("/login", lang, { error: "invalid" });
   }
 
   await setAuthCookies({
@@ -58,16 +56,29 @@ export async function loginAction(formData: FormData) {
     refreshToken: data.session.refresh_token,
     expiresIn: data.session.expires_in
   });
-  await ensureOrganizerMembershipForUser(data.user);
 
-  redirect(withLanguage(next, lang));
+  const authenticatedSupabase = getSupabaseClientForAccessToken(data.session.access_token);
+
+  if (!authenticatedSupabase) {
+    await clearAuthCookies();
+    authRedirect("/login", lang, { error: "setup" });
+  }
+
+  try {
+    await ensureOrganizerMembershipForUser(data.user, authenticatedSupabase);
+  } catch (membershipError) {
+    console.error("Failed to ensure organizer membership after login.", membershipError);
+    await clearAuthCookies();
+    authRedirect("/login", lang, { error: "membership" });
+  }
+
+  redirect(withLanguage("/admin/events", lang));
 }
 
 export async function signupAction(formData: FormData) {
   const lang = normalizeLanguage(formData.get("lang"));
   const email = normalizeEmail(getString(formData, "email"));
   const password = getString(formData, "password");
-  const organizationName = getString(formData, "organizationName");
   const supabase = getSupabaseClient();
 
   if (!supabase) {
@@ -82,9 +93,7 @@ export async function signupAction(formData: FormData) {
     email,
     password,
     options: {
-      data: {
-        organization_name: organizationName || undefined
-      }
+      data: {}
     }
   });
 
@@ -92,14 +101,28 @@ export async function signupAction(formData: FormData) {
     authRedirect("/signup", lang, { error: "invalid" });
   }
 
-  await ensureOrganizerMembershipForUser(data.user, organizationName);
-
   if (data.session) {
     await setAuthCookies({
       accessToken: data.session.access_token,
       refreshToken: data.session.refresh_token,
       expiresIn: data.session.expires_in
     });
+
+    const authenticatedSupabase = getSupabaseClientForAccessToken(data.session.access_token);
+
+    if (!authenticatedSupabase) {
+      await clearAuthCookies();
+      authRedirect("/signup", lang, { error: "setup" });
+    }
+
+    try {
+      await ensureOrganizerMembershipForUser(data.user, authenticatedSupabase);
+    } catch (membershipError) {
+      console.error("Failed to ensure organizer membership after signup.", membershipError);
+      await clearAuthCookies();
+      authRedirect("/login", lang, { error: "membership" });
+    }
+
     redirect(withLanguage("/admin/events", lang));
   }
 
