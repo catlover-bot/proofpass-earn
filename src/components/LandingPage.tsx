@@ -14,19 +14,19 @@ const copy = {
   en: {
     hero: {
       badge: "No wallet required",
-      title: "Proof NFT/SBT-style records for community events",
+      title: "Trusted Proof Cards for events and community activity",
       subtitle:
-        "Create an event, share a QR check-in, and issue wallet-free proof pages with NFT/SBT-style cards for attendance, speaking, contribution, and organizing.",
+        "Create an event, share a QR check-in, and issue wallet-free public proof pages for attendance, speaking, contribution, and learning activity.",
       primary: "Create an event",
       secondary: "View demo proof",
       pilot: "Try public pilot",
-      roadmap: "How Web3 support works"
+      roadmap: "Proof roadmap"
     },
     preview: {
       label: "Proof collection preview",
       event: "Research Systems Night",
       participant: "Demo Participant",
-      role: "Speaker proof NFT/SBT",
+      role: "Organizer-approved speaker proof",
       status: "Proof image ready",
       participantLabel: "Participant",
       proofTypeLabel: "Proof type",
@@ -37,7 +37,7 @@ const copy = {
     whoLabel: "Who it is for",
     whoTitle: "Built for practical community formats.",
     audiences: ["Research events", "Study groups", "Hackathons", "Community meetups", "Internal workshops"],
-    proofLabel: "Proof NFT/SBT roles",
+    proofLabel: "Proof labels",
     proofTitle: "Issue proof records for the activity that makes events work.",
     whyLabel: "Why use this?",
     whyTitle: "Useful proof, without extra participant work.",
@@ -45,38 +45,38 @@ const copy = {
       "Replace manual attendance lists",
       "Give participants a proof collection URL",
       "Keep participant email off public pages",
-      "Prepare for optional non-transferable SBT pilots"
+      "Keep stronger labels organizer-approved"
     ],
     collection: {
       label: "Proof collection",
       heading: "Public proof cards before wallet requirements",
       body:
-        "A participant can share proof cards that feel like event NFTs while remaining wallet-free by default. Advanced pilots can attach non-transferable SBT records later."
+        "A participant can share Proof Cards and public proof pages while staying wallet-free by default. Stronger labels are added only after organizer approval."
     },
     advanced: {
-      label: "Advanced",
-      heading: "Advanced proof infrastructure, when your community needs it",
+      label: "Optional extension",
+      heading: "Proof infrastructure that can grow with your community",
       body:
-        "ProofPass starts as a wallet-free proof page. For advanced pilots, the same proof can expose structured metadata and optional Base Sepolia non-transferable SBT records."
+        "ProofPass starts as a wallet-free proof page. For advanced pilots, organizer-approved or evidence-verified proofs can later support structured metadata and optional SBT/NFT extensions."
     },
-    badges: ["Wallet-free", "Public proof URL", "Email hidden on public pages", "Optional testnet SBT"]
+    badges: ["Wallet-free", "Public proof page", "Email hidden on public pages", "Optional SBT/NFT extension"]
   },
   ja: {
     hero: {
       badge: "ウォレット不要",
-      title: "コミュニティイベントのNFT/SBTスタイル証明",
+      title: "イベント参加・活動を信頼できるProof Cardに",
       subtitle:
-        "イベントを作成し、QRチェックインを共有するだけで、参加・登壇・貢献・主催のNFT/SBTスタイル証明カードをウォレット不要で発行できます。",
+        "イベントを作成し、QRチェックインを共有するだけで、参加証明・登壇証明・貢献証明・学習活動の公開証明ページをウォレット不要で発行できます。",
       primary: "イベントを作成する",
       secondary: "デモ証明を見る",
       pilot: "公開パイロットを試す",
-      roadmap: "Web3対応について"
+      roadmap: "証明ロードマップ"
     },
     preview: {
       label: "証明カードプレビュー",
       event: "Research Systems Night",
       participant: "デモ参加者",
-      role: "登壇者NFT/SBT証明",
+      role: "主催者承認済みの登壇証明",
       status: "証明画像準備済み",
       participantLabel: "参加者",
       proofTypeLabel: "証明タイプ",
@@ -87,7 +87,7 @@ const copy = {
     whoLabel: "対象イベント",
     whoTitle: "研究・学習・コミュニティの現場で使いやすい形です。",
     audiences: ["研究会", "勉強会", "ハッカソン", "コミュニティイベント", "社内ワークショップ"],
-    proofLabel: "NFT/SBTスタイル証明",
+    proofLabel: "証明ラベル",
     proofTitle: "イベントを支える活動を証明記録として残せます。",
     whyLabel: "使う理由",
     whyTitle: "参加者に余計な手間を増やさず、イベント後にも残る証明を発行できます。",
@@ -95,21 +95,21 @@ const copy = {
       "手作業の参加者リストを減らす",
       "参加者に証明コレクションURLを渡せる",
       "公開ページにメールアドレスを表示しない",
-      "任意の譲渡不可SBT実証に拡張できる"
+      "強いラベルは主催者承認後に付与できる"
     ],
     collection: {
       label: "証明コレクション",
       heading: "まずはウォレット不要の公開証明カード",
       body:
-        "参加者はイベントNFTのように見える証明カードを共有できます。標準フローはウォレット不要で、高度な実証では譲渡不可SBT記録を追加できます。"
+        "参加者はProof Cardと公開証明ページをウォレット不要で共有できます。登壇・貢献などの強いラベルは、主催者承認後に追加されます。"
     },
     advanced: {
-      label: "高度な証明",
+      label: "任意の拡張",
       heading: "必要に応じて拡張できる証明インフラ",
       body:
-        "ProofPassはまずウォレット不要の証明ページとして使えます。高度な実証では、同じ証明を構造化メタデータやBase Sepolia上の譲渡不可テストネットSBT記録に拡張できます。"
+        "ProofPassはまずウォレット不要の証明ページとして使えます。主催者承認済み・提出物確認済みの証明は、将来的に構造化メタデータや任意のSBT/NFT化へ拡張できます。"
     },
-    badges: ["ウォレット不要", "公開証明URL", "メール非公開", "任意のテストネットSBT"]
+    badges: ["ウォレット不要", "公開証明ページ", "メール非公開", "任意のSBT/NFT拡張"]
   }
 } as const satisfies Record<Language, object>;
 

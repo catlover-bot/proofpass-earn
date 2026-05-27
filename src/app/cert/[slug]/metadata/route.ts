@@ -83,7 +83,7 @@ export async function GET(
       { trait_type: "Proof labels", value: achievements.map((achievement) => achievement.label).join(", ") },
       { trait_type: "Verification level", value: labelVerificationLevel("en", certificate.verification_level) },
       { trait_type: "Approval status", value: labelApprovalStatus("en", certificate.approval_status) },
-      { trait_type: "Proof media", value: "NFT/SBT-style proof card image" },
+      { trait_type: "Proof media", value: "Proof Card image" },
       { trait_type: "Status", value: labelRole(certificate.status) },
       { trait_type: "Issued date", value: certificate.issued_at }
     ]

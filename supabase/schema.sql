@@ -74,6 +74,10 @@ create table if not exists certificates (
   participant_id uuid not null references participants(id) on delete cascade,
   public_slug text not null unique,
   certificate_type certificate_type not null,
+  verification_level text not null default 'checkin'
+    check (verification_level in ('checkin', 'organizer_approved', 'evidence_verified', 'onchain_sbt')),
+  approval_status text not null default 'approved'
+    check (approval_status in ('approved', 'pending', 'rejected')),
   status certificate_status not null default 'valid',
   issued_at timestamptz not null default now(),
   created_at timestamptz not null default now(),
@@ -135,3 +139,8 @@ create index if not exists point_ledger_event_id_idx on point_ledger(event_id);
 create index if not exists point_ledger_participant_id_idx on point_ledger(participant_id);
 create index if not exists organizer_members_user_id_idx on organizer_members(user_id);
 create index if not exists organizer_members_email_idx on organizer_members(email);
+create unique index if not exists organizer_members_org_user_id_unique
+  on organizer_members(organization_id, user_id)
+  where user_id is not null;
+create unique index if not exists organizer_members_org_email_unique
+  on organizer_members(organization_id, lower(email));

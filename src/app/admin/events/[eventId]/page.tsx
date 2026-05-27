@@ -106,9 +106,9 @@ export default async function EventDetailPage({
       organizerProofTitle: "Organizer proof",
       organizerProofIntro:
         "Host activity can also be represented as a proof record for the people who make the event possible.",
-      organizerProofItems: ["Organizer proof", "Host proof record", "Future optional SBT/NFT issuance"],
+      organizerProofItems: ["Organizer proof", "Host proof record", "Future optional SBT/NFT extension"],
       organizerProofNote:
-        "This is a concept placeholder for advanced pilots. It does not create a production mint flow.",
+        "This is a concept placeholder for advanced pilots. It does not issue SBT/NFT records automatically.",
       organizerMessage: "Organizer message",
       copyMessage: "Copy message",
       copiedMessage: "Message copied",
@@ -181,9 +181,9 @@ export default async function EventDetailPage({
       organizerProofTitle: "主催者証明",
       organizerProofIntro:
         "イベントを実現するホストの活動も、証明記録として扱えるようにします。",
-      organizerProofItems: ["主催者証明", "ホスト証明記録", "将来の任意SBT/NFT発行"],
+      organizerProofItems: ["主催者証明", "ホスト証明記録", "将来の任意SBT/NFT拡張"],
       organizerProofNote:
-        "高度な実証向けのコンセプトです。本番発行フローは作成しません。",
+        "高度な実証向けのコンセプトです。SBT/NFT記録は自動発行されません。",
       organizerMessage: "主催者向け共有文",
       copyMessage: "共有文をコピー",
       copiedMessage: "共有文をコピーしました",

@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ProofPass",
   description:
-    "Wallet-free proof pages and NFT/SBT-style event proof records for research events, study groups, hackathons, and technical communities."
+    "Trusted public proof pages and Proof Cards for event participation, speaking, contribution, and learning activity."
 };
 
 export default function RootLayout({

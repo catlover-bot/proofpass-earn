@@ -13,29 +13,23 @@ const copy = {
     label: "Public pilot",
     title: "Try ProofPass for your next event",
     intro:
-      "ProofPass is a Web3 event proof app. Organizers can create QR check-ins and issue public proof pages for attendance, speaking, contribution, and organizing.",
+      "ProofPass helps organizers turn event participation, speaking, contribution, and learning activity into trusted public proof pages.",
     walletFree: "The default flow is wallet-free for participants.",
     advanced:
-      "Advanced pilots can use NFT-style proof card images, structured metadata, and optional testnet SBT records.",
+      "Advanced pilots can use Proof Card images, structured metadata, and optional SBT/NFT extensions for approved proofs.",
     positioning:
-      "ProofPass is a non-speculative proof product. It does not add payment, token exchange, marketplace, wallet custody, or production mint UI.",
+      "ProofPass is focused on trustworthy proof records. It does not add payment flows, marketplaces, wallet custody, or automatic SBT/NFT issuing.",
     whoLabel: "Who should try it",
     whoTitle: "Useful for communities that want event activity to be easier to verify and share.",
     who: ["Research events", "Study groups", "Hackathons", "Community meetups", "Internal workshops"],
     tryLabel: "What you can try",
     tryTitle: "Start with QR check-in, then explore proof records.",
-    tryItems: [
-      "QR check-in",
-      "Invite-only check-in",
-      "Public proof pages",
-      "NFT/SBT-style proof cards",
-      "Testnet SBT records"
-    ],
+    tryItems: ["QR check-in confirmation", "Invite-only check-in", "Public proof pages", "Proof Cards", "Optional SBT/NFT extension"],
     demoLabel: "Demo links",
     demoTitle: "Inspect the public proof surface.",
     demoLinks: [
       { href: demoProofHref, label: "Demo proof page", description: "Public page without participant email." },
-      { href: demoImageHref, label: "Proof card image", description: "NFT-style image for sharing and metadata." },
+      { href: demoImageHref, label: "Proof Card image", description: "Shareable proof image for public pages and metadata." },
       { href: demoMetadataHref, label: "Proof metadata", description: "Structured JSON with image field." }
     ],
     ctaTitle: "Open a small pilot",
@@ -48,29 +42,23 @@ const copy = {
     label: "公開パイロット",
     title: "次のイベントでProofPassを試す",
     intro:
-      "ProofPassはWeb3イベント証明アプリです。主催者はQRチェックインを作成し、参加・登壇・貢献・主催の公開証明ページを発行できます。",
+      "ProofPassは、イベント参加・登壇・貢献・学習活動を、信頼できる公開証明ページとして残すためのプラットフォームです。",
     walletFree: "標準フローでは、参加者にウォレットは不要です。",
     advanced:
-      "高度なパイロットでは、NFTスタイルの証明カード画像、構造化メタデータ、任意のテストネットSBT記録を利用できます。",
+      "高度なパイロットでは、Proof Card画像、構造化メタデータ、承認済み証明の任意のSBT/NFT拡張を利用できます。",
     positioning:
-      "ProofPassは投機目的ではない証明プロダクトです。決済、トークン交換、マーケットプレイス、ウォレット管理、本番ミントUIは追加しません。",
+      "ProofPassは、信頼できる証明記録に集中したプロダクトです。決済、マーケットプレイス、ウォレット管理、自動SBT/NFT発行は追加しません。",
     whoLabel: "試してほしいイベント",
     whoTitle: "イベント活動を確認しやすく、共有しやすくしたいコミュニティに向いています。",
     who: ["研究イベント", "勉強会", "ハッカソン", "コミュニティミートアップ", "社内ワークショップ"],
     tryLabel: "試せること",
     tryTitle: "まずはQRチェックインから始め、証明記録を確認できます。",
-    tryItems: [
-      "QRチェックイン",
-      "招待者限定チェックイン",
-      "公開証明ページ",
-      "NFT/SBTスタイル証明カード",
-      "テストネットSBT記録"
-    ],
+    tryItems: ["QRチェックイン確認", "招待者限定チェックイン", "公開証明ページ", "Proof Card", "任意のSBT/NFT拡張"],
     demoLabel: "デモリンク",
     demoTitle: "公開証明の表示を確認できます。",
     demoLinks: [
       { href: demoProofHref, label: "デモ証明ページ", description: "参加者メールアドレスを表示しない公開ページ。" },
-      { href: demoImageHref, label: "証明カード画像", description: "共有とメタデータ用のNFTスタイル画像。" },
+      { href: demoImageHref, label: "Proof Card画像", description: "公開証明ページとメタデータに使える共有用画像。" },
       { href: demoMetadataHref, label: "証明メタデータ", description: "画像フィールドを含む構造化JSON。" }
     ],
     ctaTitle: "小さなパイロットを始める",

@@ -76,15 +76,15 @@ const copy = {
     unableProofs: "Unable to load public proofs",
     unableEvents: "Unable to load proof events",
     achievementsTitle: "Proof labels",
-    achievementsIntro: "ProofPass uses non-transferable proof labels for participation and community contribution.",
-    proofCard: "Collectible proof card",
+    achievementsIntro: "ProofPass uses trusted proof labels for participation, contribution, and organizer-approved activity.",
+    proofCard: "Proof Card",
     publicName: "Public name",
     issued: "Issued",
     checkedIn: "Checked in",
     viewProof: "Open public proof",
     privacyTitle: "Privacy note",
     privacyText: "This page does not show participant email or the internal collection key.",
-    sbtNote: "non-transferable SBT"
+    sbtNote: "optional extension"
   },
   ja: {
     label: "証明コレクション",
@@ -100,15 +100,15 @@ const copy = {
     unableProofs: "公開証明を読み込めません",
     unableEvents: "証明イベントを読み込めません",
     achievementsTitle: "証明ラベル",
-    achievementsIntro: "ProofPassは参加とコミュニティ貢献のために、譲渡不可の証明ラベルを使います。",
-    proofCard: "コレクション証明カード",
+    achievementsIntro: "ProofPassは参加・貢献・主催者承認済み活動のために、信頼できる証明ラベルを使います。",
+    proofCard: "Proof Card",
     publicName: "公開名",
     issued: "発行",
     checkedIn: "チェックイン",
     viewProof: "公開証明を開く",
     privacyTitle: "プライバシーについて",
     privacyText: "このページには参加者メールアドレスや内部コレクションキーは表示されません。",
-    sbtNote: "譲渡不可SBT"
+    sbtNote: "任意拡張"
   }
 } satisfies Record<Language, Record<string, string>>;
 

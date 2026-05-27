@@ -1,8 +1,8 @@
 # ProofPass
 
-ProofPass is a proof collection and community contribution platform for research events, study groups, hackathons, and technical communities.
+ProofPass is a trusted event and activity proof platform for research events, study groups, hackathons, and technical communities.
 
-Organizers can create events, generate QR check-in links, collect participant check-ins, issue public proof pages with NFT/SBT-style proof card images, and review proof labels.
+Organizers can create events, generate QR check-in links, collect participant check-ins, issue public proof pages with Proof Cards, and review organizer-approved proof labels.
 
 ## MVP Scope
 
@@ -12,12 +12,12 @@ Organizers can create events, generate QR check-in links, collect participant ch
 - Participant check-in with name, email, and role
 - Public certificate pages for attendance, speaker, contributor, and organizer proofs
 - Generated `/cert/[slug]/image` proof cards for metadata and page previews
-- Proof labels for attendance, speaker, contributor, organizer, early supporter, and testnet SBT records
+- Proof labels for attendance, speaker, contributor, organizer, supporter, mentor, winner, and optional SBT records
 - Public proof collection pages keyed by a hashed profile value
 - Optional event benefit placeholder for proof holder access
 - Supabase schema and local development seed data
 
-This MVP is wallet-free and payment-free. It does not include wallet custody, crypto payments, production mint UI, or participant-side chain actions. Testnet SBT support is optional and non-transferable.
+This MVP is wallet-free and payment-free. It does not include wallet custody or participant-side chain actions. SBT/NFT support is an optional extension for organizer-approved or evidence-verified proofs.
 
 ## Tech Stack
 
@@ -71,7 +71,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `/admin/events/[eventId]` event detail, QR code, and participants
 - `/checkin/[eventCode]` participant check-in
 - `/cert/[slug]` public certificate page
-- `/cert/[slug]/image` generated NFT/SBT-style proof card image
+- `/cert/[slug]/image` generated Proof Card image
 - `/profile/[emailHash]` public proof collection
 
 ## Happy Path
