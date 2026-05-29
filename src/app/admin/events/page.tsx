@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarPlus, CheckCircle2, MapPin, Users } from "lucide-react";
+import { CalendarPlus, CheckCircle2, MapPin, QrCode, Users } from "lucide-react";
 import { AdminHeader } from "@/components/AdminHeader";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
@@ -35,6 +35,8 @@ export default async function EventsPage({
       subtitle: "Create QR check-ins and manage issued proof pages.",
       newEvent: "New event",
       auth: "Admin access is protected by organizer login.",
+      guideTitle: "Pilot workflow",
+      guideSteps: ["Create an event", "Share the QR check-in", "Review participant proofs"],
       emptyTitle: "Create your first event",
       emptyText: "Generate a QR check-in and start issuing proof pages.",
       checkinReady: "Check-in ready",
@@ -52,6 +54,8 @@ export default async function EventsPage({
       subtitle: "QRチェックインを作成し、参加証明ページを管理します。",
       newEvent: "新規イベント",
       auth: "管理画面は主催者ログインで保護されています。",
+      guideTitle: "パイロットの流れ",
+      guideSteps: ["イベント作成", "QRチェックイン共有", "参加者の証明確認"],
       emptyTitle: "最初のイベントを作成",
       emptyText: "QRチェックインを作成して、参加証明ページの発行を始めましょう。",
       checkinReady: "チェックイン準備済み",
@@ -170,6 +174,26 @@ export default async function EventsPage({
           {copy.auth}
         </p>
       </Card>
+
+      <section className="grid gap-3 md:grid-cols-3" aria-label={copy.guideTitle}>
+        {copy.guideSteps.map((step, index) => {
+          const Icon = index === 1 ? QrCode : index === 2 ? CheckCircle2 : CalendarPlus;
+
+          return (
+            <div key={step} className="rounded-lg border border-slate-200 bg-white/90 p-4 shadow-soft">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-mint/10 text-mint">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500">{index + 1}</p>
+                  <p className="font-bold text-ink">{step}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </section>
 
       {events.length === 0 ? (
         <Card className="text-center">

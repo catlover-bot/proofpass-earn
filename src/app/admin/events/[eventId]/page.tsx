@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, CheckCircle2, ExternalLink, LinkIcon, MapPin, MessageSquareText, Users } from "lucide-react";
+import { Award, BadgeCheck, CheckCircle2, ExternalLink, LinkIcon, MapPin, MessageSquareText, Users, X } from "lucide-react";
 import { AchievementBadgeList } from "@/components/AchievementBadgeList";
 import { AdminHeader } from "@/components/AdminHeader";
 import { CopyButton } from "@/components/CopyButton";
@@ -125,6 +125,14 @@ export default async function EventDetailPage({
       achievements: "Proof labels",
       verification: "Verification",
       manageProofLabels: "Manage labels",
+      manageProofLabelsTitle: "Proof label management",
+      manageProofLabelsHelp:
+        "QR check-in starts as attendance proof. Add an organizer-approved label when you have confirmed the participant activity.",
+      currentLabel: "Current label",
+      noOrganizerLabel: "No organizer label yet",
+      proofRecord: "Proof record",
+      checkedInProof: "QR check-in confirmed",
+      organizerApprovedProof: "Organizer approved",
       removeLabel: "Remove label",
       labelActions: {
         speaker: "Mark speaker",
@@ -200,6 +208,14 @@ export default async function EventDetailPage({
       achievements: "証明ラベル",
       verification: "確認レベル",
       manageProofLabels: "ラベル管理",
+      manageProofLabelsTitle: "証明ラベル管理",
+      manageProofLabelsHelp:
+        "QRチェックイン直後は参加証明です。活動内容を確認できたら、主催者承認済みラベルを付与してください。",
+      currentLabel: "現在のラベル",
+      noOrganizerLabel: "主催者ラベルなし",
+      proofRecord: "証明記録",
+      checkedInProof: "QRチェックイン確認",
+      organizerApprovedProof: "主催者承認済み",
       removeLabel: "ラベル削除",
       labelActions: {
         speaker: "登壇者にする",
@@ -424,6 +440,13 @@ export default async function EventDetailPage({
 
   const checkinUrl = `${appUrl}/checkin/${event.checkin_code}?lang=${lang}`;
   const organizerShareText = copy.shareText(checkinUrl);
+  const labelIcons = {
+    speaker: MessageSquareText,
+    contributor: CheckCircle2,
+    supporter: Users,
+    mentor: BadgeCheck,
+    winner: Award
+  } satisfies Record<ProofLabelKey, typeof Award>;
 
   return (
     <PageShell className="space-y-8">
@@ -621,7 +644,7 @@ export default async function EventDetailPage({
         )}
       </Card>
 
-      <Card>
+      <section className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -636,92 +659,124 @@ export default async function EventDetailPage({
         </div>
 
         {participants.length === 0 ? (
-          <div className="mt-6 rounded-md border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+          <Card className="border-dashed bg-slate-50 text-center shadow-none">
             <Award className="mx-auto h-8 w-8 text-slate-400" />
             <h3 className="mt-3 text-lg font-bold text-ink">{copy.noParticipantsTitle}</h3>
             <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-700">
               {copy.noParticipantsText}
             </p>
-          </div>
+          </Card>
         ) : (
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[1180px] border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
-                  <th className="py-3 pr-4 font-semibold">{copy.name}</th>
-                  <th className="py-3 pr-4 font-semibold">{common.role}</th>
-                  <th className="py-3 pr-4 font-semibold">{common.proofType}</th>
-                  <th className="py-3 pr-4 font-semibold">{copy.verification}</th>
-                  <th className="py-3 pr-4 font-semibold">{copy.checkedIn}</th>
-                  <th className="py-3 pr-4 font-semibold">{copy.proofStatus}</th>
-                  <th className="py-3 pr-4 font-semibold">{copy.proofLink}</th>
-                  <th className="py-3 pr-4 font-semibold">{copy.achievements}</th>
-                  <th className="py-3 pr-4 font-semibold">{copy.manageProofLabels}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {participants.map((participant) => {
-                  const certificate = certificatesByParticipant.get(participant.id);
-                  const proofLabels = badgesByParticipant.get(participant.id) ?? [];
-                  const badges = getProofAchievementBadges(lang, {
-                    proofLabels,
-                    verificationLevel: certificate?.verification_level,
-                    hasTestnetSbt:
-                      certificate?.verification_level === "onchain_sbt" ||
-                      Boolean(certificate?.contract_address && certificate.token_id) ||
-                      Boolean(certificate?.minted_at)
-                  });
+          <div className="grid gap-4">
+            {participants.map((participant) => {
+              const certificate = certificatesByParticipant.get(participant.id);
+              const proofLabels = badgesByParticipant.get(participant.id) ?? [];
+              const currentProofLabel = PROOF_LABEL_KEYS.find((labelKey) => proofLabels.includes(labelKey));
+              const badges = getProofAchievementBadges(lang, {
+                proofLabels,
+                verificationLevel: certificate?.verification_level,
+                hasTestnetSbt:
+                  certificate?.verification_level === "onchain_sbt" ||
+                  Boolean(certificate?.contract_address && certificate.token_id) ||
+                  Boolean(certificate?.minted_at)
+              });
 
-                  return (
-                    <tr key={participant.id} className="border-b border-slate-100 last:border-0">
-                      <td className="py-4 pr-4 font-semibold text-ink">{participant.name}</td>
-                      <td className="py-4 pr-4 text-slate-700">{labelForValue(lang, participant.role)}</td>
-                      <td className="py-4 pr-4 text-slate-700">
-                        {certificate ? labelProofType(lang, certificate.certificate_type) : copy.notIssued}
-                      </td>
-                      <td className="py-4 pr-4">
+              return (
+                <Card key={participant.id} className="p-5">
+                  <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{copy.name}</p>
+                          <h3 className="mt-1 text-xl font-bold text-ink">{participant.name}</h3>
+                        </div>
+                        <StatusPill tone="info">{formatDateTime(participant.checked_in_at)}</StatusPill>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                          <p className="text-xs font-semibold text-slate-500">{common.role}</p>
+                          <p className="mt-1 font-bold text-ink">{labelForValue(lang, participant.role)}</p>
+                        </div>
+                        <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                          <p className="text-xs font-semibold text-slate-500">{common.proofType}</p>
+                          <p className="mt-1 font-bold text-ink">
+                            {certificate ? labelProofType(lang, certificate.certificate_type) : copy.notIssued}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
                         {certificate ? (
-                          <div className="flex flex-wrap gap-2">
+                          <>
                             <StatusPill tone={certificate.verification_level === "checkin" ? "info" : "success"}>
                               {labelVerificationLevel(lang, certificate.verification_level)}
                             </StatusPill>
                             <StatusPill tone={certificate.approval_status === "approved" ? "success" : "warning"}>
                               {labelApprovalStatus(lang, certificate.approval_status)}
                             </StatusPill>
-                          </div>
+                            <StatusPill tone={certificate.status === "valid" ? "success" : "danger"}>
+                              {labelForValue(lang, certificate.status)}
+                            </StatusPill>
+                          </>
                         ) : (
-                          <span className="text-slate-500">{copy.notIssued}</span>
+                          <StatusPill>{copy.notIssued}</StatusPill>
                         )}
-                      </td>
-                      <td className="py-4 pr-4 text-slate-700">{formatDateTime(participant.checked_in_at)}</td>
-                      <td className="py-4 pr-4">
-                        {certificate ? (
-                          <StatusPill tone={certificate.status === "valid" ? "success" : "danger"}>
-                            {labelForValue(lang, certificate.status)}
-                          </StatusPill>
-                        ) : (
-                          <span className="text-slate-500">{copy.notIssued}</span>
-                        )}
-                      </td>
-                      <td className="py-4 pr-4">
-                        {certificate ? (
-                          <Link
-                            href={withLanguage(`/cert/${certificate.public_slug}`, lang)}
-                            className="inline-flex items-center gap-2 font-semibold text-mint hover:text-ink"
-                          >
-                            {common.openProof}
-                            <ExternalLink className="h-4 w-4" />
-                          </Link>
-                        ) : (
-                          <span className="text-slate-500">{copy.notIssued}</span>
-                        )}
-                      </td>
-                      <td className="py-4 pr-4">
+                      </div>
+
+                      <div className="space-y-2">
+                        <p className="text-xs font-semibold text-slate-500">{copy.achievements}</p>
                         <AchievementBadgeList badges={badges} />
-                      </td>
-                      <td className="py-4 pr-4">
-                        <div className="flex max-w-[320px] flex-wrap gap-2">
-                          {PROOF_LABEL_KEYS.map((labelKey) => (
+                      </div>
+
+                      {certificate ? (
+                        <Link
+                          href={withLanguage(`/cert/${certificate.public_slug}`, lang)}
+                          className="inline-flex items-center gap-2 font-semibold text-mint hover:text-ink"
+                        >
+                          {common.openProof}
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                      ) : null}
+                    </div>
+
+                    <div className="rounded-md border border-slate-200 bg-white p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-mint">
+                            {copy.manageProofLabels}
+                          </p>
+                          <h4 className="mt-1 text-lg font-bold text-ink">{copy.manageProofLabelsTitle}</h4>
+                          <p className="mt-2 text-sm leading-6 text-slate-700">{copy.manageProofLabelsHelp}</p>
+                        </div>
+                        <div className="shrink-0">
+                          <StatusPill tone={currentProofLabel ? "success" : "info"}>
+                            {currentProofLabel ? copy.organizerApprovedProof : copy.checkedInProof}
+                          </StatusPill>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 sm:grid-cols-[0.8fr_1.2fr]">
+                        <div className="rounded-md bg-slate-50 p-3">
+                          <p className="text-xs font-semibold text-slate-500">{copy.currentLabel}</p>
+                          <p className="mt-1 font-bold text-ink">
+                            {currentProofLabel ? getAchievementBadge(lang, currentProofLabel).label : copy.noOrganizerLabel}
+                          </p>
+                        </div>
+                        <div className="rounded-md bg-slate-50 p-3">
+                          <p className="text-xs font-semibold text-slate-500">{copy.proofRecord}</p>
+                          <p className="mt-1 font-bold text-ink">
+                            {certificate ? labelVerificationLevel(lang, certificate.verification_level) : copy.notIssued}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {PROOF_LABEL_KEYS.map((labelKey) => {
+                          const LabelIcon = labelIcons[labelKey];
+                          const isSelected = currentProofLabel === labelKey;
+
+                          return (
                             <form key={labelKey} action={updateParticipantProofLabelAction}>
                               <input type="hidden" name="eventId" value={event.id} />
                               <input type="hidden" name="participantId" value={participant.id} />
@@ -729,33 +784,35 @@ export default async function EventDetailPage({
                               <input type="hidden" name="lang" value={lang} />
                               <Button
                                 type="submit"
-                                variant={proofLabels.includes(labelKey) ? "primary" : "secondary"}
-                                className="min-h-9 px-3 text-xs"
+                                variant={isSelected ? "primary" : "secondary"}
+                                aria-pressed={isSelected}
+                                className="w-full min-h-10 justify-start px-3 text-xs"
                               >
-                                {copy.labelActions[labelKey as ProofLabelKey] ??
-                                  getAchievementBadge(lang, labelKey).label}
+                                <LabelIcon className="h-4 w-4 shrink-0" />
+                                {copy.labelActions[labelKey]}
                               </Button>
                             </form>
-                          ))}
-                          <form action={updateParticipantProofLabelAction}>
-                            <input type="hidden" name="eventId" value={event.id} />
-                            <input type="hidden" name="participantId" value={participant.id} />
-                            <input type="hidden" name="labelKey" value="" />
-                            <input type="hidden" name="lang" value={lang} />
-                            <Button type="submit" variant="subtle" className="min-h-9 px-3 text-xs">
-                              {copy.removeLabel}
-                            </Button>
-                          </form>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          );
+                        })}
+                        <form action={updateParticipantProofLabelAction}>
+                          <input type="hidden" name="eventId" value={event.id} />
+                          <input type="hidden" name="participantId" value={participant.id} />
+                          <input type="hidden" name="labelKey" value="" />
+                          <input type="hidden" name="lang" value={lang} />
+                          <Button type="submit" variant="subtle" className="w-full min-h-10 justify-start px-3 text-xs">
+                            <X className="h-4 w-4 shrink-0" />
+                            {copy.removeLabel}
+                          </Button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         )}
-      </Card>
+      </section>
     </PageShell>
   );
 }

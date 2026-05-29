@@ -19,10 +19,7 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    linear-gradient(180deg, rgba(251, 250, 247, 0.98), rgba(247, 250, 252, 0.96)),
-    radial-gradient(circle at 16% 6%, rgba(31, 158, 138, 0.12), transparent 28%),
-    radial-gradient(circle at 86% 2%, rgba(118, 103, 217, 0.1), transparent 24%);
+  background: linear-gradient(180deg, rgba(251, 250, 247, 0.98), rgba(247, 250, 252, 0.96));
   color: #102033;
 }
 

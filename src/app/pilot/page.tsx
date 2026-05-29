@@ -1,7 +1,7 @@
 import { ArrowRight, BadgeCheck, Boxes, FlaskConical, Link2, QrCode, Users } from "lucide-react";
 import { PublicFooter } from "@/components/PublicFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
+import { ButtonLink, Card, PageShell, StatusPill, cn } from "@/components/ui";
 import { commonCopy, getLanguageFromSearchParams, type Language, type SearchParamsLike, withLanguage } from "@/lib/i18n";
 
 const demoProofHref = "/cert/proof_xZ0Nb0iY9yMUf1";
@@ -18,7 +18,7 @@ const copy = {
     advanced:
       "Advanced pilots can use Proof Card images, structured metadata, and optional SBT/NFT extensions for approved proofs.",
     positioning:
-      "ProofPass is focused on trustworthy proof records. It does not add payment flows, marketplaces, wallet custody, or automatic SBT/NFT issuing.",
+      "ProofPass is focused on trustworthy proof records. It does not add payment flows, wallet custody, or automatic SBT/NFT issuing.",
     whoLabel: "Who should try it",
     whoTitle: "Useful for communities that want event activity to be easier to verify and share.",
     who: ["Research events", "Study groups", "Hackathons", "Community meetups", "Internal workshops"],
@@ -47,7 +47,7 @@ const copy = {
     advanced:
       "高度なパイロットでは、Proof Card画像、構造化メタデータ、承認済み証明の任意のSBT/NFT拡張を利用できます。",
     positioning:
-      "ProofPassは、信頼できる証明記録に集中したプロダクトです。決済、マーケットプレイス、ウォレット管理、自動SBT/NFT発行は追加しません。",
+      "ProofPassは、信頼できる証明記録に集中したプロダクトです。決済、ウォレット管理、自動SBT/NFT発行は追加しません。",
     whoLabel: "試してほしいイベント",
     whoTitle: "イベント活動を確認しやすく、共有しやすくしたいコミュニティに向いています。",
     who: ["研究イベント", "勉強会", "ハッカソン", "コミュニティミートアップ", "社内ワークショップ"],
@@ -92,6 +92,19 @@ const copy = {
 
 const tryIcons = [QrCode, Link2, BadgeCheck, Boxes, FlaskConical];
 
+function PilotHeroTitle({ lang, title }: { lang: Language; title: string }) {
+  if (lang === "ja") {
+    return (
+      <>
+        <span className="inline-block">次のイベントで</span>
+        <span className="inline-block whitespace-nowrap">ProofPassを試す</span>
+      </>
+    );
+  }
+
+  return title;
+}
+
 export default async function PilotPage({
   searchParams
 }: {
@@ -112,8 +125,15 @@ export default async function PilotPage({
             <StatusPill tone="success">{common.walletFree}</StatusPill>
           </div>
           <div>
-            <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-normal text-ink sm:text-5xl">
-              {t.title}
+            <h1
+              className={cn(
+                "font-bold leading-[1.08] tracking-normal text-ink",
+                lang === "ja"
+                  ? "max-w-[38rem] text-[2.35rem] [word-break:keep-all] sm:text-[2.7rem] lg:text-[3.05rem]"
+                  : "max-w-3xl text-4xl sm:text-[2.75rem] lg:text-[3.15rem]"
+              )}
+            >
+              <PilotHeroTitle lang={lang} title={t.title} />
             </h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-700">{t.intro}</p>
           </div>

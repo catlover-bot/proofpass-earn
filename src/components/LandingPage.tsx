@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, ClipboardCheck, EyeOff, Layers3, Link2, QrCode, Users } from "lucide-react";
 import { AchievementBadgeList } from "@/components/AchievementBadgeList";
-import { EventBenefitPlaceholder } from "@/components/EventBenefitPlaceholder";
 import { PublicFooter } from "@/components/PublicFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
+import { ButtonLink, Card, PageShell, StatusPill, cn } from "@/components/ui";
 import { getAchievementCatalog } from "@/lib/achievements";
 import { commonCopy, type Language, withLanguage } from "@/lib/i18n";
 
@@ -49,7 +48,7 @@ const copy = {
     ],
     collection: {
       label: "Proof collection",
-      heading: "Public proof cards before wallet requirements",
+      heading: "Public proof cards first",
       body:
         "A participant can share Proof Cards and public proof pages while staying wallet-free by default. Stronger labels are added only after organizer approval."
     },
@@ -116,6 +115,20 @@ const copy = {
 const stepIcons = [BadgeCheck, QrCode, Link2];
 const reasonIcons = [ClipboardCheck, Link2, EyeOff, Layers3];
 
+function LandingHeroTitle({ lang, title }: { lang: Language; title: string }) {
+  if (lang === "ja") {
+    return (
+      <>
+        <span className="inline-block">イベント参加・活動を</span>
+        <span className="inline-block">信頼できる</span>
+        <span className="inline-block whitespace-nowrap">Proof Cardに</span>
+      </>
+    );
+  }
+
+  return title;
+}
+
 export function LandingPage({ lang }: { lang: Language }) {
   const t = copy[lang];
   const common = commonCopy[lang];
@@ -132,8 +145,15 @@ export function LandingPage({ lang }: { lang: Language }) {
             <StatusPill tone="info">{t.badges[1]}</StatusPill>
           </div>
           <div className="space-y-5">
-            <h1 className="max-w-3xl text-4xl font-bold leading-tight tracking-normal text-ink sm:text-5xl lg:text-6xl">
-              {t.hero.title}
+            <h1
+              className={cn(
+                "font-bold leading-[1.08] tracking-normal text-ink",
+                lang === "ja"
+                  ? "max-w-[42rem] text-[2.35rem] [word-break:keep-all] sm:text-[2.7rem] lg:text-[3.05rem] xl:text-[3.2rem]"
+                  : "max-w-3xl text-4xl sm:text-[2.8rem] lg:text-[3.35rem] xl:text-[3.55rem]"
+              )}
+            >
+              <LandingHeroTitle lang={lang} title={t.hero.title} />
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-slate-700">{t.hero.subtitle}</p>
           </div>
@@ -275,8 +295,6 @@ export function LandingPage({ lang }: { lang: Language }) {
           <p className="text-sm leading-7 text-slate-700">{t.advanced.body}</p>
         </div>
       </section>
-
-      <EventBenefitPlaceholder lang={lang} />
 
       <PublicFooter lang={lang} />
     </PageShell>

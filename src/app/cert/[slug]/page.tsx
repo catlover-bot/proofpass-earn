@@ -127,7 +127,12 @@ export default async function CertificatePage({
       approvalTitle: "Approval status",
       cardPreviewTitle: "Proof Card",
       cardPreviewText:
-        "This generated image is included in the public proof metadata. SBT/NFT extension is optional and never automatic.",
+        "Proof Card is a shareable proof card for event participation, speaking, contribution, and other activity.",
+      cardPreviewBullets: [
+        "Use it together with the public proof page to confirm activity records.",
+        "The image is included in public proof metadata.",
+        "SBT/NFT extension is optional and never automatic."
+      ],
       openImage: "Open proof image",
       advancedLabel: "Optional proof extension",
       sbtExplanation:
@@ -173,7 +178,12 @@ export default async function CertificatePage({
       approvalTitle: "承認ステータス",
       cardPreviewTitle: "Proof Card",
       cardPreviewText:
-        "この生成画像は公開証明メタデータに含まれます。SBT/NFT化は任意の拡張機能であり、自動発行されません。",
+        "Proof Cardは、参加・登壇・貢献を共有しやすくする証明カードです。",
+      cardPreviewBullets: [
+        "公開証明ページとあわせて、活動記録を確認できます。",
+        "この生成画像は公開証明メタデータに含まれます。",
+        "SBT/NFT化は任意の拡張機能であり、自動発行はされません。"
+      ],
       openImage: "証明画像を開く",
       advancedLabel: "任意の証明拡張",
       sbtExplanation:
@@ -351,12 +361,12 @@ export default async function CertificatePage({
   const txUrl = explorerUrl && certificate.tx_hash ? `${explorerUrl}/tx/${certificate.tx_hash}` : null;
 
   return (
-    <PageShell className="max-w-4xl space-y-6">
+    <PageShell className="max-w-4xl space-y-5">
       <SiteHeader lang={lang} />
 
-      <Card className={revoked ? "border-red-200 bg-red-50 shadow-lift" : "border-mint/30 bg-white shadow-lift"}>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-5">
+      <Card className={revoked ? "border-red-200 bg-red-50 p-5 shadow-lift" : "border-mint/30 bg-white p-5 shadow-lift"}>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className={revoked ? "rounded-md bg-red-100 p-3 text-red-700" : "rounded-md bg-mint/10 p-3 text-mint"}>
                 {revoked ? <ShieldAlert className="h-7 w-7" /> : <ShieldCheck className="h-7 w-7" />}
@@ -409,16 +419,23 @@ export default async function CertificatePage({
         </div>
 
         {revoked ? (
-          <div className="mt-6 rounded-md border border-red-200 bg-white p-4 text-sm font-medium text-red-700">
+          <div className="mt-5 rounded-md border border-red-200 bg-white p-4 text-sm font-medium text-red-700">
             {copy.revoked}
           </div>
         ) : null}
       </Card>
 
-      <Card className="space-y-4 overflow-hidden p-0 shadow-lift">
+      <Card className="space-y-3 overflow-hidden p-0 shadow-lift">
         <div className="px-5 pt-5">
           <p className="text-sm font-semibold uppercase tracking-wider text-mint">{copy.cardPreviewTitle}</p>
           <p className="mt-2 text-sm leading-6 text-slate-700">{copy.cardPreviewText}</p>
+          <ul className="mt-3 grid gap-2 text-sm leading-6 text-slate-700 sm:grid-cols-3">
+            {copy.cardPreviewBullets.map((item) => (
+              <li key={item} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                {item}
+              </li>
+            ))}
+          </ul>
         </div>
         <object
           data={proofImageUrl}

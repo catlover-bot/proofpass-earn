@@ -4,16 +4,16 @@ import type { Language } from "@/lib/i18n";
 
 const copy = {
   en: {
-    label: "Optional event benefit",
-    title: "Proof holder access",
-    example: "Show this proof at the event booth",
-    note: "Organizers can replace this with event-specific access information. No code, balance, or transfer is attached."
+    label: "Optional event note",
+    title: "Proof holder guidance",
+    example: "Show this proof when the organizer asks for activity confirmation.",
+    note: "Organizers can replace this with event-specific guidance. No payment, balance, or transfer is attached."
   },
   ja: {
-    label: "任意のイベントベネフィット",
-    title: "証明保有者向けアクセス",
-    example: "この証明をイベントブースで提示してください",
-    note: "主催者はイベント固有のアクセス案内に差し替えられます。コード、残高、譲渡は含みません。"
+    label: "任意のイベント案内",
+    title: "証明保有者向けガイド",
+    example: "主催者から活動確認を求められたときに、この証明を提示できます。",
+    note: "主催者はイベント固有の案内に差し替えられます。決済、残高、譲渡は含みません。"
   }
 } satisfies Record<Language, Record<string, string>>;
 
