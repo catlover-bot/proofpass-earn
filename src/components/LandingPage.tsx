@@ -13,9 +13,9 @@ const copy = {
   en: {
     hero: {
       badge: "No wallet required",
-      title: "Trusted Proof Cards for events and community activity",
+      title: "Turn event participation and contribution into trusted proof",
       subtitle:
-        "Create an event, share a QR check-in, and issue wallet-free public proof pages for attendance, speaking, contribution, and learning activity.",
+        "ProofPass lets organizers issue shareable proof pages for attendance, speaking, contributions, and learning activity. Participants can use it without a wallet.",
       primary: "Create an event",
       secondary: "View demo proof",
       pilot: "Try public pilot",
@@ -25,8 +25,8 @@ const copy = {
       label: "Proof collection preview",
       event: "Research Systems Night",
       participant: "Demo Participant",
-      role: "Organizer-approved speaker proof",
-      status: "Proof image ready",
+      role: "Organizer-confirmed speaker proof",
+      status: "Shareable proof card ready",
       participantLabel: "Participant",
       proofTypeLabel: "Proof type",
       proofUrlLabel: "Proof URL"
@@ -37,35 +37,35 @@ const copy = {
     whoTitle: "Built for practical community formats.",
     audiences: ["Research events", "Study groups", "Hackathons", "Community meetups", "Internal workshops"],
     proofLabel: "Proof labels",
-    proofTitle: "Issue proof records for the activity that makes events work.",
+    proofTitle: "Keep attendance, speaking, and contribution records easy to share.",
     whyLabel: "Why use this?",
     whyTitle: "Useful proof, without extra participant work.",
     reasons: [
       "Replace manual attendance lists",
       "Give participants a proof collection URL",
       "Keep participant email off public pages",
-      "Keep stronger labels organizer-approved"
+      "Let organizers confirm stronger activity labels"
     ],
     collection: {
       label: "Proof collection",
-      heading: "Public proof cards first",
+      heading: "Shareable proof pages first",
       body:
-        "A participant can share Proof Cards and public proof pages while staying wallet-free by default. Stronger labels are added only after organizer approval."
+        "Participants can share proof pages and proof cards while staying wallet-free by default. Speaking and contribution labels are added only after organizer confirmation."
     },
     advanced: {
       label: "Optional extension",
       heading: "Proof infrastructure that can grow with your community",
       body:
-        "ProofPass starts as a wallet-free proof page. For advanced pilots, organizer-approved or evidence-verified proofs can later support structured metadata and optional SBT/NFT extensions."
+        "ProofPass starts as a wallet-free proof page. If needed, confirmed proofs can later be saved as digital proof records."
     },
-    badges: ["Wallet-free", "Public proof page", "Email hidden on public pages", "Optional SBT/NFT extension"]
+    badges: ["Wallet-free", "Shareable proof page", "Email hidden on public pages", "Digital proof option"]
   },
   ja: {
     hero: {
       badge: "ウォレット不要",
-      title: "イベント参加・活動を信頼できるProof Cardに",
+      title: "イベント参加・登壇・貢献を、信頼できる証明に",
       subtitle:
-        "イベントを作成し、QRチェックインを共有するだけで、参加証明・登壇証明・貢献証明・学習活動の公開証明ページをウォレット不要で発行できます。",
+        "ProofPassは、イベント参加・登壇・貢献を、共有できる証明ページとして発行できるサービスです。参加者はウォレット不要で使えます。",
       primary: "イベントを作成する",
       secondary: "デモ証明を見る",
       pilot: "公開パイロットを試す",
@@ -75,8 +75,8 @@ const copy = {
       label: "証明カードプレビュー",
       event: "Research Systems Night",
       participant: "デモ参加者",
-      role: "主催者承認済みの登壇証明",
-      status: "証明画像準備済み",
+      role: "主催者が確認済みの登壇証明",
+      status: "共有用の証明カード準備済み",
       participantLabel: "参加者",
       proofTypeLabel: "証明タイプ",
       proofUrlLabel: "証明URL"
@@ -87,28 +87,28 @@ const copy = {
     whoTitle: "研究・学習・コミュニティの現場で使いやすい形です。",
     audiences: ["研究会", "勉強会", "ハッカソン", "コミュニティイベント", "社内ワークショップ"],
     proofLabel: "証明ラベル",
-    proofTitle: "イベントを支える活動を証明記録として残せます。",
+    proofTitle: "参加・登壇・貢献の記録を、共有できる証明として残せます。",
     whyLabel: "使う理由",
     whyTitle: "参加者に余計な手間を増やさず、イベント後にも残る証明を発行できます。",
     reasons: [
       "手作業の参加者リストを減らす",
       "参加者に証明コレクションURLを渡せる",
       "公開ページにメールアドレスを表示しない",
-      "強いラベルは主催者承認後に付与できる"
+      "登壇・貢献などは主催者が確認できる"
     ],
     collection: {
       label: "証明コレクション",
-      heading: "まずはウォレット不要の公開証明カード",
+      heading: "まずは共有できる証明ページ",
       body:
-        "参加者はProof Cardと公開証明ページをウォレット不要で共有できます。登壇・貢献などの強いラベルは、主催者承認後に追加されます。"
+        "参加者は、証明ページと共有しやすい証明カードをウォレット不要で使えます。登壇・貢献などのラベルは、主催者が確認した後に追加されます。"
     },
     advanced: {
       label: "任意の拡張",
-      heading: "必要に応じて拡張できる証明インフラ",
+      heading: "必要に応じてデジタル証明として保存",
       body:
-        "ProofPassはまずウォレット不要の証明ページとして使えます。主催者承認済み・提出物確認済みの証明は、将来的に構造化メタデータや任意のSBT/NFT化へ拡張できます。"
+        "確認済みの証明は、必要に応じてデジタル証明として保存する拡張にも対応できます。"
     },
-    badges: ["ウォレット不要", "公開証明ページ", "メール非公開", "任意のSBT/NFT拡張"]
+    badges: ["ウォレット不要", "共有できる証明ページ", "メール非公開", "デジタル証明の拡張"]
   }
 } as const satisfies Record<Language, object>;
 
@@ -119,9 +119,8 @@ function LandingHeroTitle({ lang, title }: { lang: Language; title: string }) {
   if (lang === "ja") {
     return (
       <>
-        <span className="inline-block">イベント参加・活動を</span>
-        <span className="inline-block">信頼できる</span>
-        <span className="inline-block whitespace-nowrap">Proof Cardに</span>
+        <span className="inline-block">イベント参加・登壇・貢献を、</span>
+        <span className="inline-block whitespace-nowrap">信頼できる証明に</span>
       </>
     );
   }

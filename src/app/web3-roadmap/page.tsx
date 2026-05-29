@@ -8,69 +8,69 @@ const copy = {
     label: "Roadmap",
     title: "Proof roadmap",
     intro:
-      "ProofPass starts with wallet-free proof pages and strengthens them through organizer approval, evidence verification, and optional SBT/NFT extensions.",
+      "ProofPass starts with shareable proof pages and strengthens them through organizer confirmation, evidence checks, and optional digital proof storage.",
     phases: [
       {
         title: "Today",
-        body: "QR check-in confirmation, public proof pages, and Proof Cards for attendance and event activity."
+        body: "QR participation confirmation, shareable proof pages, and proof cards for attendance and event activity."
       },
       {
         title: "Next",
-        body: "Organizer-approved labels for speaking, contribution, support, mentoring, and awards."
+        body: "Organizer-confirmed labels for speaking, contribution, support, mentoring, and awards."
       },
       {
         title: "Later",
-        body: "Evidence-verified proofs, Open Badges, Verifiable Credentials, and proof collection views for portable activity history."
+        body: "Evidence-checked proofs and collection views that help participants share their activity history."
       },
       {
         title: "Optional extension",
-        body: "Optional non-transferable SBT/NFT records for approved proofs, with personal information kept off-chain."
+        body: "Confirmed proofs can be saved as optional digital proof records. Personal information should stay private."
       }
     ],
     positioningTitle: "Positioning",
     positioning:
-      "ProofPass is a trustworthy proof product for attendance, speaking, contribution, and learning activity. SBT/NFT support is treated as an optional extension for approved or evidence-verified proofs.",
-    privacy: "No personal information should be placed on-chain.",
-    prototypeTitle: "Optional SBT/NFT extension prototype",
+      "ProofPass is a proof product for attendance, speaking, contribution, and learning activity. Technical extensions are optional and come after organizer confirmation.",
+    privacy: "Personal information should not be included in public technical records.",
+    prototypeTitle: "Digital proof extension",
     prototype:
-      "A testnet-only prototype can be used for optional experiments with non-transferable proof records. The default flow remains wallet-free and does not issue SBT/NFT records automatically.",
+      "Advanced pilots can save confirmed proofs as optional digital proof records. The default flow remains wallet-free and does not save digital proof records automatically.",
     validated:
-      "The first manual Base Sepolia proof record has been validated with public proof metadata and a non-transferable status check.",
-    noWallet: "The app does not include wallet login or a client-side wallet connection."
+      "A first pilot record has been checked with public proof information and a non-transferable status.",
+    noWallet: "Participants do not need wallet login for the default flow."
   },
   ja: {
     label: "ロードマップ",
     title: "証明ロードマップ",
     intro:
-      "ProofPassはウォレット不要の公開証明ページから始め、主催者承認・提出物確認・任意のSBT/NFT拡張によって証明の信頼性を高めていきます。",
+      "ProofPassは、共有できる証明ページから始め、主催者確認・提出内容の確認・必要に応じたデジタル証明保存によって、証明の信頼性を高めていきます。",
     phases: [
       {
         title: "現在",
-        body: "参加証明とイベント活動のための、QRチェックイン確認、公開証明ページ、Proof Card。"
+        body: "参加証明とイベント活動のための、QRでの参加確認、共有できる証明ページ、共有しやすい証明カード。"
       },
       {
         title: "次の段階",
-        body: "登壇・貢献・サポート・メンター・受賞のための、主催者承認済みラベル。"
+        body: "登壇・貢献・サポート・メンター・受賞の活動を、主催者が確認したラベル。"
       },
       {
         title: "将来",
-        body: "提出物確認済み証明、Open Badges、Verifiable Credentials、活動履歴として使える証明コレクション。"
+        body: "提出内容を確認した証明と、参加者が活動履歴として共有しやすい証明コレクション。"
       },
       {
         title: "任意の拡張",
-        body: "承認済み証明のための任意の譲渡不可SBT/NFT記録。個人情報はオフチェーンに保ちます。"
+        body: "確認済みの証明を、必要に応じてデジタル証明として保存できます。個人情報は公開記録に含めません。"
       }
     ],
     positioningTitle: "位置づけ",
     positioning:
-      "ProofPassは、参加証明・登壇証明・貢献証明・学習活動のための信頼できる証明プロダクトです。SBT/NFT化は、主催者承認済みまたは提出物確認済み証明の任意拡張として扱います。",
-    privacy: "個人情報をオンチェーンに載せるべきではありません。",
-    prototypeTitle: "任意のSBT/NFT拡張プロトタイプ",
+      "ProofPassは、参加証明・登壇証明・貢献証明・学習活動のための証明プロダクトです。技術的な拡張は、主催者が確認した証明に必要な場合だけ使います。",
+    privacy: "個人情報を公開用の技術記録に含めないことが大切です。",
+    prototypeTitle: "デジタル証明として保存する拡張",
     prototype:
-      "譲渡不可の証明記録を使った任意の実験として、テストネット限定プロトタイプを利用できます。標準フローはウォレット不要で、SBT/NFT記録は自動発行されません。",
+      "高度なパイロットでは、確認済みの証明を任意でデジタル証明として保存できます。標準フローはウォレット不要で、自動保存はされません。",
     validated:
-      "最初のBase Sepolia手動証明記録では、公開証明メタデータと譲渡不可ステータスを確認済みです。",
-    noWallet: "アプリにはウォレットログイン、クライアント側ウォレット接続は含まれていません。"
+      "最初のパイロット記録では、公開証明情報と譲渡不可の状態を確認済みです。",
+    noWallet: "標準フローでは、参加者のウォレットログインは不要です。"
   }
 } satisfies Record<Language, {
   label: string;

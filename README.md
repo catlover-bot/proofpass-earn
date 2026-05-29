@@ -1,10 +1,10 @@
 # ProofPass
 
-ProofPass is a trusted event and activity proof product for research events, study groups, hackathons, and technical communities.
+ProofPass helps organizers turn event participation, speaking, contribution, and learning activity into shareable proof pages.
 
-Organizers can create events, generate QR check-in links, collect participant check-ins, issue public proof pages with Proof Cards, and add organizer-approved proof labels.
+Organizers can create events, share QR check-in links, collect participant check-ins, issue proof pages, and confirm activity labels such as speaker, contributor, supporter, mentor, or winner.
 
-ProofPass focuses on durable proof records. SBT/NFT support is treated as an optional future extension for approved proofs.
+Participants can use the default flow without a wallet. If needed, confirmed proofs can later be saved as digital proof records as an optional extension.
 
 ## MVP Scope
 
@@ -13,19 +13,19 @@ ProofPass focuses on durable proof records. SBT/NFT support is treated as an opt
 - QR check-in URLs for each event
 - Participant check-in with name and email
 - Public proof pages for attendance, speaking, contribution, and community activity
-- Generated `/cert/[slug]/image` proof cards for metadata and page previews
-- Organizer-approved proof labels for speaker, contributor, supporter, mentor, and winner
+- Generated `/cert/[slug]/image` proof card images for sharing and page previews
+- Organizer-confirmed proof labels for speaker, contributor, supporter, mentor, and winner
 - Public proof collection pages keyed by a hashed profile value
 - Supabase schema and local development seed data
 
-This MVP is wallet-free and payment-free. It does not include wallet custody, participant-side chain actions, or automatic SBT/NFT issuing.
+This MVP is wallet-free and payment-free. It does not include wallet custody, participant-side chain actions, or automatic digital proof storage.
 
 ## Proof Levels
 
 - QR check-in = attendance proof. A participant checked in through the event QR/check-in URL.
-- Organizer approval = stronger proof. The organizer confirmed a role or contribution such as speaker, contributor, supporter, mentor, or winner.
-- Evidence verification = future stronger proof. Submitted evidence can be reviewed before a proof is strengthened.
-- SBT/NFT = optional future extension. It is not issued automatically and should not contain personal information on-chain.
+- Organizer confirmation = stronger proof. The organizer confirmed a role or contribution such as speaker, contributor, supporter, mentor, or winner.
+- Evidence review = future stronger proof. Submitted information can be reviewed before a proof is strengthened.
+- Digital proof storage = optional future extension. It is not automatic and should not contain personal information in public technical records.
 
 ## Tech Stack
 
@@ -68,7 +68,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 5. Run `supabase/invitations.sql` if invite-only check-in is used.
 6. Run `supabase/certificate-proof-types.sql` for existing pilot databases that predate the current certificate types.
 7. Run `supabase/certificate-verification-levels.sql` for existing pilot databases that predate proof strength fields.
-8. Run `supabase/sbt-testnet-fields.sql` only if optional testnet SBT fields are needed.
+8. Run `supabase/sbt-testnet-fields.sql` only if optional digital proof pilot fields are needed.
 9. Run `supabase/organizer-proof-rls-policies.sql` after the schema is ready.
 10. Run `supabase/seed.sql` if demo data is useful.
 11. Copy the project URL and anon key into `.env.local`.
@@ -85,8 +85,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `/admin/events/[eventId]` event detail, QR code, and participants
 - `/checkin/[eventCode]` participant check-in
 - `/cert/[slug]` public certificate page
-- `/cert/[slug]/image` generated Proof Card image
-- `/cert/[slug]/metadata` structured public proof metadata
+- `/cert/[slug]/image` generated proof card image
+- `/cert/[slug]/metadata` structured proof information endpoint
 - `/profile/[emailHash]` public proof collection
 
 ## Happy Path
@@ -105,7 +105,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - Public certificate pages do not expose internal ledger details.
 - The public proof collection route does not expose raw email.
 - Admin routes require organizer login. Participant check-in and public proof pages remain account-free.
-- No personal information is intended for future on-chain metadata.
+- Personal information should not be included in future public technical records.
 
 ## Validation
 

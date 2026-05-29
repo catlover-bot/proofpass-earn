@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ProofPass",
   description:
-    "Trusted public proof pages and Proof Cards for event participation, speaking, contribution, and learning activity."
+    "Shareable proof pages for event participation, speaking, contribution, and learning activity."
 };
 
 export default function RootLayout({

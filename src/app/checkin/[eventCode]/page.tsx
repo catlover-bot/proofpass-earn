@@ -37,7 +37,7 @@ export default async function CheckinPage({
       beforeTitle: "Before you check in",
       duplicate: "Duplicate check-ins with the same email return the existing proof when possible.",
       achievement:
-        "QR check-in issues attendance proof only. Speaker, contributor, supporter, mentor, and winner labels require organizer approval.",
+        "QR check-in creates an attendance proof. Speaking, contribution, support, mentoring, and award labels are added after organizer confirmation.",
       inviteNote: "You are checking in with an invitation link.",
       inviteOnlyNote: "This event is invite-only. Please use your invitation link or contact the organizer.",
       publicMode: "Public QR check-in",
@@ -53,7 +53,7 @@ export default async function CheckinPage({
       beforeTitle: "チェックイン前の確認",
       duplicate: "同じメールアドレスで再度チェックインした場合は、可能な限り既存の証明ページへ移動します。",
       achievement:
-        "QRチェックインで発行されるのは「参加」と「QRチェックイン済み」のみです。登壇者・貢献者などのラベルは主催者承認後に追加されます。",
+        "QRチェックインでは参加証明が発行されます。登壇・貢献・サポート・メンター・受賞などのラベルは、主催者が確認した後に追加されます。",
       inviteNote: "招待リンクからチェックインしています。",
       inviteOnlyNote: "このイベントは招待者限定です。招待リンクを使用するか、主催者にお問い合わせください。",
       publicMode: "公開QRチェックイン",

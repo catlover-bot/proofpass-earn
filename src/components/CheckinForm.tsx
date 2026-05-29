@@ -15,7 +15,7 @@ const formCopy = {
     namePlaceholder: "Name to show on your proof",
     email: "Email",
     emailPlaceholder: "Used for organizer records, not public proof",
-    proofNote: "QR check-in issues attendance proof only. Stronger labels require organizer approval.",
+    proofNote: "QR check-in creates an attendance proof. Speaking, contribution, and other activity labels are added after organizer confirmation.",
     completing: "Completing check-in...",
     submit: "Complete check-in"
   },
@@ -24,7 +24,7 @@ const formCopy = {
     namePlaceholder: "公開証明ページに表示する名前",
     email: "メールアドレス",
     emailPlaceholder: "主催者管理と重複確認に使用します",
-    proofNote: "QRチェックインで発行されるのは「参加」と「QRチェックイン済み」のみです。強いラベルは主催者承認後に追加されます。",
+    proofNote: "QRチェックインでは参加証明が発行されます。登壇・貢献などのラベルは、主催者が確認した後に追加されます。",
     completing: "チェックイン中...",
     submit: "チェックインを完了する"
   }

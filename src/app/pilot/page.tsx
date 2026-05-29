@@ -13,24 +13,24 @@ const copy = {
     label: "Public pilot",
     title: "Try ProofPass for your next event",
     intro:
-      "ProofPass helps organizers turn event participation, speaking, contribution, and learning activity into trusted public proof pages.",
-    walletFree: "The default flow is wallet-free for participants.",
+      "ProofPass helps organizers turn attendance, speaking, contribution, and learning activity into shareable proof pages.",
+    walletFree: "Participants do not need a wallet.",
     advanced:
-      "Advanced pilots can use Proof Card images, structured metadata, and optional SBT/NFT extensions for approved proofs.",
+      "Confirmed proofs can be shown as shareable proof cards and, when needed, saved as digital proof records.",
     positioning:
-      "ProofPass is focused on trustworthy proof records. It does not add payment flows, wallet custody, or automatic SBT/NFT issuing.",
+      "ProofPass focuses on trustworthy activity records for events. It does not add payment flows or wallet custody.",
     whoLabel: "Who should try it",
     whoTitle: "Useful for communities that want event activity to be easier to verify and share.",
     who: ["Research events", "Study groups", "Hackathons", "Community meetups", "Internal workshops"],
     tryLabel: "What you can try",
     tryTitle: "Start with QR check-in, then explore proof records.",
-    tryItems: ["QR check-in confirmation", "Invite-only check-in", "Public proof pages", "Proof Cards", "Optional SBT/NFT extension"],
+    tryItems: ["QR participation confirmation", "Invite-only check-in", "Shareable proof pages", "Shareable proof cards", "Digital proof option"],
     demoLabel: "Demo links",
     demoTitle: "Inspect the public proof surface.",
     demoLinks: [
       { href: demoProofHref, label: "Demo proof page", description: "Public page without participant email." },
-      { href: demoImageHref, label: "Proof Card image", description: "Shareable proof image for public pages and metadata." },
-      { href: demoMetadataHref, label: "Proof metadata", description: "Structured JSON with image field." }
+      { href: demoImageHref, label: "Shareable proof card", description: "Image used when sharing the proof page." },
+      { href: demoMetadataHref, label: "Proof information", description: "Basic proof information used by the proof page." }
     ],
     ctaTitle: "Open a small pilot",
     ctaText: "Create a test event, share the check-in link with a few people, and see how ProofPass feels in a real event flow.",
@@ -42,24 +42,24 @@ const copy = {
     label: "公開パイロット",
     title: "次のイベントでProofPassを試す",
     intro:
-      "ProofPassは、イベント参加・登壇・貢献・学習活動を、信頼できる公開証明ページとして残すためのプラットフォームです。",
-    walletFree: "標準フローでは、参加者にウォレットは不要です。",
+      "ProofPassは、イベント参加・登壇・貢献・学習活動を、共有できる証明ページとして残すためのサービスです。",
+    walletFree: "参加者はウォレット不要で使えます。",
     advanced:
-      "高度なパイロットでは、Proof Card画像、構造化メタデータ、承認済み証明の任意のSBT/NFT拡張を利用できます。",
+      "確認済みの証明は、共有しやすい証明カードとして表示でき、必要に応じてデジタル証明として保存できます。",
     positioning:
-      "ProofPassは、信頼できる証明記録に集中したプロダクトです。決済、ウォレット管理、自動SBT/NFT発行は追加しません。",
+      "ProofPassは、イベントの活動記録を信頼できる形で残すことに集中したプロダクトです。決済やウォレット管理は行いません。",
     whoLabel: "試してほしいイベント",
     whoTitle: "イベント活動を確認しやすく、共有しやすくしたいコミュニティに向いています。",
     who: ["研究イベント", "勉強会", "ハッカソン", "コミュニティミートアップ", "社内ワークショップ"],
     tryLabel: "試せること",
     tryTitle: "まずはQRチェックインから始め、証明記録を確認できます。",
-    tryItems: ["QRチェックイン確認", "招待者限定チェックイン", "公開証明ページ", "Proof Card", "任意のSBT/NFT拡張"],
+    tryItems: ["QRで参加確認", "招待者限定チェックイン", "共有できる証明ページ", "共有しやすい証明カード", "デジタル証明の拡張"],
     demoLabel: "デモリンク",
     demoTitle: "公開証明の表示を確認できます。",
     demoLinks: [
       { href: demoProofHref, label: "デモ証明ページ", description: "参加者メールアドレスを表示しない公開ページ。" },
-      { href: demoImageHref, label: "Proof Card画像", description: "公開証明ページとメタデータに使える共有用画像。" },
-      { href: demoMetadataHref, label: "証明メタデータ", description: "画像フィールドを含む構造化JSON。" }
+      { href: demoImageHref, label: "共有しやすい証明カード", description: "証明ページを共有するときに使える画像。" },
+      { href: demoMetadataHref, label: "証明情報", description: "証明ページで使う基本的な証明情報。" }
     ],
     ctaTitle: "小さなパイロットを始める",
     ctaText: "テストイベントを作成し、数人にチェックインリンクを共有して、実際のイベント導線でProofPassを試せます。",

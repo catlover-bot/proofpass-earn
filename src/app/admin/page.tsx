@@ -7,17 +7,17 @@ const copy = {
   en: {
     label: "Admin",
     title: "ProofPass dashboard",
-    intro: "Manage events, create check-in links, and review participant proof status.",
+    intro: "Manage events, create check-in links, and review participant activity records.",
     cardTitle: "Event management",
-    cardText: "Create events, display QR check-in links, and inspect participants.",
+    cardText: "Create events, display QR check-in links, and confirm participants after the event.",
     openEvents: "Open events"
   },
   ja: {
     label: "管理",
     title: "ProofPassダッシュボード",
-    intro: "イベント管理、チェックインリンク作成、参加者の証明状況確認を行います。",
+    intro: "イベント管理、チェックインリンク作成、参加者の活動記録確認を行います。",
     cardTitle: "イベント管理",
-    cardText: "イベントを作成し、QRチェックインリンクを表示して、参加者を確認します。",
+    cardText: "イベントを作成し、QRチェックインリンクを表示して、イベント後に参加者を確認します。",
     openEvents: "イベントを開く"
   }
 } satisfies Record<Language, Record<string, string>>;

@@ -74,8 +74,8 @@ const achievementCopy = {
       description: "Joined during the ProofPass pilot."
     },
     testnet_sbt_minted: {
-      label: "Optional SBT recorded",
-      description: "Recorded as an optional non-transferable SBT extension."
+      label: "Digital proof saved",
+      description: "Saved as an optional digital proof record."
     }
   },
   ja: {
@@ -116,8 +116,8 @@ const achievementCopy = {
       description: "ProofPassパイロットに参加しました。"
     },
     testnet_sbt_minted: {
-      label: "任意SBT記録済み",
-      description: "任意の譲渡不可SBT拡張として記録されました。"
+      label: "デジタル証明として保存済み",
+      description: "必要に応じて、デジタル証明として保存されています。"
     }
   }
 } satisfies Record<Language, Record<AchievementKey, { label: string; description: string }>>;

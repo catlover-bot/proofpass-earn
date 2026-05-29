@@ -47,44 +47,44 @@ const proofTypeLabels = {
 
 const verificationLevelLabels = {
   en: {
-    checkin: "QR check-in confirmed",
-    organizer_approved: "Organizer approved",
-    evidence_verified: "Evidence verified",
-    onchain_sbt: "SBT issued"
+    checkin: "QR participation confirmed",
+    organizer_approved: "Organizer confirmed",
+    evidence_verified: "Evidence checked",
+    onchain_sbt: "Digital proof saved"
   },
   ja: {
-    checkin: "QRチェックイン確認",
-    organizer_approved: "主催者承認済み",
-    evidence_verified: "提出物確認済み",
-    onchain_sbt: "SBT発行済み"
+    checkin: "QRで参加確認済み",
+    organizer_approved: "主催者が確認済み",
+    evidence_verified: "提出内容を確認済み",
+    onchain_sbt: "デジタル証明として保存済み"
   }
 } satisfies Record<Language, Record<CertificateVerificationLevel, string>>;
 
 const verificationLevelSummaries = {
   en: {
-    checkin: "QR check-in only",
-    organizer_approved: "Organizer approved proof",
-    evidence_verified: "Organizer reviewed submitted evidence",
-    onchain_sbt: "Organizer-approved proof with an issued SBT"
+    checkin: "This proof shows the participant checked in with the event QR link.",
+    organizer_approved: "The organizer has confirmed the activity shown on this proof.",
+    evidence_verified: "The organizer has reviewed supporting information for this activity.",
+    onchain_sbt: "This confirmed proof has also been saved as a digital proof record."
   },
   ja: {
-    checkin: "QRチェックインのみ",
-    organizer_approved: "主催者が承認した証明",
-    evidence_verified: "提出物を確認済み",
-    onchain_sbt: "SBT発行済みの承認証明"
+    checkin: "この証明は、QRチェックインによって参加が確認された記録です。",
+    organizer_approved: "この証明は、イベント主催者によって活動内容が確認された記録です。",
+    evidence_verified: "この証明は、提出内容を主催者が確認した記録です。",
+    onchain_sbt: "この確認済みの証明は、デジタル証明としても保存されています。"
   }
 } satisfies Record<Language, Record<CertificateVerificationLevel, string>>;
 
 const approvalStatusLabels = {
   en: {
-    approved: "Approved",
-    pending: "Pending",
-    rejected: "Rejected"
+    approved: "Confirmed",
+    pending: "Waiting for confirmation",
+    rejected: "Not confirmed"
   },
   ja: {
-    approved: "承認済み",
-    pending: "承認待ち",
-    rejected: "却下"
+    approved: "確認済み",
+    pending: "確認待ち",
+    rejected: "未確認"
   }
 } satisfies Record<Language, Record<CertificateApprovalStatus, string>>;
 

@@ -60,7 +60,7 @@ export const commonCopy = {
     eventDashboard: "Event dashboard",
     shareCheckIn: "Share check-in",
     checkedInParticipants: "Checked-in participants",
-    optionalTestnetSbt: "Optional SBT/NFT extension",
+    optionalTestnetSbt: "Digital proof option",
     walletFree: "Wallet-free",
     emailHiddenPublic: "Email is not shown publicly",
     participant: "Participant",
@@ -82,7 +82,7 @@ export const commonCopy = {
     endsAt: "Ends at",
     backToEvents: "Back to events",
     openProof: "Open proof",
-    viewMetadata: "View metadata",
+    viewMetadata: "View proof information",
     selected: "selected",
     logout: "Logout"
   },
@@ -108,7 +108,7 @@ export const commonCopy = {
     eventDashboard: "イベントダッシュボード",
     shareCheckIn: "チェックインを共有",
     checkedInParticipants: "チェックイン済み参加者",
-    optionalTestnetSbt: "任意のSBT/NFT拡張",
+    optionalTestnetSbt: "デジタル証明の拡張",
     walletFree: "ウォレット不要",
     emailHiddenPublic: "メールは公開されません",
     participant: "参加者",
@@ -130,7 +130,7 @@ export const commonCopy = {
     endsAt: "終了日時",
     backToEvents: "イベント一覧に戻る",
     openProof: "証明を開く",
-    viewMetadata: "メタデータを見る",
+    viewMetadata: "証明情報を見る",
     selected: "選択中",
     logout: "ログアウト"
   }

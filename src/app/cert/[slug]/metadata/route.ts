@@ -20,14 +20,14 @@ export async function GET(
   const missing = getMissingEnv();
 
   if (missing.length > 0) {
-    return NextResponse.json({ error: "Proof metadata is not configured." }, { status: 503 });
+    return NextResponse.json({ error: "Proof information is not configured." }, { status: 503 });
   }
 
   const supabase = getSupabaseClient();
   const appUrl = getAppUrl();
 
   if (!supabase || !appUrl) {
-    return NextResponse.json({ error: "Proof metadata is not configured." }, { status: 503 });
+    return NextResponse.json({ error: "Proof information is not configured." }, { status: 503 });
   }
 
   const { data: certificate, error: certificateError } = await supabase
@@ -37,11 +37,11 @@ export async function GET(
     .maybeSingle();
 
   if (certificateError) {
-    return NextResponse.json({ error: "Unable to load proof metadata." }, { status: 500 });
+    return NextResponse.json({ error: "Unable to load proof information." }, { status: 500 });
   }
 
   if (!certificate) {
-    return NextResponse.json({ error: "Proof metadata not found." }, { status: 404 });
+    return NextResponse.json({ error: "Proof information not found." }, { status: 404 });
   }
 
   const [{ data: event, error: eventError }, { data: participant, error: participantError }] =
@@ -51,7 +51,7 @@ export async function GET(
     ]);
 
   if (eventError || participantError || !event || !participant) {
-    return NextResponse.json({ error: "Unable to load proof metadata." }, { status: 500 });
+    return NextResponse.json({ error: "Unable to load proof information." }, { status: 500 });
   }
 
   const { data: proofLabelRows, error: proofLabelError } = await supabase
@@ -61,7 +61,7 @@ export async function GET(
     .in("badge_type", [...PROOF_LABEL_KEYS]);
 
   if (proofLabelError) {
-    return NextResponse.json({ error: "Unable to load proof metadata." }, { status: 500 });
+    return NextResponse.json({ error: "Unable to load proof information." }, { status: 500 });
   }
 
   const achievements = getProofAchievementBadges("en", {
@@ -73,7 +73,7 @@ export async function GET(
   return NextResponse.json({
     name: `ProofPass proof: ${event.title}`,
     description:
-      "Off-chain public proof metadata for event participation, achievement, or community contribution. Private contact details are not included.",
+      "Public proof information for event participation, achievement, or community contribution. Private contact details are not included.",
     external_url: `${appUrl}/cert/${certificate.public_slug}`,
     image: proofImageUrl,
     attributes: [
@@ -81,9 +81,9 @@ export async function GET(
       { trait_type: "Certificate type", value: labelProofType("en", certificate.certificate_type) },
       { trait_type: "Participant role", value: labelRole(participant.role) },
       { trait_type: "Proof labels", value: achievements.map((achievement) => achievement.label).join(", ") },
-      { trait_type: "Verification level", value: labelVerificationLevel("en", certificate.verification_level) },
-      { trait_type: "Approval status", value: labelApprovalStatus("en", certificate.approval_status) },
-      { trait_type: "Proof media", value: "Proof Card image" },
+      { trait_type: "How confirmed", value: labelVerificationLevel("en", certificate.verification_level) },
+      { trait_type: "Proof status", value: labelApprovalStatus("en", certificate.approval_status) },
+      { trait_type: "Proof media", value: "Shareable proof card" },
       { trait_type: "Status", value: labelRole(certificate.status) },
       { trait_type: "Issued date", value: certificate.issued_at }
     ]
