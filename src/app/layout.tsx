@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "ProofPass",
   description:
-    "Shareable proof pages for event participation, speaking, contribution, and learning activity."
+    "ProofPassは、イベント参加・登壇・貢献を、共有できる証明ページとして発行できるサービスです。参加者はウォレット不要で使えます。"
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body className="antialiased">{children}</body>
     </html>
   );
