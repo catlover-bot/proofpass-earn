@@ -28,6 +28,9 @@ export function SiteHeader({ lang, adminEmail }: { lang: Language; adminEmail?: 
           <Link href={withLanguage("/cert/proof_xZ0Nb0iY9yMUf1", lang)} className="hover:text-ink">
             {t.demoProof}
           </Link>
+          <Link href={withLanguage("/pricing", lang)} className="hover:text-ink">
+            {t.pricing}
+          </Link>
           <Link href={withLanguage("/web3-roadmap", lang)} className="hover:text-ink">
             {t.web3Roadmap}
           </Link>

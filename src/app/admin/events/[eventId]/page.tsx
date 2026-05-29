@@ -1,5 +1,16 @@
 import Link from "next/link";
-import { Award, BadgeCheck, CheckCircle2, ExternalLink, LinkIcon, MapPin, MessageSquareText, Users, X } from "lucide-react";
+import {
+  Award,
+  BadgeCheck,
+  CheckCircle2,
+  ExternalLink,
+  FileDown,
+  LinkIcon,
+  MapPin,
+  MessageSquareText,
+  Users,
+  X
+} from "lucide-react";
 import { AchievementBadgeList } from "@/components/AchievementBadgeList";
 import { AdminHeader } from "@/components/AdminHeader";
 import { CopyButton } from "@/components/CopyButton";
@@ -116,6 +127,7 @@ export default async function EventDetailPage({
         `Please check in here to receive your public participation proof: ${url}. Your email is used by the organizer and will not appear on the public proof page.`,
       participantNote:
         "Participant email is hidden in this list and on public proof pages. Use this list to confirm check-ins, proof links, and proof labels.",
+      downloadCsv: "Export participants CSV",
       noParticipantsTitle: "No participants yet",
       noParticipantsText: "Share the QR code to start issuing proofs.",
       name: "Name",
@@ -199,6 +211,7 @@ export default async function EventDetailPage({
         `参加証明を受け取るため、こちらからチェックインしてください: ${url}。メールアドレスは主催者側の管理に使用されますが、公開証明ページには表示されません。`,
       participantNote:
         "参加者のメールアドレスはこの一覧と証明ページには表示していません。この一覧でチェックイン、証明リンク、証明ラベルを確認できます。",
+      downloadCsv: "参加者CSVを出力",
       noParticipantsTitle: "まだ参加者はいません",
       noParticipantsText: "QRコードを共有して参加証明の発行を始めましょう。",
       name: "名前",
@@ -655,7 +668,17 @@ export default async function EventDetailPage({
               {copy.participantNote}
             </p>
           </div>
-          <StatusPill>{participants.length} {copy.checkedInSoFar}</StatusPill>
+          <div className="flex flex-wrap gap-3">
+            <StatusPill>{participants.length} {copy.checkedInSoFar}</StatusPill>
+            <a
+              href={withLanguage(`/admin/events/${event.id}/export`, lang)}
+              download
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-ink shadow-sm transition hover:bg-slate-50"
+            >
+              <FileDown className="h-4 w-4" />
+              {copy.downloadCsv}
+            </a>
+          </div>
         </div>
 
         {participants.length === 0 ? (

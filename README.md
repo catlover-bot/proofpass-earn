@@ -15,6 +15,8 @@ Participants can use the default flow without a wallet. If needed, confirmed pro
 - Public proof pages for attendance, speaking, contribution, and community activity
 - Generated `/cert/[slug]/image` proof card images for sharing and page previews
 - Organizer-confirmed proof labels for speaker, contributor, supporter, mentor, and winner
+- Participant CSV export for organizer event operations
+- Internal plan definitions for future SaaS packaging
 - Public proof collection pages keyed by a hashed profile value
 - Supabase schema and local development seed data
 
@@ -26,6 +28,15 @@ This MVP is wallet-free and payment-free. It does not include wallet custody, pa
 - Organizer confirmation = stronger proof. The organizer confirmed a role or contribution such as speaker, contributor, supporter, mentor, or winner.
 - Evidence review = future stronger proof. Submitted information can be reviewed before a proof is strengthened.
 - Digital proof storage = optional future extension. It is not automatic and should not contain personal information in public technical records.
+
+## Business Expansion Direction
+
+- Start as an organizer-facing SaaS for event and activity proof operations.
+- Participants use ProofPass for free by default.
+- The paying users are organizers, community operators, education operators, and organizations that need ongoing proof management.
+- ProofPass is not full event management software. It is the proof layer that remains after an event.
+- Future packaging can expand into Community Plan and Enterprise Plan for multi-event and organization-level needs.
+- SBT/NFT support, if used, is an optional storage and proof extension for confirmed records. It is not for speculation.
 
 ## Tech Stack
 
@@ -77,12 +88,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 - `/` landing page
 - `/pilot` public pilot page
+- `/pricing` pilot plan page
 - `/login` organizer login
 - `/signup` organizer signup
 - `/admin` admin entry page
 - `/admin/events` event list
 - `/admin/events/new` event creation
 - `/admin/events/[eventId]` event detail, QR code, and participants
+- `/admin/events/[eventId]/export` protected participant CSV export
 - `/checkin/[eventCode]` participant check-in
 - `/cert/[slug]` public certificate page
 - `/cert/[slug]/image` generated proof card image

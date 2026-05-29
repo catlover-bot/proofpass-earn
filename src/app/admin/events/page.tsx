@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { CalendarPlus, CheckCircle2, MapPin, QrCode, Users } from "lucide-react";
+import { BarChart3, CalendarPlus, CheckCircle2, MapPin, MessageCircle, QrCode, Users } from "lucide-react";
 import { AdminHeader } from "@/components/AdminHeader";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
 import { formatDateTime } from "@/lib/format";
 import { commonCopy, getLanguageFromSearchParams, type SearchParamsLike, withLanguage } from "@/lib/i18n";
 import { getOrganizerSupabaseClient, requireOrganizer } from "@/lib/organizer-auth";
+import { currentPilotPlan } from "@/lib/plans";
 import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import type { EventCheckinMode } from "@/lib/supabase/types";
 
@@ -47,7 +48,17 @@ export default async function EventsPage({
       inviteOnlyMode: "Invite-only check-in",
       open: "Open dashboard",
       unableEvents: "Unable to load events",
-      unableCounts: "Unable to load participant counts"
+      unableCounts: "Unable to load participant counts",
+      unableProofCounts: "Unable to load proof counts",
+      usageTitle: "Usage",
+      usageIntro: "Current pilot usage for this organizer account.",
+      currentPlan: "Current plan",
+      createdEvents: "Created events",
+      issuedProofs: "Issued proofs",
+      perEventLimit: "Current proof limit per event",
+      proFeaturesTitle: "Pro features being prepared",
+      proFeatures: ["CSV export", "Proof Card customization", "Community achievement page", "Multiple organizer management"],
+      consultCta: "Discuss ongoing or community use"
     },
     ja: {
       label: "イベント",
@@ -66,7 +77,17 @@ export default async function EventsPage({
       inviteOnlyMode: "招待者限定チェックイン",
       open: "ダッシュボードを開く",
       unableEvents: "イベントを読み込めません",
-      unableCounts: "参加者数を読み込めません"
+      unableCounts: "参加者数を読み込めません",
+      unableProofCounts: "証明数を読み込めません",
+      usageTitle: "利用状況",
+      usageIntro: "この主催者アカウントのパイロット利用状況です。",
+      currentPlan: "現在のプラン",
+      createdEvents: "作成済みイベント数",
+      issuedProofs: "発行済み証明数",
+      perEventLimit: "現在の各イベント証明上限",
+      proFeaturesTitle: "今後追加予定のPro機能",
+      proFeatures: ["CSV export", "Proof Cardカスタマイズ", "コミュニティ実績ページ", "複数主催者管理"],
+      consultCta: "継続利用・コミュニティ利用について相談する"
     }
   }[lang];
 
@@ -130,6 +151,7 @@ export default async function EventsPage({
 
   const participantCounts = new Map<string, number>();
   const eventIds = events.map((event) => event.id);
+  let proofCount = 0;
 
   if (eventIds.length > 0) {
     const { data: participants, error: participantCountError } = await supabase
@@ -149,6 +171,22 @@ export default async function EventsPage({
     participants.forEach((participant) => {
       participantCounts.set(participant.event_id, (participantCounts.get(participant.event_id) ?? 0) + 1);
     });
+
+    const { data: certificates, error: proofCountError } = await supabase
+      .from("certificates")
+      .select("event_id")
+      .in("event_id", eventIds);
+
+    if (proofCountError) {
+      return (
+        <PageShell className="space-y-8">
+          <AdminHeader lang={lang} />
+          <SetupError title={copy.unableProofCounts} message={proofCountError.message} />
+        </PageShell>
+      );
+    }
+
+    proofCount = (certificates ?? []).length;
   }
 
   return (
@@ -173,6 +211,56 @@ export default async function EventsPage({
         <p className="text-sm font-semibold text-amber-950">
           {copy.auth}
         </p>
+      </Card>
+
+      <Card className="border-cyan-200 bg-cyan-50/45 p-5 shadow-none">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="rounded-lg bg-cyan-100 p-3 text-cyan-800">
+              <BarChart3 className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-xl font-bold text-ink">{copy.usageTitle}</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-700">{copy.usageIntro}</p>
+            </div>
+          </div>
+          <ButtonLink href={withLanguage("/contact", lang)} variant="secondary">
+            <MessageCircle className="h-4 w-4" />
+            {copy.consultCta}
+          </ButtonLink>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-4">
+          <div className="rounded-lg border border-cyan-100 bg-white/85 p-4">
+            <p className="text-xs font-semibold text-slate-500">{copy.currentPlan}</p>
+            <p className="mt-1 text-lg font-bold text-ink">{currentPilotPlan.name[lang]}</p>
+          </div>
+          <div className="rounded-lg border border-cyan-100 bg-white/85 p-4">
+            <p className="text-xs font-semibold text-slate-500">{copy.createdEvents}</p>
+            <p className="mt-1 text-lg font-bold text-ink">
+              {events.length} / {currentPilotPlan.eventLimit}
+            </p>
+          </div>
+          <div className="rounded-lg border border-cyan-100 bg-white/85 p-4">
+            <p className="text-xs font-semibold text-slate-500">{copy.issuedProofs}</p>
+            <p className="mt-1 text-lg font-bold text-ink">{proofCount}</p>
+          </div>
+          <div className="rounded-lg border border-cyan-100 bg-white/85 p-4">
+            <p className="text-xs font-semibold text-slate-500">{copy.perEventLimit}</p>
+            <p className="mt-1 text-lg font-bold text-ink">{currentPilotPlan.proofLimitPerEvent}</p>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <p className="text-xs font-semibold uppercase tracking-wider text-cyan-900">{copy.proFeaturesTitle}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {copy.proFeatures.map((feature) => (
+              <StatusPill key={feature} tone="info">
+                {feature}
+              </StatusPill>
+            ))}
+          </div>
+        </div>
       </Card>
 
       <section className="grid gap-3 md:grid-cols-3" aria-label={copy.guideTitle}>

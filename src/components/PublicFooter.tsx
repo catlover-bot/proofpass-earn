@@ -5,6 +5,7 @@ export function PublicFooter({ lang = defaultLanguage }: { lang?: Language }) {
   const t = commonCopy[lang];
   const footerLinks = [
     { href: "/pilot", label: t.pilot },
+    { href: "/pricing", label: t.pricing },
     { href: "/privacy", label: t.privacy },
     { href: "/terms", label: t.terms },
     { href: "/contact", label: t.contact },
