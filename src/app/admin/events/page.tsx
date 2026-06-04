@@ -1,5 +1,15 @@
 import Link from "next/link";
-import { BarChart3, CalendarPlus, CheckCircle2, MapPin, MessageCircle, QrCode, Users } from "lucide-react";
+import {
+  Award,
+  BarChart3,
+  CalendarPlus,
+  CheckCircle2,
+  ExternalLink,
+  MapPin,
+  MessageCircle,
+  QrCode,
+  Users
+} from "lucide-react";
 import { AdminHeader } from "@/components/AdminHeader";
 import { SetupError } from "@/components/SetupError";
 import { ButtonLink, Card, PageShell, StatusPill } from "@/components/ui";
@@ -7,7 +17,7 @@ import { formatDateTime } from "@/lib/format";
 import { commonCopy, getLanguageFromSearchParams, type SearchParamsLike, withLanguage } from "@/lib/i18n";
 import { getOrganizerSupabaseClient, requireOrganizer } from "@/lib/organizer-auth";
 import { currentPilotPlan } from "@/lib/plans";
-import { getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
+import { getAppUrl, getMissingEnv, getSupabaseClient } from "@/lib/supabase/client";
 import type { EventCheckinMode } from "@/lib/supabase/types";
 
 export const dynamic = "force-dynamic";
@@ -58,7 +68,13 @@ export default async function EventsPage({
       perEventLimit: "Current proof limit per event",
       proFeaturesTitle: "Pro features being prepared",
       proFeatures: ["CSV export", "Proof Card customization", "Community achievement page", "Multiple organizer management"],
-      consultCta: "Discuss ongoing or community use"
+      consultCta: "Discuss ongoing or community use",
+      communityCardTitle: "Community achievements page",
+      communityCardText:
+        "As events accumulate, participation, speaking, and contribution proofs are collected at the community level.",
+      communityPageUrl: "Community page URL",
+      viewCommunityPage: "View community achievements page",
+      communityUnavailable: "No organization is available yet."
     },
     ja: {
       label: "イベント",
@@ -87,7 +103,13 @@ export default async function EventsPage({
       perEventLimit: "現在の各イベント証明上限",
       proFeaturesTitle: "今後追加予定のPro機能",
       proFeatures: ["CSV export", "Proof Cardカスタマイズ", "コミュニティ実績ページ", "複数主催者管理"],
-      consultCta: "継続利用・コミュニティ利用について相談する"
+      consultCta: "継続利用・コミュニティ利用について相談する",
+      communityCardTitle: "コミュニティ実績ページ",
+      communityCardText:
+        "イベントを重ねるほど、参加・登壇・貢献の実績がコミュニティ単位で蓄積されます。",
+      communityPageUrl: "コミュニティページURL",
+      viewCommunityPage: "コミュニティ実績ページを見る",
+      communityUnavailable: "利用できる組織がまだありません。"
     }
   }[lang];
 
@@ -103,6 +125,7 @@ export default async function EventsPage({
 
   const organizer = await requireOrganizer(lang);
   const supabase = getOrganizerSupabaseClient(organizer) ?? getSupabaseClient();
+  const appUrl = getAppUrl();
   if (!supabase) {
     return (
       <PageShell className="space-y-8">
@@ -152,6 +175,9 @@ export default async function EventsPage({
   const participantCounts = new Map<string, number>();
   const eventIds = events.map((event) => event.id);
   let proofCount = 0;
+  const currentOrganizationId = organizer.organizationIds[0];
+  const communityPagePath = currentOrganizationId ? `/community/${currentOrganizationId}` : null;
+  const communityPageUrl = appUrl && communityPagePath ? `${appUrl}${withLanguage(communityPagePath, lang)}` : null;
 
   if (eventIds.length > 0) {
     const { data: participants, error: participantCountError } = await supabase
@@ -260,6 +286,36 @@ export default async function EventsPage({
               </StatusPill>
             ))}
           </div>
+        </div>
+      </Card>
+
+      <Card className="border-emerald-200 bg-emerald-50/55 p-5 shadow-none">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="rounded-lg bg-emerald-100 p-3 text-emerald-800">
+              <Award className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-xl font-bold text-ink">{copy.communityCardTitle}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">{copy.communityCardText}</p>
+              {communityPageUrl ? (
+                <div className="mt-4 rounded-md border border-emerald-100 bg-white/85 p-3">
+                  <p className="text-xs font-semibold text-slate-500">{copy.communityPageUrl}</p>
+                  <p className="mt-1 break-all text-sm font-bold text-ink">{communityPageUrl}</p>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <StatusPill tone="warning">{copy.communityUnavailable}</StatusPill>
+                </div>
+              )}
+            </div>
+          </div>
+          {communityPagePath ? (
+            <ButtonLink href={withLanguage(communityPagePath, lang)} variant="secondary">
+              <ExternalLink className="h-4 w-4" />
+              {copy.viewCommunityPage}
+            </ButtonLink>
+          ) : null}
         </div>
       </Card>
 

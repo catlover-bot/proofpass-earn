@@ -38,6 +38,10 @@ This MVP is wallet-free and payment-free. It does not include wallet custody, pa
 - Future packaging can expand into Community Plan and Enterprise Plan for multi-event and organization-level needs.
 - SBT/NFT support, if used, is an optional storage and proof extension for confirmed records. It is not for speculation.
 
+## Community Achievements
+
+ProofPass can accumulate event participation, speaking, contribution, support, mentoring, and winner activity at the community level. The public community achievements page is part of the SaaS/business expansion direction, but it should stay framed as proof and reputation infrastructure for organizer-confirmed activity records, not speculation.
+
 ## Tech Stack
 
 - Next.js App Router
@@ -81,8 +85,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 7. Run `supabase/certificate-verification-levels.sql` for existing pilot databases that predate proof strength fields.
 8. Run `supabase/sbt-testnet-fields.sql` only if optional digital proof pilot fields are needed.
 9. Run `supabase/organizer-proof-rls-policies.sql` after the schema is ready.
-10. Run `supabase/seed.sql` if demo data is useful.
-11. Copy the project URL and anon key into `.env.local`.
+10. Run `supabase/community-public-views.sql` if public community achievement pages need safe RLS-compatible reads.
+11. Run `supabase/seed.sql` if demo data is useful.
+12. Copy the project URL and anon key into `.env.local`.
 
 ## Routes
 
@@ -96,6 +101,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - `/admin/events/new` event creation
 - `/admin/events/[eventId]` event detail, QR code, and participants
 - `/admin/events/[eventId]/export` protected participant CSV export
+- `/community/[organizationId]` public community achievements page
 - `/checkin/[eventCode]` participant check-in
 - `/cert/[slug]` public certificate page
 - `/cert/[slug]/image` generated proof card image

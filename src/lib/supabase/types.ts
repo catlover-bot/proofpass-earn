@@ -306,7 +306,52 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      community_public_organizations: {
+        Row: {
+          id: string;
+          name: string;
+          created_at: string;
+        };
+        Relationships: [];
+      };
+      community_public_events: {
+        Row: {
+          id: string;
+          organization_id: string | null;
+          title: string;
+          starts_at: string;
+          checkin_code: string;
+          checkin_mode: EventCheckinMode;
+          participant_count: number;
+          proof_count: number;
+        };
+        Relationships: [];
+      };
+      community_public_proofs: {
+        Row: {
+          id: string;
+          organization_id: string | null;
+          event_title: string;
+          public_slug: string;
+          participant_name: string;
+          proof_label: string | null;
+          certificate_type: CertificateType;
+          verification_level: CertificateVerificationLevel;
+          approval_status: CertificateApprovalStatus;
+          issued_at: string;
+        };
+        Relationships: [];
+      };
+      community_public_label_counts: {
+        Row: {
+          organization_id: string | null;
+          proof_label: string;
+          proof_count: number;
+        };
+        Relationships: [];
+      };
+    };
     Functions: Record<string, never>;
     Enums: {
       participant_role: ParticipantRole;
